@@ -1,3 +1,8 @@
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="images/analyticsPage.png" />
+</div>
+> more pic at images/ folder
+
 # AI Fitness Tracker
 
 A modern, AI-powered fitness tracker designed to monitor your running progress, set personalized goals, and provide intelligent insights into your performance. Built with React and TypeScript for a seamless user experience.
