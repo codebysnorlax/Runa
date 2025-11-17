@@ -29,6 +29,12 @@ const AnalyticsSkeleton: React.FC = () => (
 );
 
 
+const formatPace = (paceMinutes: number) => {
+    const minutes = Math.floor(paceMinutes);
+    const seconds = Math.round((paceMinutes - minutes) * 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
@@ -36,7 +42,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 <p className="label text-white">{`${label}`}</p>
                 {payload.map((pld: any, index: number) => (
                     <p key={index} style={{ color: pld.color }}>
-                        {`${pld.name}: ${pld.value.toFixed(2)}`}
+                        {pld.name.includes('Pace') 
+                            ? `${pld.name}: ${formatPace(pld.value)} min/km`
+                            : `${pld.name}: ${pld.value.toFixed(2)}`
+                        }
                     </p>
                 ))}
             </div>
@@ -160,7 +169,7 @@ const Analytics: React.FC = () => {
                 <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
                     <XAxis dataKey="name" stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} />
-                    <YAxis stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} unit={yUnit} domain={['dataMin - 1', 'dataMax + 1']} />
+                    <YAxis stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} unit={yUnit} domain={['dataMin - 1', 'dataMax + 1']} tickFormatter={yKey === 'pace' ? formatPace : undefined} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
                     <Line type="monotone" dataKey={yKey} stroke={color} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} name={title.split('(')[0].trim()} />
