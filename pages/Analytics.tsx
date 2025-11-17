@@ -42,7 +42,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
                 <p className="label text-white">{`${label}`}</p>
                 {payload.map((pld: any, index: number) => (
                     <p key={index} style={{ color: pld.color }}>
-                        {pld.name.includes('Pace') 
+                        {pld.name.includes('Pace')
                             ? `${pld.name}: ${formatPace(pld.value)} min/km`
                             : `${pld.name}: ${pld.value.toFixed(2)}`
                         }
@@ -133,7 +133,7 @@ const Analytics: React.FC = () => {
             }))
             .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
             .map(run => ({
-                name: run.dateObj.toLocaleDateString('en-CA'),
+                name: run.dateObj.toLocaleDateString('en-IN'),
                 pace: run.distance_m > 0 ? (run.total_time_sec / 60) / (run.distance_m / 1000) : 0, // min/km
                 speed: run.avg_speed_kmh,
                 distance: run.distance_m / 1000,
@@ -144,20 +144,22 @@ const Analytics: React.FC = () => {
         const weeks: { [key: string]: number } = {};
         runs.forEach(run => {
             const date = new Date(run.date);
-            const dayOfWeek = date.getDay();
-            const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // adjust when day is sunday
-            const weekStart = new Date(date.setDate(diff)).toLocaleDateString('en-CA');
+            const day = date.getDay();
+            const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(date);
+            monday.setDate(diff);
+            const weekStart = monday.toLocaleDateString('en-IN');
 
             if (!weeks[weekStart]) weeks[weekStart] = 0;
             weeks[weekStart] += run.distance_m / 1000;
         });
-        return Object.keys(weeks).map(week => ({ name: week, distance: weeks[week] })).slice(-8); // last 8 weeks
+        return Object.keys(weeks).sort().map(week => ({ name: week, distance: weeks[week] })).slice(-8);
     }, [runs]);
 
     if (loading) {
         return <AnalyticsSkeleton />;
     }
-    
+
     if (runs.length < 1) {
         return <div className="text-center text-gray-400 p-8">Not enough data to display analytics. Go for a run!</div>;
     }
@@ -183,7 +185,7 @@ const Analytics: React.FC = () => {
             <h1 className="text-3xl font-bold text-white">Analytics</h1>
 
             <Heatmap runs={runs} />
-            
+
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {renderChart("Pace Trend (min/km)", chartData.slice(-14), "pace", " min/km", "#FF7A00")}
                 {renderChart("Speed Trend (km/h)", chartData.slice(-14), "speed", " km/h", "#8884d8")}
