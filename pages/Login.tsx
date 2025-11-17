@@ -11,9 +11,11 @@ const Login: React.FC = () => {
     const { login } = useAppContext();
     const navigate = useNavigate();
 
+    const correctPassword = process.env.GETIN_PASSWORD;
+    
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (password !== '10072005') {
+        if (password !== correctPassword) {
             setError('');
             return;
         }
@@ -62,7 +64,7 @@ const Login: React.FC = () => {
                             className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
                         />
                     </div>
-                    {password && password !== '10072005' && (
+                    {password && password !== correctPassword && (
                         <div className="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
                             You are not allowed. Contact developer{' '}
                             <a 
