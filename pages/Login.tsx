@@ -88,7 +88,7 @@ const Login: React.FC = () => {
                             className="w-full flex justify-center items-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
                         >
                             <Instagram className="w-5 h-5 mr-2" />
-                            Contact Developer
+                            DM-Developer
                         </button>
                     )}
                 </form>

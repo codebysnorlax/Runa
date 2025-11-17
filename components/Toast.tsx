@@ -29,7 +29,7 @@ const toastStyles = `
       opacity: 1;
     }
   }
-  
+
   .animate-toast-slide {
     animation: toast-jelly 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
@@ -53,7 +53,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 3000);
+    }, 4500);
 
     return () => clearTimeout(timer);
   }, [onClose]);
