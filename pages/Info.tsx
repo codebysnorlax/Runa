@@ -90,7 +90,11 @@ const Info: React.FC = () => {
         <Card>
           <div className="space-y-4">
             <div className="flex items-center space-x-3 mb-4">
-              <User className="w-6 h-6 text-brand-orange" />
+              <img 
+                src="https://github.com/codebysnorlax.png" 
+                alt="Ravi Ranjan Sharma" 
+                className="w-6 h-6 rounded-full"
+              />
               <h2 className="text-xl font-semibold text-white">Developer</h2>
             </div>
 
