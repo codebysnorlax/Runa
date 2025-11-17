@@ -1,0 +1,108 @@
+import { Profile, Run, Goal, InsightsData } from '../types';
+
+const PROFILE_KEY = 'profile.json';
+const RUNS_KEY = 'runs.json';
+const GOALS_KEY = 'goals.json';
+const INSIGHTS_KEY = 'insights.json';
+const CURRENT_USER_KEY = 'currentUser';
+
+// Helper to create a user-specific key
+const userKey = (key: string, username: string) => `${username}-${key}`;
+
+// Session management
+export const getCurrentUser = (): string | null => window.localStorage.getItem(CURRENT_USER_KEY);
+export const setCurrentUser = (username: string): void => window.localStorage.setItem(CURRENT_USER_KEY, username);
+export const clearCurrentUser = (): void => window.localStorage.removeItem(CURRENT_USER_KEY);
+
+
+const defaultProfile: Profile = {
+  name: 'User',
+  height_cm: 0,
+  weight_kg: 0,
+  age: 0,
+};
+
+const defaultRuns: Run[] = [];
+
+const defaultGoals: Goal = {
+  distance_target_km: 0,
+  days_target: 0,
+  time_target_1_6km: '00:00',
+  start_date: new Date().toISOString(),
+};
+
+const defaultInsights: InsightsData = {
+    insights: [],
+    weeklyPlan: {
+        monday: '',
+        tuesday: '',
+        wednesday: '',
+        thursday: '',
+        friday: '',
+        saturday: '',
+        sunday: '',
+    },
+    improvementScore: 0,
+};
+
+
+export const loadJSON = <T,>(key: string, defaultValue: T, username: string): T => {
+  try {
+    const item = window.localStorage.getItem(userKey(key, username));
+    if (item) {
+        const parsed = JSON.parse(item);
+        // Handle case where profile name is default "User" and we have a username
+        if (key === PROFILE_KEY && parsed.name === 'User') {
+            parsed.name = username;
+        }
+        return parsed;
+    }
+    // If it's a new user and we're loading the profile, set the name
+    if (key === PROFILE_KEY && (defaultValue as any).name === 'User') {
+        (defaultValue as Profile).name = username;
+    }
+    return defaultValue;
+  } catch (error) {
+    console.error(`Error reading from localStorage key “${userKey(key, username)}”:`, error);
+    return defaultValue;
+  }
+};
+
+export const saveJSON = <T,>(key: string, data: T, username: string): void => {
+  try {
+    const serializedData = JSON.stringify(data);
+    window.localStorage.setItem(userKey(key, username), serializedData);
+  } catch (error) {
+    console.error(`Error writing to localStorage key “${userKey(key, username)}”:`, error);
+  }
+};
+
+export const initializeDefaults = (username: string): { profile: Profile; runs: Run[]; goals: Goal; insights: InsightsData } => {
+  const profile = loadJSON<Profile>(PROFILE_KEY, { ...defaultProfile }, username);
+  const runs = loadJSON<Run[]>(RUNS_KEY, defaultRuns, username);
+  const goals = loadJSON<Goal>(GOALS_KEY, { ...defaultGoals }, username);
+  const insights = loadJSON<InsightsData>(INSIGHTS_KEY, { ...defaultInsights }, username);
+
+  saveJSON(PROFILE_KEY, profile, username);
+  saveJSON(RUNS_KEY, runs, username);
+  saveJSON(GOALS_KEY, goals, username);
+  saveJSON(INSIGHTS_KEY, insights, username);
+
+  return { profile, runs, goals, insights };
+};
+
+export const getProfile = (username: string) => loadJSON<Profile>(PROFILE_KEY, defaultProfile, username);
+export const saveProfile = (data: Profile, username: string) => saveJSON(PROFILE_KEY, data, username);
+
+export const getRuns = (username: string) => loadJSON<Run[]>(RUNS_KEY, defaultRuns, username);
+export const saveRuns = (data: Run[], username: string) => saveJSON(RUNS_KEY, data, username);
+export const addRun = (run: Run, username: string) => {
+    const runs = getRuns(username);
+    saveRuns([run, ...runs], username);
+}
+
+export const getGoals = (username: string) => loadJSON<Goal>(GOALS_KEY, defaultGoals, username);
+export const saveGoals = (data: Goal, username: string) => saveJSON(GOALS_KEY, data, username);
+
+export const getInsights = (username: string) => loadJSON<InsightsData>(INSIGHTS_KEY, defaultInsights, username);
+export const saveInsights = (data: InsightsData, username: string) => saveJSON(INSIGHTS_KEY, data, username);
