@@ -106,3 +106,68 @@ export const saveGoals = (data: Goal, username: string) => saveJSON(GOALS_KEY, d
 
 export const getInsights = (username: string) => loadJSON<InsightsData>(INSIGHTS_KEY, defaultInsights, username);
 export const saveInsights = (data: InsightsData, username: string) => saveJSON(INSIGHTS_KEY, data, username);
+
+// Backup functionality
+export const exportUserData = (username: string) => {
+  const profile = getProfile(username);
+  const runs = getRuns(username);
+  const goals = getGoals(username);
+  const insights = getInsights(username);
+  
+  const backupData = {
+    username,
+    exportDate: new Date().toISOString(),
+    profile,
+    runs,
+    goals,
+    insights
+  };
+  
+  return JSON.stringify(backupData, null, 2);
+};
+
+export const downloadBackup = (username: string) => {
+  const data = exportUserData(username);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `aifit-backup-${username}-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+export const importUserData = (jsonData: string, username: string): boolean => {
+  try {
+    const backupData = JSON.parse(jsonData);
+    
+    if (!backupData.profile || !backupData.runs || !backupData.goals || !backupData.insights) {
+      throw new Error('Invalid backup file format');
+    }
+    
+    saveProfile(backupData.profile, username);
+    saveRuns(backupData.runs, username);
+    saveGoals(backupData.goals, username);
+    saveInsights(backupData.insights, username);
+    
+    return true;
+  } catch (error) {
+    console.error('Error importing backup:', error);
+    return false;
+  }
+};
+
+export const recreateBackupFile = (username: string) => {
+  const data = exportUserData(username);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `data.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
