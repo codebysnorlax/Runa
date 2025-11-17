@@ -6,11 +6,17 @@ import { LogIn } from 'lucide-react';
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const { login } = useAppContext();
     const navigate = useNavigate();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (password !== '10072005') {
+            setError('');
+            return;
+        }
         if (username.trim()) {
             login(username.trim().toLowerCase());
             navigate('/');
@@ -40,12 +46,40 @@ const Login: React.FC = () => {
                             placeholder="Enter any username"
                             className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
                         />
-                         <p className="text-xs text-gray-500 mt-2">No password needed. Your data is stored locally on this device under the username you enter.</p>
                     </div>
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+                            Password
+                        </label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter password"
+                            className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
+                        />
+                    </div>
+                    {password && password !== '10072005' && (
+                        <div className="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded">
+                            You are not allowed. Contact developer{' '}
+                            <a 
+                                href="https://instagram.com/nr_snorlax" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-brand-orange hover:underline font-medium"
+                            >
+                                @nr_snorlax
+                            </a>{' '}
+                            to get in.
+                        </div>
+                    )}
                     <button
                         type="submit"
                         className="w-full flex justify-center items-center bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-500"
-                        disabled={!username.trim()}
+                        disabled={!username.trim() || !password}
                     >
                         <LogIn className="w-5 h-5 mr-2" />
                         Enter Dashboard

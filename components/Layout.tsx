@@ -30,7 +30,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-dark-card border-r border-dark-border p-4 md:sticky md:top-0 md:h-screen">
         <div>
-          <h1 className="text-2xl font-bold text-brand-orange mb-1">FitAI</h1>
+          <h1 className="text-2xl font-bold text-brand-orange mb-1">Runa</h1>
           <p className="text-sm text-gray-400 mb-8">User: <span className="font-bold text-gray-300">{currentUser}</span></p>
         </div>
         <nav className="flex flex-col space-y-2 flex-grow">
