@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusCircle, List, BarChart2, Zap, Settings, LogOut } from 'lucide-react';
+import { Home, PlusCircle, List, BarChart2, Zap, Settings, LogOut, Info, Github, Mail, Globe, Instagram, Twitter, Linkedin } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 
 interface LayoutProps {
@@ -14,6 +14,7 @@ const navItems = [
   { path: '/analytics', label: 'Analytics', icon: BarChart2 },
   { path: '/insights', label: 'Insights', icon: Zap },
   { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/info', label: 'Info', icon: Info },
 ];
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -49,6 +50,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </NavLink>
           ))}
         </nav>
+        
+
+        
         <button
           onClick={handleLogout}
           className="flex items-center space-x-3 p-3 w-full rounded-lg transition-colors duration-200 hover:bg-red-500/20 text-red-400"
