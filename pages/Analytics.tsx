@@ -101,20 +101,20 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
     return (
         <Card>
             <h2 className="text-lg font-semibold text-white mb-4">Running Frequency Heatmap</h2>
-            <div className="flex flex-col items-center">
-                 <div className="grid grid-flow-col grid-rows-7 gap-1">
-                    {[...Array(firstDayOffset)].map((_, i) => <div key={`empty-${i}`} className="w-3.5 h-3.5 rounded-sm" />)}
+            <div className="flex flex-col items-center overflow-x-auto">
+                 <div className="grid grid-flow-col grid-rows-7 gap-1 min-w-max">
+                    {[...Array(firstDayOffset)].map((_, i) => <div key={`empty-${i}`} className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm" />)}
                     {data.map(({ date, distance }, index) => (
-                        <div key={index} className={`w-3.5 h-3.5 rounded-sm ${getColor(distance)}`} title={`${date.toDateString()}: ${distance.toFixed(1)}km`} />
+                        <div key={index} className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm ${getColor(distance)}`} title={`${date.toDateString()}: ${distance.toFixed(1)}km`} />
                     ))}
                 </div>
                  <div className="flex justify-end mt-2 text-xs text-gray-400 self-stretch items-center">
                      <span>Less</span>
-                     <div className="w-3.5 h-3.5 rounded-sm bg-gray-800 mx-1" />
-                     <div className="w-3.5 h-3.5 rounded-sm bg-brand-orange/20 mx-1" />
-                     <div className="w-3.5 h-3.5 rounded-sm bg-brand-orange/40 mx-1" />
-                     <div className="w-3.5 h-3.5 rounded-sm bg-brand-orange/60 mx-1" />
-                     <div className="w-3.5 h-3.5 rounded-sm bg-brand-orange/80 mx-1" />
+                     <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-gray-800 mx-1" />
+                     <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/20 mx-1" />
+                     <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/40 mx-1" />
+                     <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/60 mx-1" />
+                     <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/80 mx-1" />
                      <span>More</span>
                  </div>
             </div>
@@ -166,10 +166,10 @@ const Analytics: React.FC = () => {
          <Card>
             <h2 className="text-lg font-semibold text-white mb-4">{title}</h2>
             <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={data} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
-                    <XAxis dataKey="name" stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} />
-                    <YAxis stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} unit={yUnit} domain={['dataMin - 1', 'dataMax + 1']} tickFormatter={yKey === 'pace' ? formatPace : undefined} />
+                    <XAxis dataKey="name" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
+                    <YAxis stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit={yUnit} domain={['dataMin - 1', 'dataMax + 1']} tickFormatter={yKey === 'pace' ? formatPace : undefined} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
                     <Line type="monotone" dataKey={yKey} stroke={color} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 6 }} name={title.split('(')[0].trim()} />
@@ -184,17 +184,17 @@ const Analytics: React.FC = () => {
 
             <Heatmap runs={runs} />
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {renderChart("Pace Trend (min/km)", chartData.slice(-14), "pace", " min/km", "#FF7A00")}
                 {renderChart("Speed Trend (km/h)", chartData.slice(-14), "speed", " km/h", "#8884d8")}
             </div>
              <Card>
                 <h2 className="text-lg font-semibold text-white mb-4">Weekly Distance</h2>
                 <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={weeklyDistanceData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <BarChart data={weeklyDistanceData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
-                        <XAxis dataKey="name" stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} />
-                        <YAxis stroke="#888" fontSize={12} tick={{ fill: '#9CA3AF' }} unit=" km"/>
+                        <XAxis dataKey="name" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
+                        <YAxis stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit=" km"/>
                         <Tooltip content={<CustomTooltip />} />
                         <Legend />
                         <Bar dataKey="distance" fill="#FF7A00" name="Distance (km)" />

@@ -9,7 +9,7 @@ interface LayoutProps {
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: Home },
-  { path: '/add-run', label: 'Add Run', icon: PlusCircle },
+  { path: '/add-run', label: 'Run', icon: PlusCircle },
   { path: '/history', label: 'History', icon: List },
   { path: '/analytics', label: 'Analytics', icon: BarChart2 },
   { path: '/insights', label: 'Insights', icon: Zap },
@@ -50,9 +50,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </NavLink>
           ))}
         </nav>
-        
 
-        
+
+
         <button
           onClick={handleLogout}
           className="flex items-center space-x-3 p-3 w-full rounded-lg transition-colors duration-200 hover:bg-red-500/20 text-red-400"
