@@ -36,7 +36,7 @@ const Login: React.FC = () => {
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <Card className="max-w-sm w-full">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-brand-orange">FitAI</h1>
+                    <h1 className="text-3xl font-bold text-brand-orange">Runa</h1>
                     <p className="text-gray-400">Your AI-Powered Fitness Tracker</p>
                 </div>
                 <form onSubmit={handleSubmit} className="space-y-6">
