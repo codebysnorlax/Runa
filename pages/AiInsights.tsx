@@ -90,21 +90,36 @@ const GeneratingContentSkeleton: React.FC = () => (
 const AiInsights: React.FC = () => {
     const { runs, goals, profile, insights, updateInsights, loading: contextLoading } = useAppContext();
     const [isGenerating, setIsGenerating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
     const handleGenerate = async () => {
         if (!profile || !goals || runs.length === 0) {
-            setToast({ message: 'Need profile, goals, and at least one run to generate insights.', type: 'error' });
+            setToast({ message: 'Complete your profile, set goals, and add at least one run to generate insights.', type: 'error' });
             return;
         }
 
         setIsGenerating(true);
-        const newInsightsData = await generateInsightsAndPlan(runs, goals, profile);
-        if (newInsightsData) {
-            updateInsights(newInsightsData);
-            setToast({ message: 'Insights generated successfully!', type: 'success' });
-        } else {
-             setToast({ message: 'Failed to generate insights. Please try again.', type: 'error' });
+        setError(null);
+        try {
+            const newInsightsData = await generateInsightsAndPlan(runs, goals, profile);
+            if (newInsightsData) {
+                updateInsights(newInsightsData);
+                setToast({ message: 'Insights generated successfully!', type: 'success' });
+            } else {
+                setError('AI service is currently unavailable. Please try again later.');
+            }
+        } catch (err: any) {
+            console.error('AI Insights Error:', err);
+            if (err.message?.includes('API key')) {
+                setError('AI service configuration error. Please check API key settings.');
+            } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+                setError('Network error. Please check your internet connection and try again.');
+            } else if (err.message?.includes('quota') || err.message?.includes('limit')) {
+                setError('AI service quota exceeded. Please try again later.');
+            } else {
+                setError(`AI service error: ${err.message || 'Unknown error occurred. Please try again.'}`); 
+            }
         }
         setIsGenerating(false);
     };
@@ -200,12 +215,32 @@ const AiInsights: React.FC = () => {
                         </Card>
                      )}
                     
-                    {insights?.insights?.length === 0 &&
-                        <div className="text-center py-16">
-                            <Zap className="w-16 h-16 mx-auto text-gray-600" />
-                            <p className="mt-4 text-gray-400">Click "Generate New Insights" to get your personalized analysis.</p>
-                        </div>
-                    }
+                    {error && (
+                        <Card>
+                            <div className="text-center py-12">
+                                <ThumbsDown className="w-16 h-16 mx-auto text-red-400 mb-4" />
+                                <h3 className="text-xl font-semibold text-white mb-2">AI Service Error</h3>
+                                <p className="text-gray-400 mb-4">{error}</p>
+                                <button
+                                    onClick={() => setError(null)}
+                                    className="text-brand-orange hover:text-orange-400 transition-colors"
+                                >
+                                    Try Again
+                                </button>
+                            </div>
+                        </Card>
+                    )}
+
+                    {!error && (!insights || insights?.insights?.length === 0) && (
+                        <Card>
+                            <div className="text-center py-12">
+                                <Zap className="w-16 h-16 mx-auto text-brand-orange mb-4" />
+                                <h3 className="text-xl font-semibold text-white mb-2">No AI Insights Available</h3>
+                                <p className="text-gray-400 mb-4">Generate personalized insights based on your running data</p>
+                                <p className="text-sm text-gray-500">Make sure you have profile, goals, and at least one run recorded</p>
+                            </div>
+                        </Card>
+                    )}
                 </>
             )}
         </div>
