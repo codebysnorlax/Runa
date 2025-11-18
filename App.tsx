@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AppContextProvider } from './context/AppContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -66,6 +67,7 @@ const App: React.FC = () => {
           </Routes>
         </Suspense>
       </Router>
+      <SpeedInsights />
     </AppContextProvider>
   );
 };
