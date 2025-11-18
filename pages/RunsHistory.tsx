@@ -150,28 +150,28 @@ const RunsHistory: React.FC = () => {
             
             {/* Search and Filter Controls */}
             <Card>
-                <div className="flex flex-col gap-3 p-3 sm:p-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className="flex gap-2 p-2 sm:p-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             type="text"
-                            placeholder="Search runs..."
+                            placeholder="Search..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-11 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-brand-orange text-base"
+                            className="w-full pl-8 pr-3 py-2 sm:py-3 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-brand-orange text-sm sm:text-base"
                         />
                     </div>
                     <div className="relative">
-                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <Filter className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value as FilterType)}
-                            className="w-full pl-11 pr-8 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-brand-orange appearance-none text-base"
+                            className="pl-8 pr-6 py-2 sm:py-3 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-brand-orange appearance-none text-sm sm:text-base"
                         >
-                            <option value="all">All Time</option>
-                            <option value="thisWeek">This Week</option>
-                            <option value="thisMonth">This Month</option>
-                            <option value="last3Months">Last 3 Months</option>
+                            <option value="all">All</option>
+                            <option value="thisWeek">Week</option>
+                            <option value="thisMonth">Month</option>
+                            <option value="last3Months">3 Months</option>
                         </select>
                     </div>
                 </div>
