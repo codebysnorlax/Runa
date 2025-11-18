@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 import { Goal, Profile, DistanceGoal } from '../types';
 import Card from '../components/Card';
 import Skeleton from '../components/Skeleton';
 import Toast from '../components/Toast';
-import { User, Target, Download, Upload, Database, Plus, Trash2, Info, Github, Mail, Globe, Instagram, Twitter, Linkedin, Code, Shield } from 'lucide-react';
+import { User, Target, Download, Upload, Database, Plus, Trash2, Info, Github, Mail, Globe, Instagram, Twitter, Linkedin, Code, Shield, LogOut } from 'lucide-react';
 import * as storage from '../services/storageService';
 
 const SettingsSkeleton: React.FC = () => (
@@ -34,7 +35,8 @@ const SettingsSkeleton: React.FC = () => (
 type ActiveTab = 'profile' | 'goals' | 'backup' | 'info';
 
 const Settings: React.FC = () => {
-    const { profile, goals, updateProfile, updateGoals, loading, currentUser, refreshData } = useAppContext();
+    const { profile, goals, updateProfile, updateGoals, loading, currentUser, refreshData, logout } = useAppContext();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<ActiveTab>('profile');
     
     const [profileState, setProfileState] = useState<Profile | null>(null);
@@ -223,6 +225,22 @@ const Settings: React.FC = () => {
                         <button type="submit" className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
                             Save Profile
                         </button>
+                        
+                        <div className="md:hidden mt-4">
+                            <button 
+                                type="button" 
+                                onClick={() => {
+                                    if (confirm('Are you sure you want to logout?')) {
+                                        logout();
+                                        navigate('/login');
+                                    }
+                                }}
+                                className="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center"
+                            >
+                                <LogOut className="w-5 h-5 mr-2" />
+                                Logout
+                            </button>
+                        </div>
                     </form>
                 )}
                  {activeTab === 'goals' && (
