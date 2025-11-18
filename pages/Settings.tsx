@@ -65,10 +65,12 @@ const Settings: React.FC = () => {
         }
     };
 
-    const addDistanceGoal = () => {
+    const addDistanceGoal = (e?: React.MouseEvent | React.TouchEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
         if (goalState) {
             const newGoal: DistanceGoal = {
-                id: crypto.randomUUID(),
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
                 distance_km: 1,
                 target_time: '06:00',
                 name: 'New Goal'
@@ -91,7 +93,9 @@ const Settings: React.FC = () => {
         }
     };
 
-    const removeDistanceGoal = (id: string) => {
+    const removeDistanceGoal = (id: string, e?: React.MouseEvent | React.TouchEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
         if (goalState) {
             setGoalState({
                 ...goalState,
@@ -235,30 +239,35 @@ const Settings: React.FC = () => {
                         </div>
                         
                         <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="text-lg font-medium text-white">Distance Goals</h3>
-                                <button type="button" onClick={addDistanceGoal} className="flex items-center bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors">
-                                    <Plus className="w-4 h-4 mr-1" /> Add Goal
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                                <h3 className="text-base sm:text-lg font-medium text-white">Distance Goals</h3>
+                                <button 
+                                    type="button" 
+                                    onClick={(e) => addDistanceGoal(e)}
+                                    className="flex items-center justify-center bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-3 rounded-lg hover:from-green-700 hover:to-green-600 active:scale-95 transition-all duration-200 shadow-lg"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" /> Add New Goal
                                 </button>
                             </div>
                             
                             {(goalState.distance_goals || []).length === 0 ? (
-                                <div className="text-center py-8 bg-gray-800 rounded-lg">
-                                    <p className="text-gray-400">No distance goals set. Add your first goal!</p>
+                                <div className="text-center py-6 bg-gray-800 rounded-lg border border-gray-700">
+                                    <Target className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+                                    <p className="text-gray-400 text-sm">No goals set</p>
                                 </div>
                             ) : (
                                 <div className="space-y-3">
                                     {(goalState.distance_goals || []).map((goal) => (
-                                        <div key={goal.id} className="bg-gray-800 p-4 rounded-lg">
-                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                                        <div key={goal.id} className="bg-gray-800 p-3 rounded-lg border border-gray-700">
+                                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                                 <div>
-                                                    <label className="block text-xs text-gray-400 mb-1">Goal Name</label>
+                                                    <label className="block text-xs text-gray-400 mb-1">Name</label>
                                                     <input 
                                                         type="text" 
                                                         value={goal.name} 
                                                         onChange={(e) => updateDistanceGoal(goal.id, 'name', e.target.value)}
-                                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm focus:ring-brand-orange focus:border-brand-orange" 
-                                                        placeholder="e.g., 5K Run"
+                                                        className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm focus:ring-1 focus:ring-brand-orange focus:border-brand-orange" 
+                                                        placeholder="5K Run"
                                                     />
                                                 </div>
                                                 <div>
@@ -269,24 +278,24 @@ const Settings: React.FC = () => {
                                                         min="0.1"
                                                         value={goal.distance_km} 
                                                         onChange={(e) => updateDistanceGoal(goal.id, 'distance_km', Number(e.target.value))}
-                                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm focus:ring-brand-orange focus:border-brand-orange" 
+                                                        className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm focus:ring-1 focus:ring-brand-orange focus:border-brand-orange" 
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs text-gray-400 mb-1">Target Time (MM:SS)</label>
+                                                    <label className="block text-xs text-gray-400 mb-1">Time (MM:SS)</label>
                                                     <input 
                                                         type="text" 
                                                         value={goal.target_time} 
                                                         onChange={(e) => updateDistanceGoal(goal.id, 'target_time', e.target.value)}
-                                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm focus:ring-brand-orange focus:border-brand-orange" 
-                                                        placeholder="06:00"
+                                                        className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm focus:ring-1 focus:ring-brand-orange focus:border-brand-orange" 
+                                                        placeholder="25:00"
                                                     />
                                                 </div>
-                                                <div>
+                                                <div className="flex items-end">
                                                     <button 
                                                         type="button" 
-                                                        onClick={() => removeDistanceGoal(goal.id)}
-                                                        className="w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center"
+                                                        onClick={(e) => removeDistanceGoal(goal.id, e)}
+                                                        className="w-full bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-colors flex items-center justify-center"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
@@ -296,10 +305,14 @@ const Settings: React.FC = () => {
                                     ))}
                                 </div>
                             )}
-                            <p className="text-xs text-gray-400 mt-2">Set custom distance goals with target times. Examples: 5K in 25:00, 10K in 50:00, etc.</p>
+                            <p className="text-xs text-gray-400 mt-2">💡 Set realistic goals like 5K in 25:00, 10K in 50:00</p>
                         </div>
                         
-                        <button type="submit" className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                        <button 
+                            type="submit" 
+                            onTouchStart={() => {}}
+                            className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 active:scale-95 transition-all duration-200 touch-manipulation"
+                        >
                             Save Goals
                         </button>
                     </form>
