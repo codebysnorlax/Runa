@@ -190,7 +190,7 @@ const Settings: React.FC = () => {
     );
 
     return (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
              {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">Settings</h1>
 
@@ -205,28 +205,29 @@ const Settings: React.FC = () => {
 
             <Card>
                 {activeTab === 'profile' && (
-                    <form onSubmit={handleProfileSubmit} className="space-y-4 animate-fade-in">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Name</label>
-                            <input name="name" type="text" value={profileState.name} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                    <form onSubmit={handleProfileSubmit} className="animate-fade-in">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
+                                <input name="name" type="text" value={profileState.name} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Age</label>
+                                <input name="age" type="number" value={profileState.age} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Height (cm)</label>
+                                <input name="height_cm" type="number" value={profileState.height_cm} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Weight (kg)</label>
+                                <input name="weight_kg" type="number" value={profileState.weight_kg} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Age</label>
-                            <input name="age" type="number" value={profileState.age} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Height (cm)</label>
-                            <input name="height_cm" type="number" value={profileState.height_cm} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Weight (kg)</label>
-                            <input name="weight_kg" type="number" value={profileState.weight_kg} onChange={handleProfileChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                        </div>
-                        <button type="submit" className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
-                            Save Profile
-                        </button>
-                        
-                        <div className="md:hidden mt-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <button type="submit" className="flex-1 bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                                Save Profile
+                            </button>
                             <button 
                                 type="button" 
                                 onClick={() => {
@@ -235,7 +236,7 @@ const Settings: React.FC = () => {
                                         navigate('/login');
                                     }
                                 }}
-                                className="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center"
+                                className="sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center"
                             >
                                 <LogOut className="w-5 h-5 mr-2" />
                                 Logout
@@ -336,54 +337,74 @@ const Settings: React.FC = () => {
                     </form>
                  )}
                  {activeTab === 'backup' && (
-                    <div className="space-y-6 animate-fade-in">
-                        <div>
-                            <h3 className="text-lg font-semibold text-white mb-3">Data Backup & Restore</h3>
-                            <p className="text-gray-400 text-sm mb-4">Keep your fitness data safe by creating backups and restoring from previous saves.</p>
-                        </div>
-                        
-                        <div className="space-y-4">
-                            <button
-                                onClick={handleDownloadBackup}
-                                className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                            >
-                                <Download className="w-5 h-5 mr-2" />
-                                Download Backup
-                            </button>
-                            
-                            <button
-                                onClick={handleRecreateDataFile}
-                                className="w-full flex items-center justify-center bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                            >
-                                <Database className="w-5 h-5 mr-2" />
-                                Create data.json
-                            </button>
-                            
+                    <div className="animate-fade-in">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept=".json"
-                                    onChange={handleFileUpload}
-                                    className="hidden"
-                                />
-                                <button
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="w-full flex items-center justify-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
-                                >
-                                    <Upload className="w-5 h-5 mr-2" />
-                                    Restore from Backup
-                                </button>
+                                <h3 className="text-lg font-semibold text-white mb-3">Data Backup & Restore</h3>
+                                <p className="text-gray-400 text-sm mb-6">Keep your fitness data safe by creating backups and restoring from previous saves.</p>
+                                
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={handleDownloadBackup}
+                                        className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                    >
+                                        <Download className="w-5 h-5 mr-2" />
+                                        Download Backup
+                                    </button>
+                                    
+                                    <button
+                                        onClick={handleRecreateDataFile}
+                                        className="w-full flex items-center justify-center bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                    >
+                                        <Database className="w-5 h-5 mr-2" />
+                                        Create data.json
+                                    </button>
+                                    
+                                    <div>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept=".json"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                        />
+                                        <button
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="w-full flex items-center justify-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                        >
+                                            <Upload className="w-5 h-5 mr-2" />
+                                            Restore from Backup
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div className="bg-gray-800 p-4 rounded-lg">
-                            <h4 className="text-white font-medium mb-2">How it works:</h4>
-                            <ul className="text-gray-400 text-sm space-y-1">
-                                <li>• <strong>Download Backup:</strong> Creates a timestamped backup file</li>
-                                <li>• <strong>Create data.json:</strong> Creates a simple "data.json" file</li>
-                                <li>• <strong>Restore:</strong> Upload any backup file to restore your data</li>
-                            </ul>
+                            
+                            <div className="bg-gray-800 p-6 rounded-lg h-fit">
+                                <h4 className="text-white font-medium mb-4">How it works:</h4>
+                                <div className="space-y-4">
+                                    <div className="flex items-start space-x-3">
+                                        <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <div className="text-white font-medium">Download Backup</div>
+                                            <div className="text-gray-400 text-sm">Creates a timestamped backup file with all your data</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <div className="text-white font-medium">Create data.json</div>
+                                            <div className="text-gray-400 text-sm">Creates a simple "data.json" file for easy sharing</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <div className="text-white font-medium">Restore</div>
+                                            <div className="text-gray-400 text-sm">Upload any backup file to restore your data</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                  )}
