@@ -2,11 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Run, Goal, Profile, InsightsData } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
 
 export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile: Profile): Promise<InsightsData | null> => {
-  if (!process.env.API_KEY) {
-    console.error("API_KEY environment variable not set.");
+  if (!process.env.GEMINI_API_KEY) {
+    console.error("GEMINI_API_KEY environment variable not set.");
     return null;
   }
 
