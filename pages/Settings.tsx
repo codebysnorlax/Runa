@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { Goal, Profile } from '../types';
+import { Goal, Profile, DistanceGoal } from '../types';
 import Card from '../components/Card';
 import Skeleton from '../components/Skeleton';
 import Toast from '../components/Toast';
-import { User, Target, Download, Upload, Database } from 'lucide-react';
+import { User, Target, Download, Upload, Database, Plus, Trash2 } from 'lucide-react';
 import * as storage from '../services/storageService';
 
 const SettingsSkeleton: React.FC = () => (
@@ -45,7 +45,12 @@ const Settings: React.FC = () => {
 
     useEffect(() => {
         if (profile) setProfileState({ ...profile });
-        if (goals) setGoalState({ ...goals });
+        if (goals) {
+            setGoalState({
+                ...goals,
+                distance_goals: goals.distance_goals || []
+            });
+        }
     }, [profile, goals]);
 
     const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,10 +65,44 @@ const Settings: React.FC = () => {
         }
     };
 
+    const addDistanceGoal = () => {
+        if (goalState) {
+            const newGoal: DistanceGoal = {
+                id: crypto.randomUUID(),
+                distance_km: 1,
+                target_time: '06:00',
+                name: 'New Goal'
+            };
+            setGoalState({
+                ...goalState,
+                distance_goals: [...goalState.distance_goals, newGoal]
+            });
+        }
+    };
+
+    const updateDistanceGoal = (id: string, field: keyof DistanceGoal, value: string | number) => {
+        if (goalState) {
+            setGoalState({
+                ...goalState,
+                distance_goals: goalState.distance_goals.map(goal => 
+                    goal.id === id ? { ...goal, [field]: value } : goal
+                )
+            });
+        }
+    };
+
+    const removeDistanceGoal = (id: string) => {
+        if (goalState) {
+            setGoalState({
+                ...goalState,
+                distance_goals: goalState.distance_goals.filter(goal => goal.id !== id)
+            });
+        }
+    };
+
     const handleProfileSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (profileState) {
-            // Convert string values back to numbers
             const finalProfile = {
                 ...profileState,
                 age: Number(profileState.age) || 0,
@@ -80,8 +119,8 @@ const Settings: React.FC = () => {
         if (goalState) {
             const finalGoals = {
                 ...goalState,
-                distance_target_km: Number(goalState.distance_target_km) || 0,
-                days_target: Number(goalState.days_target) || 0,
+                weekly_distance_km: Number(goalState.weekly_distance_km) || 0,
+                weekly_runs: Number(goalState.weekly_runs) || 0,
             };
             updateGoals(finalGoals);
             setToast({ message: 'Goals updated successfully!', type: 'success' });
@@ -180,20 +219,83 @@ const Settings: React.FC = () => {
                     </form>
                 )}
                  {activeTab === 'goals' && (
-                    <form onSubmit={handleGoalSubmit} className="space-y-4 animate-fade-in">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Weekly Distance Target (km)</label>
-                            <input name="distance_target_km" type="number" value={goalState.distance_target_km} onChange={handleGoalChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                    <form onSubmit={handleGoalSubmit} className="space-y-6 animate-fade-in">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Weekly Distance Target (km)</label>
+                                <input name="weekly_distance_km" type="number" step="0.1" value={goalState.weekly_distance_km || 0} onChange={handleGoalChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-1">Weekly Running Days</label>
+                                <input name="weekly_runs" type="number" min="0" max="7" value={goalState.weekly_runs || 0} onChange={handleGoalChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            </div>
                         </div>
+                        
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Weekly Running Days</label>
-                            <input name="days_target" type="number" value={goalState.days_target} onChange={handleGoalChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-lg font-medium text-white">Distance Goals</h3>
+                                <button type="button" onClick={addDistanceGoal} className="flex items-center bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 transition-colors">
+                                    <Plus className="w-4 h-4 mr-1" /> Add Goal
+                                </button>
+                            </div>
+                            
+                            {(goalState.distance_goals || []).length === 0 ? (
+                                <div className="text-center py-8 bg-gray-800 rounded-lg">
+                                    <p className="text-gray-400">No distance goals set. Add your first goal!</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {(goalState.distance_goals || []).map((goal) => (
+                                        <div key={goal.id} className="bg-gray-800 p-4 rounded-lg">
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                                                <div>
+                                                    <label className="block text-xs text-gray-400 mb-1">Goal Name</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={goal.name} 
+                                                        onChange={(e) => updateDistanceGoal(goal.id, 'name', e.target.value)}
+                                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm focus:ring-brand-orange focus:border-brand-orange" 
+                                                        placeholder="e.g., 5K Run"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs text-gray-400 mb-1">Distance (km)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.1" 
+                                                        min="0.1"
+                                                        value={goal.distance_km} 
+                                                        onChange={(e) => updateDistanceGoal(goal.id, 'distance_km', Number(e.target.value))}
+                                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm focus:ring-brand-orange focus:border-brand-orange" 
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs text-gray-400 mb-1">Target Time (MM:SS)</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={goal.target_time} 
+                                                        onChange={(e) => updateDistanceGoal(goal.id, 'target_time', e.target.value)}
+                                                        className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white text-sm focus:ring-brand-orange focus:border-brand-orange" 
+                                                        placeholder="06:00"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => removeDistanceGoal(goal.id)}
+                                                        className="w-full bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors flex items-center justify-center"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <p className="text-xs text-gray-400 mt-2">Set custom distance goals with target times. Examples: 5K in 25:00, 10K in 50:00, etc.</p>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">1.6km (1-mile) Time Target</label>
-                            <input name="time_target_1_6km" type="text" value={goalState.time_target_1_6km} onChange={handleGoalChange} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                        </div>
-                        <p className="text-xs text-gray-400">Use MM:SS format, e.g., 06:00</p>
+                        
                         <button type="submit" className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
                             Save Goals
                         </button>

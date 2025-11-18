@@ -16,10 +16,17 @@ export interface Run {
 }
 
 export interface Goal {
-  distance_target_km: number;
-  days_target: number; // e.g., run 5 days a week
-  time_target_1_6km: string; // MM:SS format for 1.6km (1 mile)
-  start_date: string; // ISO 8601 format
+  weekly_distance_km: number;
+  weekly_runs: number;
+  distance_goals: DistanceGoal[];
+  start_date: string;
+}
+
+export interface DistanceGoal {
+  id: string;
+  distance_km: number;
+  target_time: string; // MM:SS format
+  name: string;
 }
 
 export interface Insight {
