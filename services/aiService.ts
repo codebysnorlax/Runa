@@ -2,11 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Run, Goal, Profile, InsightsData } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
 
 export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile: Profile): Promise<InsightsData | null> => {
-  if (!process.env.API_KEY) {
-    console.error("API_KEY environment variable not set.");
+  if (!process.env.GEMINI_API_KEY) {
+    console.error("GEMINI_API_KEY environment variable not set.");
     return null;
   }
 
@@ -19,9 +19,9 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     - Height: ${profile.height_cm} cm
 
     User Goals:
-    - Weekly Distance Target: ${goals.distance_target_km} km
-    - Weekly Running Days Target: ${goals.days_target} days
-    - 1.6km (1-mile) Time Target: ${goals.time_target_1_6km}
+    - Weekly Distance Target: ${goals.weekly_distance_km} km
+    - Weekly Running Days Target: ${goals.weekly_runs} days
+    - Distance Goals: ${goals.distance_goals.map(g => `${g.name}: ${g.distance_km}km in ${g.target_time}`).join(', ') || 'None set'}
 
     Recent Runs (up to last 10, most recent first):
     ${runs.slice(0, 10).map(r => 

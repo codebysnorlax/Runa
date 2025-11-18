@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
     const last7DaysRuns = runs.filter(run => new Date(run.date) >= last7Days);
     const last7DaysDistance = last7DaysRuns.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
 
-    const goalProgress = goals && goals.distance_target_km > 0 ? (last7DaysDistance / goals.distance_target_km) * 100 : 0;
+    const goalProgress = goals && goals.weekly_distance_km > 0 ? (last7DaysDistance / goals.weekly_distance_km) * 100 : 0;
 
     const latestInsight = insights?.insights?.[0];
 

@@ -25,9 +25,9 @@ const defaultProfile: Profile = {
 const defaultRuns: Run[] = [];
 
 const defaultGoals: Goal = {
-  distance_target_km: 0,
-  days_target: 0,
-  time_target_1_6km: '00:00',
+  weekly_distance_km: 0,
+  weekly_runs: 0,
+  distance_goals: [],
   start_date: new Date().toISOString(),
 };
 

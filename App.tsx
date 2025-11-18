@@ -13,9 +13,9 @@ const AddRun = lazy(() => import('./pages/AddRun'));
 const EditRun = lazy(() => import('./pages/EditRun'));
 const RunsHistory = lazy(() => import('./pages/RunsHistory'));
 const Analytics = lazy(() => import('./pages/Analytics'));
-const AiInsights = lazy(() => import('./pages/AiInsights'));
+const ProtectedInsights = lazy(() => import('./pages/ProtectedInsights'));
 const Settings = lazy(() => import('./pages/Settings'));
-const Info = lazy(() => import('./pages/Info'));
+
 
 // Using a more generic page skeleton for the suspense fallback
 const PageSkeleton: React.FC = () => (
@@ -55,9 +55,8 @@ const App: React.FC = () => {
                         <Route path="/edit-run/:runId" element={<EditRun />} />
                         <Route path="/history" element={<RunsHistory />} />
                         <Route path="/analytics" element={<Analytics />} />
-                        <Route path="/insights" element={<AiInsights />} />
+                        <Route path="/insights" element={<ProtectedInsights />} />
                         <Route path="/settings" element={<Settings />} />
-                        <Route path="/info" element={<Info />} />
                       </Routes>
                     </Suspense>
                   </Layout>
