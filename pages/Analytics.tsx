@@ -272,7 +272,7 @@ const Analytics: React.FC = () => {
                 <Card>
                     <h2 className="text-lg font-semibold text-white mb-4">Performance Trend</h2>
                     <ResponsiveContainer width="100%" height={300}>
-                        <ComposedChart data={performanceData.slice(-14)}>
+                        <ComposedChart data={performanceData.slice(-14)} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
                             <XAxis dataKey="name" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
                             <YAxis yAxisId="left" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
@@ -288,7 +288,7 @@ const Analytics: React.FC = () => {
                 <Card>
                     <h2 className="text-lg font-semibold text-white mb-4">Cumulative Distance</h2>
                     <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={performanceData}>
+                        <AreaChart data={performanceData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
                             <XAxis dataKey="name" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
                             <YAxis stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit=" km" />
@@ -303,7 +303,7 @@ const Analytics: React.FC = () => {
             <Card>
                 <h2 className="text-lg font-semibold text-white mb-4">Weekly Performance vs Goals</h2>
                 <ResponsiveContainer width="100%" height={350}>
-                    <ComposedChart data={weeklyDistanceData}>
+                    <ComposedChart data={weeklyDistanceData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
                         <XAxis dataKey="name" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
                         <YAxis yAxisId="left" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit=" km" />
