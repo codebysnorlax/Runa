@@ -1,7 +1,7 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="images/analytics.png" />
+<img width="1200" height="475" alt="GHBanner" src="assets/analytics.png" />
 </div>
-> more pic at images/ folder
+> more screenshots at assets/ folder
 
 # AI Fitness Tracker
 
