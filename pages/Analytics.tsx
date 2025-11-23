@@ -137,6 +137,7 @@ const Analytics: React.FC = () => {
                 pace: run.distance_m > 0 ? (run.total_time_sec / 60) / (run.distance_m / 1000) : 0, // min/km
                 speed: run.avg_speed_kmh,
                 distance: run.distance_m / 1000,
+                time: run.total_time_sec / 60, // minutes
             }));
     }, [runs]);
 
@@ -286,15 +287,18 @@ const Analytics: React.FC = () => {
                 </Card>
 
                 <Card>
-                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Cumulative Distance</h2>
+                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Distance & Time per Run</h2>
                     <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={performanceData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                        <ComposedChart data={chartData.slice(-14)} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
                             <XAxis dataKey="name" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} />
-                            <YAxis stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit=" km" />
+                            <YAxis yAxisId="left" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit=" km" />
+                            <YAxis yAxisId="right" orientation="right" stroke="#888" fontSize={10} tick={{ fill: '#9CA3AF' }} unit=" min" />
                             <Tooltip content={<CustomTooltip />} />
-                            <Area type="monotone" dataKey="cumDistance" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} name="Total Distance (km)" />
-                        </AreaChart>
+                            <Legend />
+                            <Bar yAxisId="left" dataKey="distance" fill="#82ca9d" name="Distance (km)" animationDuration={800} />
+                            <Bar yAxisId="right" dataKey="time" fill="#ff6b6b" name="Time (min)" animationDuration={800} />
+                        </ComposedChart>
                     </ResponsiveContainer>
                 </Card>
             </div>
