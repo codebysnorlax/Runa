@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import dashboardImg from '../assets/dashboard.png';
 import analyticsImg from '../assets/analytics.png';
+import analytics2Img from '../assets/analytics2.png';
 import historyImg from '../assets/history.png';
 import insightsImg from '../assets/insights.png';
 import goalImg from '../assets/goal.png';
 
-const images = [dashboardImg, analyticsImg, historyImg, insightsImg, goalImg];
+const images = [dashboardImg, analyticsImg, analytics2Img, historyImg, insightsImg, goalImg];
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -40,80 +41,156 @@ const Login: React.FC = () => {
           </div>
         </header>
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 flex flex-col justify-center">
-          <div className="text-center py-8 sm:py-12">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 px-2">
-              AI-Powered Fitness Tracker
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-              Track your runs, analyze performance, and get intelligent
-              insights. All your data stays private in your browser.
-            </p>
-
-            <form
-              onSubmit={handleSubmit}
-              className="max-w-lg mx-auto mb-8 sm:mb-10 px-4"
-            >
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 sm:px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange transition-colors"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto bg-brand-orange hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
-                >
-                  Start
-                </button>
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:flex lg:items-center">
+          <div className="w-full py-8 md:py-12 lg:py-12">
+            {/* Mobile/Tablet Layout */}
+            <div className="lg:hidden flex flex-col gap-8 md:gap-10 max-w-5xl mx-auto">
+              {/* Text on top */}
+              <div className="text-center">
+                <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
+                  AI-Powered Fitness Tracker
+                </h2>
+                <p className="text-lg md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                  For those who truly want to track their runs, analyze performance, and get intelligent insights.
+                </p>
               </div>
-            </form>
 
-            <div className="max-w-6xl mx-auto px-4">
-              <div className="relative overflow-hidden rounded-lg">
-                {images.map((img, index) => (
-                  <img
-                    key={index}
-                    src={img}
-                    alt={`Screenshot ${index + 1}`}
-                    className={`rounded-lg border border-gray-800 shadow-2xl w-full ${
-                      index === currentImage ? "relative" : "absolute inset-0"
-                    }`}
-                    style={{
-                      opacity: index === currentImage ? 1 : 0,
-                      transform:
-                        index === currentImage ? "scale(1)" : "scale(0.95)",
-                      transition:
-                        "opacity 0.8s ease-in-out, transform 0.8s ease-in-out",
-                    }}
+              {/* Image in middle */}
+              <div className="w-full">
+                <div className="relative overflow-hidden rounded-xl shadow-2xl">
+                  {images.map((img, index) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`Screenshot ${index + 1}`}
+                      className={`rounded-xl border-2 border-gray-700 w-full ${
+                        index === currentImage ? "relative" : "absolute inset-0"
+                      }`}
+                      style={{
+                        opacity: index === currentImage ? 1 : 0,
+                        transform:
+                          index === currentImage ? "scale(1)" : "scale(0.95)",
+                        transition:
+                          "opacity 0.8s ease-in-out, transform 0.8s ease-in-out",
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-center items-center gap-3 mt-6">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImage(index)}
+                      className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full transition-all duration-500 ${
+                        index === currentImage
+                          ? "bg-brand-orange shadow-lg shadow-brand-orange/50 scale-125"
+                          : "bg-gray-600 hover:bg-gray-500"
+                      }`}
+                      style={{
+                        transition:
+                          "all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Input at bottom */}
+              <form onSubmit={handleSubmit} className="max-w-xl mx-auto w-full">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter username"
+                    className="w-full bg-gray-800 border-2 border-gray-700 rounded-xl px-6 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange transition-colors"
+                    required
                   />
-                ))}
-              </div>
-              <div className="flex justify-center items-center gap-2 mt-4 sm:mt-6">
-                {images.map((_, index) => (
                   <button
-                    key={index}
-                    onClick={() => setCurrentImage(index)}
-                    className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                      index === currentImage
-                        ? "bg-brand-orange shadow-lg shadow-brand-orange/50"
-                        : "bg-gray-600 hover:bg-gray-500"
-                    }`}
-                    style={{
-                      transition:
-                        "all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-                    }}
-                  />
-                ))}
+                    type="submit"
+                    className="w-full sm:w-auto bg-brand-orange hover:bg-orange-600 text-white font-semibold px-10 py-4 rounded-xl transition-all hover:scale-105 whitespace-nowrap text-lg"
+                  >
+                    Start
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Desktop Layout */}
+            <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+              {/* Content on left */}
+              <div className="flex flex-col justify-center">
+                <h2 className="text-5xl xl:text-6xl font-bold text-white mb-4">
+                  AI-Powered Fitness Tracker
+                </h2>
+                <p className="text-xl text-gray-400 mb-8">
+                  Track your runs, analyze performance, and get intelligent
+                  insights. All your data stays private in your browser.
+                </p>
+                <form onSubmit={handleSubmit} className="max-w-lg">
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter username"
+                      className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange transition-colors"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="bg-brand-orange hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
+                    >
+                      Start
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Image on right */}
+              <div>
+                <div className="relative overflow-hidden rounded-lg">
+                  {images.map((img, index) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`Screenshot ${index + 1}`}
+                      className={`rounded-lg border border-gray-800 shadow-2xl w-full ${
+                        index === currentImage ? "relative" : "absolute inset-0"
+                      }`}
+                      style={{
+                        opacity: index === currentImage ? 1 : 0,
+                        transform:
+                          index === currentImage ? "scale(1)" : "scale(0.95)",
+                        transition:
+                          "opacity 0.8s ease-in-out, transform 0.8s ease-in-out",
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="flex justify-center items-center gap-2 mt-6">
+                  {images.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImage(index)}
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
+                        index === currentImage
+                          ? "bg-brand-orange shadow-lg shadow-brand-orange/50"
+                          : "bg-gray-600 hover:bg-gray-500"
+                      }`}
+                      style={{
+                        transition:
+                          "all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </main>
 
-        <footer className="border-t border-gray-800 py-4 sm:py-8 mt-auto">
+        <footer className="border-t border-gray-800 py-4 sm:py-6 mt-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">

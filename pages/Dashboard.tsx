@@ -114,7 +114,7 @@ const Dashboard: React.FC = () => {
         <div className="space-y-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-white animate-fade-in">Welcome back, {profile?.name}!</h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <div className="animate-slide-up" style={{animationDelay: '0.1s'}}>
                     <StatCard title="Today's Distance" value={todayRun ? (todayRun.distance_m / 1000).toFixed(2) : '0'} unit="km" 
                         change={todayRun && yesterdayRun && yesterdayRun.distance_m > 0 ? ((todayRun.distance_m - yesterdayRun.distance_m) / yesterdayRun.distance_m) * 100 : undefined } />
@@ -125,6 +125,9 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="animate-slide-up" style={{animationDelay: '0.3s'}}>
                     <StatCard title="Last 7 Days" value={last7DaysDistance.toFixed(2)} unit="km" />
+                </div>
+                <div className="animate-slide-up" style={{animationDelay: '0.35s'}}>
+                    <StatCard title="Total Runs" value={runs.length.toString()} unit="runs" />
                 </div>
             </div>
 
