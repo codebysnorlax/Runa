@@ -75,11 +75,13 @@ const Login: React.FC = () => {
                                     key={index}
                                     src={img}
                                     alt={`Screenshot ${index + 1}`}
-                                    className={`rounded-lg border border-gray-800 shadow-2xl w-full transition-all duration-1000 ${
-                                        index === currentImage ? 'relative opacity-100 scale-100' : 'absolute inset-0 opacity-0 scale-95'
+                                    className={`rounded-lg border border-gray-800 shadow-2xl w-full ${
+                                        index === currentImage ? 'relative' : 'absolute inset-0'
                                     }`}
                                     style={{
-                                        transition: 'opacity 1s ease-in-out, transform 1s ease-in-out'
+                                        opacity: index === currentImage ? 1 : 0,
+                                        transform: index === currentImage ? 'scale(1)' : 'scale(0.95)',
+                                        transition: 'opacity 0.8s ease-in-out, transform 0.8s ease-in-out'
                                     }}
                                 />
                             ))}
