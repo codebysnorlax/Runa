@@ -9,7 +9,7 @@ import { User, Target, Download, Upload, Database, Plus, Trash2, Info, Github, M
 import * as storage from '../services/storageService';
 
 const SettingsSkeleton: React.FC = () => (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-4xl mx-auto">
         <Skeleton className="h-9 w-1/2 mb-6" />
         <Card>
             <div className="space-y-6">

@@ -9,21 +9,21 @@ const AnalyticsSkeleton: React.FC = () => (
         <Skeleton className="h-9 w-1/3" />
         <Card>
             <Skeleton className="h-6 w-1/2 mb-4" />
-            <Skeleton className="w-full h-[200px]" />
+            <Skeleton className="w-full h-[200px] sm:h-[250px]" />
         </Card>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card>
                 <Skeleton className="h-6 w-1/2 mb-4" />
-                <Skeleton className="w-full h-[300px]" />
+                <Skeleton className="w-full h-[250px] sm:h-[300px]" />
             </Card>
             <Card>
                 <Skeleton className="h-6 w-1/2 mb-4" />
-                <Skeleton className="w-full h-[300px]" />
+                <Skeleton className="w-full h-[250px] sm:h-[300px]" />
             </Card>
         </div>
         <Card>
             <Skeleton className="h-6 w-1/2 mb-4" />
-            <Skeleton className="w-full h-[300px]" />
+            <Skeleton className="w-full h-[250px] sm:h-[300px]" />
         </Card>
     </div>
 );
@@ -235,15 +235,15 @@ const Analytics: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">Analytics</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
 
             <Heatmap runs={runs} />
 
             {/* Goal Progress Section */}
             {goalProgressData.length > 0 && (
                 <Card>
-                    <h2 className="text-lg font-semibold text-white mb-4">Goal Progress</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Goal Progress</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {goalProgressData.map((goal, index) => (
                             <div key={index} className="bg-gray-800 p-4 rounded-lg">
                                 <h3 className="font-semibold text-white mb-2">{goal.name}</h3>
@@ -268,9 +268,9 @@ const Analytics: React.FC = () => {
             )}
 
             {/* Advanced Performance Charts */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 <Card>
-                    <h2 className="text-lg font-semibold text-white mb-4">Performance Trend</h2>
+                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Performance Trend</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <ComposedChart data={performanceData.slice(-14)} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -286,7 +286,7 @@ const Analytics: React.FC = () => {
                 </Card>
 
                 <Card>
-                    <h2 className="text-lg font-semibold text-white mb-4">Cumulative Distance</h2>
+                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Cumulative Distance</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <AreaChart data={performanceData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -301,7 +301,7 @@ const Analytics: React.FC = () => {
 
             {/* Weekly Analysis with Goals */}
             <Card>
-                <h2 className="text-lg font-semibold text-white mb-4">Weekly Performance vs Goals</h2>
+                <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Weekly Performance vs Goals</h2>
                 <ResponsiveContainer width="100%" height={350}>
                     <ComposedChart data={weeklyDistanceData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -319,8 +319,8 @@ const Analytics: React.FC = () => {
 
             {/* Monthly Overview */}
             <Card>
-                <h2 className="text-lg font-semibold text-white mb-4">Monthly Progress Rings</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Monthly Progress Rings</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
                     {monthlyData.map((month, index) => {
                         const maxDistance = Math.max(...monthlyData.map(m => m.distance));
                         const maxRuns = Math.max(...monthlyData.map(m => m.runs));
@@ -328,9 +328,9 @@ const Analytics: React.FC = () => {
                         const runsProgress = (month.runs / maxRuns) * 100;
                         
                         return (
-                            <div key={index} className="flex flex-col items-center p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors">
-                                <div className="relative w-24 h-24 mb-3">
-                                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                            <div key={index} className="flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors">
+                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
+                                    <svg className="w-20 h-20 sm:w-24 sm:h-24 transform -rotate-90" viewBox="0 0 100 100">
                                         {/* Background circles */}
                                         <circle cx="50" cy="50" r="40" stroke="#374151" strokeWidth="8" fill="none" />
                                         <circle cx="50" cy="50" r="30" stroke="#374151" strokeWidth="6" fill="none" />
@@ -365,11 +365,11 @@ const Analytics: React.FC = () => {
                                 <div className="text-center space-y-1">
                                     <div className="flex items-center justify-center space-x-2">
                                         <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
-                                        <span className="text-sm text-white font-semibold">{month.distance.toFixed(1)}km</span>
+                                        <span className="text-xs sm:text-sm text-white font-semibold">{month.distance.toFixed(1)}km</span>
                                     </div>
                                     <div className="flex items-center justify-center space-x-2">
                                         <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                        <span className="text-sm text-gray-300">{month.runs} runs</span>
+                                        <span className="text-xs sm:text-sm text-gray-300">{month.runs} runs</span>
                                     </div>
                                     <div className="text-xs text-gray-400">{month.time.toFixed(1)}h total</div>
                                 </div>
