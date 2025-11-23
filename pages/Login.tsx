@@ -51,7 +51,8 @@ const Login: React.FC = () => {
                   AI-Powered Fitness Tracker
                 </h2>
                 <p className="text-lg md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                  For those who truly want to track their runs, analyze performance, and get intelligent insights.
+                  For those who truly want to track their runs, analyze
+                  performance, and get intelligent insights.
                 </p>
               </div>
 
@@ -124,8 +125,8 @@ const Login: React.FC = () => {
                   AI-Powered Fitness Tracker
                 </h2>
                 <p className="text-xl text-gray-400 mb-8">
-                  Track your runs, analyze performance, and get intelligent
-                  insights. All your data stays private in your browser.
+                  For those who truly want to track their runs, analyze
+                  performance, and get intelligent insights.
                 </p>
                 <form onSubmit={handleSubmit} className="max-w-lg">
                   <div className="flex gap-3">
@@ -203,9 +204,7 @@ const Login: React.FC = () => {
                   <p className="text-white font-semibold text-sm">
                     Ravi Ranjan Sharma
                   </p>
-                  <p className="text-gray-400 text-xs">
-                    Tech enthusiast
-                  </p>
+                  <p className="text-gray-400 text-xs">Tech enthusiast</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-wrap justify-center">
