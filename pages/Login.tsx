@@ -70,7 +70,10 @@ const Login: React.FC = () => {
                   <img
                     key={index}
                     src={img}
-                    alt={`Screenshot ${index + 1}`}
+                    alt={`App screenshot ${index + 1}`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    width="400"
+                    height="300"
                     className={`rounded-xl border-2 border-gray-700 w-full ${
                       index === currentImage ? "relative" : "absolute inset-0"
                     }`}
@@ -162,7 +165,10 @@ const Login: React.FC = () => {
                   <img
                     key={index}
                     src={img}
-                    alt={`Screenshot ${index + 1}`}
+                    alt={`App screenshot ${index + 1}`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    width="600"
+                    height="400"
                     className={`rounded-lg border border-gray-800 shadow-2xl w-full ${
                       index === currentImage ? "relative" : "absolute inset-0"
                     }`}
