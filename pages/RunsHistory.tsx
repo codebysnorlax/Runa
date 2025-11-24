@@ -115,7 +115,7 @@ const RunsHistory: React.FC = () => {
     };
 
     const SortableHeader: React.FC<{ sortKeyId: SortKey; children: React.ReactNode }> = ({ sortKeyId, children }) => (
-        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => handleSort(sortKeyId)}>
+        <th scope="col" className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer" onClick={() => handleSort(sortKeyId)}>
             <div className="flex items-center">
                 {children}
                 {sortKey === sortKeyId && (
@@ -142,11 +142,16 @@ const RunsHistory: React.FC = () => {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<<<<<<< HEAD
                 <h1 className="text-3xl font-bold text-white">Run History</h1>
+=======
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Run History</h1>
+>>>>>>> main
                 <div className="text-sm text-gray-400">
                     {filteredAndSortedRuns.length} of {runs.length} runs
                 </div>
             </div>
+<<<<<<< HEAD
             
             {/* Search and Filter Controls */}
             <Card>
@@ -179,6 +184,40 @@ const RunsHistory: React.FC = () => {
             
             {/* Desktop Table View */}
             <div className="hidden lg:block">
+=======
+            
+            {/* Search and Filter Controls */}
+            <Card>
+                <div className="flex gap-2 p-2 sm:p-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-8 pr-3 py-2 sm:py-3 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-brand-orange text-sm sm:text-base"
+                        />
+                    </div>
+                    <div className="relative">
+                        <Filter className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <select
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value as FilterType)}
+                            className="pl-8 pr-6 py-2 sm:py-3 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-brand-orange appearance-none text-sm sm:text-base"
+                        >
+                            <option value="all">All</option>
+                            <option value="thisWeek">Week</option>
+                            <option value="thisMonth">Month</option>
+                            <option value="last3Months">3 Months</option>
+                        </select>
+                    </div>
+                </div>
+            </Card>
+            
+            {/* Desktop & Tablet Table View */}
+            <div className="hidden md:block">
+>>>>>>> main
                 <Card>
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-700">
@@ -187,9 +226,9 @@ const RunsHistory: React.FC = () => {
                                     <SortableHeader sortKeyId="date">Date</SortableHeader>
                                     <SortableHeader sortKeyId="distance_m">Distance</SortableHeader>
                                     <SortableHeader sortKeyId="avg_speed_kmh">Avg Speed</SortableHeader>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Notes</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                                    <th scope="col" className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
+                                    <th scope="col" className="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Notes</th>
+                                    <th scope="col" className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-dark-card divide-y divide-gray-700">
@@ -239,11 +278,19 @@ const RunsHistory: React.FC = () => {
                         <table className="min-w-full text-sm">
                             <thead className="bg-gray-800">
                                 <tr>
+<<<<<<< HEAD
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase">Date</th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase">Dist</th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase">Speed</th>
                                     <th className="px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase">Time</th>
                                     <th className="px-2 py-3 text-center text-xs font-medium text-gray-300 uppercase">Actions</th>
+=======
+                                    <th className="px-2 sm:px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase">Date</th>
+                                    <th className="px-2 sm:px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase">Dist</th>
+                                    <th className="px-2 sm:px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase">Speed</th>
+                                    <th className="px-2 sm:px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase">Time</th>
+                                    <th className="px-2 sm:px-3 py-3 text-center text-xs font-medium text-gray-300 uppercase">Actions</th>
+>>>>>>> main
                                 </tr>
                             </thead>
                             <tbody className="bg-dark-card divide-y divide-gray-700">
@@ -251,19 +298,29 @@ const RunsHistory: React.FC = () => {
                                     const prevRun = paginatedRuns[index + 1];
                                     return (
                                         <tr key={run.id}>
+<<<<<<< HEAD
                                             <td className="px-2 py-3 text-white text-xs">{new Date(run.date).toLocaleDateString('en', {month: 'short', day: 'numeric'})}</td>
                                             <td className="px-2 py-3 text-white text-xs">
+=======
+                                            <td className="px-2 sm:px-3 py-3 text-white text-xs sm:text-sm">{new Date(run.date).toLocaleDateString('en', {month: 'short', day: 'numeric'})}</td>
+                                            <td className="px-2 sm:px-3 py-3 text-white text-xs sm:text-sm">
+>>>>>>> main
                                                 <div className="flex items-center">
                                                     {(run.distance_m / 1000).toFixed(1)}km
                                                     {prevRun && <span className="ml-1"><TrendIndicator current={run.distance_m} previous={prevRun.distance_m} /></span>}
                                                 </div>
                                             </td>
+<<<<<<< HEAD
                                             <td className="px-2 py-3 text-white text-xs">
+=======
+                                            <td className="px-2 sm:px-3 py-3 text-white text-xs sm:text-sm">
+>>>>>>> main
                                                 <div className="flex items-center">
                                                     {run.avg_speed_kmh.toFixed(1)}
                                                     {prevRun && <span className="ml-1"><TrendIndicator current={run.avg_speed_kmh} previous={prevRun.avg_speed_kmh} /></span>}
                                                 </div>
                                             </td>
+<<<<<<< HEAD
                                             <td className="px-2 py-3 text-white text-xs">{Math.floor(run.total_time_sec / 60)}m</td>
                                             <td className="px-2 py-3">
                                                 <div className="flex items-center justify-center space-x-2">
@@ -272,6 +329,16 @@ const RunsHistory: React.FC = () => {
                                                     </button>
                                                     <button onClick={() => setRunToDelete(run)} className="p-1.5 bg-red-600 hover:bg-red-700 rounded transition-colors">
                                                         <Trash2 className="w-3.5 h-3.5 text-white" />
+=======
+                                            <td className="px-2 sm:px-3 py-3 text-white text-xs sm:text-sm">{Math.floor(run.total_time_sec / 60)}m</td>
+                                            <td className="px-2 sm:px-3 py-3">
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <button onClick={() => navigate(`/edit-run/${run.id}`)} className="p-1.5 sm:p-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors">
+                                                        <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                                                    </button>
+                                                    <button onClick={() => setRunToDelete(run)} className="p-1.5 sm:p-2 bg-red-600 hover:bg-red-700 rounded transition-colors">
+                                                        <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+>>>>>>> main
                                                     </button>
                                                 </div>
                                             </td>

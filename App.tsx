@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AppContextProvider } from './context/AppContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -31,7 +32,16 @@ const PageSkeleton: React.FC = () => (
 
 const FullPageLoader: React.FC = () => (
     <div className="min-h-screen bg-dark-bg flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-brand-orange"></div>
+        <svg width="64px" height="48px">
+            <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="back" style={{fill: 'none', stroke: '#ff630033', strokeWidth: 3, strokeLinecap: 'round', strokeLinejoin: 'round'}} />
+            <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="front" style={{fill: 'none', stroke: '#ff6300', strokeWidth: 3, strokeLinecap: 'round', strokeLinejoin: 'round', strokeDasharray: '48, 144', strokeDashoffset: 192, animation: 'dash 1.4s linear infinite'}} />
+        </svg>
+        <style>{`
+            @keyframes dash {
+                72.5% { opacity: 0; }
+                to { stroke-dashoffset: 0; }
+            }
+        `}</style>
     </div>
 );
 
@@ -66,6 +76,7 @@ const App: React.FC = () => {
           </Routes>
         </Suspense>
       </Router>
+      <SpeedInsights />
     </AppContextProvider>
   );
 };
