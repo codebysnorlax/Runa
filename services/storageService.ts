@@ -32,17 +32,17 @@ const defaultGoals: Goal = {
 };
 
 const defaultInsights: InsightsData = {
-    insights: [],
-    weeklyPlan: {
-        monday: '',
-        tuesday: '',
-        wednesday: '',
-        thursday: '',
-        friday: '',
-        saturday: '',
-        sunday: '',
-    },
-    improvementScore: 0,
+  insights: [],
+  weeklyPlan: {
+    monday: '',
+    tuesday: '',
+    wednesday: '',
+    thursday: '',
+    friday: '',
+    saturday: '',
+    sunday: '',
+  },
+  improvementScore: 0,
 };
 
 
@@ -50,16 +50,16 @@ export const loadJSON = <T,>(key: string, defaultValue: T, username: string): T 
   try {
     const item = window.localStorage.getItem(userKey(key, username));
     if (item) {
-        const parsed = JSON.parse(item);
-        // Handle case where profile name is default "User" and we have a username
-        if (key === PROFILE_KEY && parsed.name === 'User') {
-            parsed.name = username;
-        }
-        return parsed;
+      const parsed = JSON.parse(item);
+      // Handle case where profile name is default "User" and we have a username
+      if (key === PROFILE_KEY && parsed.name === 'User') {
+        parsed.name = username;
+      }
+      return parsed;
     }
     // If it's a new user and we're loading the profile, set the name
     if (key === PROFILE_KEY && (defaultValue as any).name === 'User') {
-        (defaultValue as Profile).name = username;
+      (defaultValue as Profile).name = username;
     }
     return defaultValue;
   } catch (error) {
@@ -97,8 +97,8 @@ export const saveProfile = (data: Profile, username: string) => saveJSON(PROFILE
 export const getRuns = (username: string) => loadJSON<Run[]>(RUNS_KEY, defaultRuns, username);
 export const saveRuns = (data: Run[], username: string) => saveJSON(RUNS_KEY, data, username);
 export const addRun = (run: Run, username: string) => {
-    const runs = getRuns(username);
-    saveRuns([run, ...runs], username);
+  const runs = getRuns(username);
+  saveRuns([run, ...runs], username);
 }
 
 export const getGoals = (username: string) => loadJSON<Goal>(GOALS_KEY, defaultGoals, username);
@@ -113,7 +113,7 @@ export const exportUserData = (username: string) => {
   const runs = getRuns(username);
   const goals = getGoals(username);
   const insights = getInsights(username);
-  
+
   const backupData = {
     username,
     exportDate: new Date().toISOString(),
@@ -122,7 +122,7 @@ export const exportUserData = (username: string) => {
     goals,
     insights
   };
-  
+
   return JSON.stringify(backupData, null, 2);
 };
 
@@ -132,7 +132,7 @@ export const downloadBackup = (username: string) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `aifit-backup-${username}-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `runa-backup-${username}-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -142,16 +142,16 @@ export const downloadBackup = (username: string) => {
 export const importUserData = (jsonData: string, username: string): boolean => {
   try {
     const backupData = JSON.parse(jsonData);
-    
+
     if (!backupData.profile || !backupData.runs || !backupData.goals || !backupData.insights) {
       throw new Error('Invalid backup file format');
     }
-    
+
     saveProfile(backupData.profile, username);
     saveRuns(backupData.runs, username);
     saveGoals(backupData.goals, username);
     saveInsights(backupData.insights, username);
-    
+
     return true;
   } catch (error) {
     console.error('Error importing backup:', error);
