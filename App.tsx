@@ -1,8 +1,8 @@
 import React, { Suspense, lazy } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { AppContextProvider } from './context/AppContext';
 import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
 import Card from './components/Card';
 import Skeleton from './components/Skeleton';
 
@@ -51,25 +51,39 @@ const App: React.FC = () => {
       <Router>
         <Suspense fallback={<FullPageLoader />}>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={
+              <>
+                <SignedOut>
+                  <Login />
+                </SignedOut>
+                <SignedIn>
+                  <Navigate to="/" replace />
+                </SignedIn>
+              </>
+            } />
             <Route 
               path="/*" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Suspense fallback={<PageSkeleton />}>
-                      <Routes>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/add-run" element={<AddRun />} />
-                        <Route path="/edit-run/:runId" element={<EditRun />} />
-                        <Route path="/history" element={<RunsHistory />} />
-                        <Route path="/analytics" element={<Analytics />} />
-                        <Route path="/insights" element={<ProtectedInsights />} />
-                        <Route path="/settings" element={<Settings />} />
-                      </Routes>
-                    </Suspense>
-                  </Layout>
-                </ProtectedRoute>
+                <>
+                  <SignedOut>
+                    <Navigate to="/login" replace />
+                  </SignedOut>
+                  <SignedIn>
+                    <Layout>
+                      <Suspense fallback={<PageSkeleton />}>
+                        <Routes>
+                          <Route path="/" element={<Dashboard />} />
+                          <Route path="/add-run" element={<AddRun />} />
+                          <Route path="/edit-run/:runId" element={<EditRun />} />
+                          <Route path="/history" element={<RunsHistory />} />
+                          <Route path="/analytics" element={<Analytics />} />
+                          <Route path="/insights" element={<ProtectedInsights />} />
+                          <Route path="/settings" element={<Settings />} />
+                        </Routes>
+                      </Suspense>
+                    </Layout>
+                  </SignedIn>
+                </>
               } 
             />
           </Routes>

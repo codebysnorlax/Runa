@@ -22,7 +22,6 @@ import {
   Linkedin,
   Code,
   Shield,
-  LogOut,
 } from "lucide-react";
 import * as storage from "../services/storageService";
 
@@ -61,7 +60,6 @@ const Settings: React.FC = () => {
     loading,
     currentUser,
     refreshData,
-    logout,
   } = useAppContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>("profile");
@@ -318,19 +316,6 @@ const Settings: React.FC = () => {
                 className="flex-1 bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200"
               >
                 Save Profile
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm("Are you sure you want to logout?")) {
-                    logout();
-                    navigate("/login");
-                  }
-                }}
-                className="sm:w-auto bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center"
-              >
-                <LogOut className="w-5 h-5 mr-2" />
-                Logout
               </button>
             </div>
           </form>

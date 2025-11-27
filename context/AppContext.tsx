@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import { Profile, Run, Goal, InsightsData } from '../types';
 import * as storage from '../services/storageService';
 
@@ -16,13 +17,12 @@ interface AppContextType {
   updateProfile: (newProfile: Profile) => void;
   updateInsights: (newInsights: InsightsData) => void;
   refreshData: () => void;
-  login: (username: string) => void;
-  logout: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { user, isLoaded } = useUser();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [goals, setGoals] = useState<Goal | null>(null);
@@ -31,13 +31,14 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   useEffect(() => {
-    const user = storage.getCurrentUser();
-    if (user) {
-      setCurrentUser(user);
-    } else {
+    if (isLoaded && user) {
+      const username = user.id;
+      setCurrentUser(user.firstName || user.username || 'User');
+      refreshUserData(username);
+    } else if (isLoaded) {
       setLoading(false);
     }
-  }, []);
+  }, [user, isLoaded]);
 
   const refreshUserData = (username: string) => {
     setLoading(true);
@@ -49,74 +50,54 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     setLoading(false);
   };
   
-  useEffect(() => {
-    if (currentUser) {
-      refreshUserData(currentUser);
-    }
-  }, [currentUser]);
-
-  const login = (username: string) => {
-    storage.setCurrentUser(username);
-    setCurrentUser(username);
-  };
-
-  const logout = () => {
-    storage.clearCurrentUser();
-    setCurrentUser(null);
-    setProfile(null);
-    setRuns([]);
-    setGoals(null);
-    setInsights(null);
-  };
-
   const addRun = (newRunData: Omit<Run, 'id'>) => {
-    if (!currentUser) return;
+    if (!user) return;
     const newRun: Run = { ...newRunData, id: crypto.randomUUID() };
     const updatedRuns = [newRun, ...runs];
     setRuns(updatedRuns);
-    storage.saveRuns(updatedRuns, currentUser);
+    storage.saveRuns(updatedRuns, user.id);
   };
 
   const editRun = (updatedRun: Run) => {
-    if (!currentUser) return;
+    if (!user) return;
     const updatedRuns = runs.map(run => run.id === updatedRun.id ? updatedRun : run);
     setRuns(updatedRuns);
-    storage.saveRuns(updatedRuns, currentUser);
+    storage.saveRuns(updatedRuns, user.id);
   };
 
   const deleteRun = (runId: string) => {
-    if (!currentUser) return;
+    if (!user) return;
     const updatedRuns = runs.filter(run => run.id !== runId);
     setRuns(updatedRuns);
-    storage.saveRuns(updatedRuns, currentUser);
+    storage.saveRuns(updatedRuns, user.id);
   };
 
   const updateGoals = (newGoals: Goal) => {
-    if (!currentUser) return;
+    if (!user) return;
     setGoals(newGoals);
-    storage.saveGoals(newGoals, currentUser);
+    storage.saveGoals(newGoals, user.id);
   };
 
   const updateProfile = (newProfile: Profile) => {
-    if (!currentUser) return;
+    if (!user) return;
     setProfile(newProfile);
-    storage.saveProfile(newProfile, currentUser);
+    storage.saveProfile(newProfile, user.id);
   };
   
   const updateInsights = (newInsights: InsightsData) => {
-    if (!currentUser) return;
+    if (!user) return;
     setInsights(newInsights);
-    storage.saveInsights(newInsights, currentUser);
+    storage.saveInsights(newInsights, user.id);
   };
 
   const refreshData = () => {
-    if (currentUser) {
-      refreshUserData(currentUser);
+    if (user) {
+      refreshUserData(user.id);
     }
   };
 
   return (
-    <AppContext.Provider value={{ profile, runs, goals, insights, loading, currentUser, addRun, editRun, deleteRun, updateGoals, updateProfile, updateInsights, refreshData, login, logout }}>
+    <AppContext.Provider value={{ profile, runs, goals, insights, loading, currentUser, addRun, editRun, deleteRun, updateGoals, updateProfile, updateInsights, refreshData }}>
       {children}
     </AppContext.Provider>
   );

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../context/AppContext";
+import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import dashboardImg from "../assets/dashboard.png";
 import analyticsImg from "../assets/analytics.png";
 import analytics2Img from "../assets/analytics2.png";
@@ -18,10 +17,7 @@ const images = [
 ];
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
-  const { login } = useAppContext();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,14 +25,6 @@ const Login: React.FC = () => {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (username.trim()) {
-      login(username.trim().toLowerCase());
-      navigate("/");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -52,7 +40,6 @@ const Login: React.FC = () => {
         <div className="w-full py-8 md:py-12 lg:py-12">
           {/* Mobile/Tablet Layout */}
           <div className="lg:hidden flex flex-col gap-8 md:gap-10 max-w-5xl mx-auto">
-            {/* Text on top */}
             <div className="text-center">
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                 AI-Powered Fitness Tracker
@@ -63,7 +50,6 @@ const Login: React.FC = () => {
               </p>
             </div>
 
-            {/* Image in middle */}
             <div className="w-full">
               <div className="relative overflow-hidden rounded-xl shadow-2xl">
                 {images.map((img, index) => (
@@ -106,30 +92,24 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* Input at bottom */}
-            <form onSubmit={handleSubmit} className="max-w-xl mx-auto w-full">
+            <div className="max-w-xl mx-auto w-full">
               <div className="flex flex-col sm:flex-row gap-4">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
-                  className="w-full bg-gray-800 border-2 border-gray-700 rounded-xl px-6 py-4 text-lg text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange transition-colors"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto bg-brand-orange hover:bg-orange-600 text-white font-semibold px-10 py-4 rounded-xl transition-all hover:scale-105 whitespace-nowrap text-lg"
-                >
-                  Start
-                </button>
+                <SignInButton mode="modal">
+                  <button className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold px-10 py-4 rounded-xl transition-all hover:scale-105 text-lg">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="w-full bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 text-white font-semibold px-10 py-4 rounded-xl transition-all hover:scale-105 text-lg">
+                    Sign Up
+                  </button>
+                </SignUpButton>
               </div>
-            </form>
+            </div>
           </div>
 
           {/* Desktop Layout */}
           <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
-            {/* Content on left */}
             <div className="flex flex-col justify-center">
               <h2 className="text-5xl xl:text-6xl font-bold text-white mb-4">
                 AI-Powered Fitness Tracker
@@ -138,27 +118,20 @@ const Login: React.FC = () => {
                 For those who truly want to track their runs, analyze
                 performance, and get intelligent insights.
               </p>
-              <form onSubmit={handleSubmit} className="max-w-lg">
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter username"
-                    className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-brand-orange transition-colors"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className="bg-brand-orange hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-lg transition-colors whitespace-nowrap"
-                  >
-                    Start
+              <div className="max-w-lg flex gap-3">
+                <SignInButton mode="modal">
+                  <button className="flex-1 bg-brand-orange hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+                    Sign In
                   </button>
-                </div>
-              </form>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-medium px-8 py-3 rounded-lg transition-colors">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </div>
             </div>
 
-            {/* Image on right */}
             <div>
               <div className="relative overflow-hidden rounded-lg">
                 {images.map((img, index) => (

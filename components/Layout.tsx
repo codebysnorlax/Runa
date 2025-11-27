@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusCircle, List, BarChart2, Zap, Settings, LogOut } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { NavLink } from 'react-router-dom';
+import { Home, PlusCircle, List, BarChart2, Zap, Settings } from 'lucide-react';
+import { UserButton, useUser } from '@clerk/clerk-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,21 +17,21 @@ const navItems = [
 ];
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { currentUser, logout } = useAppContext();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const { user } = useUser();
 
   return (
     <div className="min-h-screen text-gray-200 flex flex-col lg:flex-row">
+      {/* Mobile/Tablet Header */}
+      <header className="lg:hidden sticky top-0 z-40 bg-dark-card border-b border-dark-border px-4 py-3 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-brand-orange">Runa</h1>
+        <UserButton afterSignOutUrl="/login" />
+      </header>
+
       {/* Sidebar for Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-dark-card border-r border-dark-border p-4 lg:sticky lg:top-0 lg:h-screen">
         <div>
           <h1 className="text-2xl font-bold text-brand-orange mb-1">Runa</h1>
-          <p className="text-sm text-gray-400 mb-8">User: <span className="font-bold text-gray-300">{currentUser}</span></p>
+          <p className="text-sm text-gray-400 mb-8">User: <span className="font-bold text-gray-300">{user?.firstName || user?.username || 'User'}</span></p>
         </div>
         <nav className="flex flex-col space-y-2 flex-grow">
           {navItems.map((item) => (
@@ -50,13 +50,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           ))}
         </nav>
 
-        <button
-          onClick={handleLogout}
-          className="flex items-center space-x-3 p-3 w-full rounded-lg transition-colors duration-200 hover:bg-red-500/20 text-red-400"
-        >
-          <LogOut className="w-5 h-5" />
-          <span>Logout</span>
-        </button>
+        <div className="flex items-center space-x-3 p-3">
+          <UserButton afterSignOutUrl="/login" />
+          <span className="text-sm text-gray-400">Account</span>
+        </div>
       </aside>
 
       {/* Bottom Navbar for Mobile & Tablet */}
