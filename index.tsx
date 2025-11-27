@@ -37,7 +37,7 @@ root.render(
           fontFamily: 'system-ui, -apple-system, sans-serif',
         },
         elements: {
-          rootBox: 'bg-gray-900',
+          rootBox: 'bg-gray-900 rounded-full',
           card: 'bg-gray-800 border border-gray-700',
           headerTitle: 'text-white text-2xl',
           headerSubtitle: 'text-gray-300',
@@ -56,6 +56,13 @@ root.render(
           formResendCodeLink: 'text-[#ff6300]',
           alertText: 'text-white',
           formFieldErrorText: 'text-red-400',
+          avatarBox: 'rounded-full',
+          userButtonAvatarBox: 'rounded-full',
+          userButtonBox: 'rounded-full',
+          userButtonTrigger: 'rounded-full',
+          userButtonOuterIdentifier: 'rounded-full',
+          avatarImage: 'rounded-full',
+          userButtonAvatarImage: 'rounded-full',
         }
       }}
     >
