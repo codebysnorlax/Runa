@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import Card from '../components/Card';
 import ProgressRing from '../components/ProgressRing';
 import Skeleton from '../components/Skeleton';
+import Toast from '../components/Toast';
 import { TrendingUp, TrendingDown, ArrowRight, Trophy, Zap, Clock, Route } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Run, PersonalRecords } from '../types';
@@ -56,6 +57,19 @@ const DashboardSkeleton: React.FC = () => (
 
 const Dashboard: React.FC = () => {
     const { profile, runs, goals, insights, loading, currentUser } = useAppContext();
+    const [showBackupReminder, setShowBackupReminder] = useState(false);
+
+    useEffect(() => {
+        const lastBackupReminder = localStorage.getItem('lastBackupReminder');
+        const today = new Date().toDateString();
+        const hour = new Date().getHours();
+        
+        // Show reminder once per day in the morning (6 AM - 12 PM)
+        if (lastBackupReminder !== today && hour >= 6 && hour < 12) {
+            setShowBackupReminder(true);
+            localStorage.setItem('lastBackupReminder', today);
+        }
+    }, []);
 
     const personalRecords = useMemo<PersonalRecords | null>(() => {
         if (runs.length === 0) return null;
@@ -119,6 +133,13 @@ const Dashboard: React.FC = () => {
 
     return (
         <div className="space-y-6 pb-24 lg:pb-6">
+            {showBackupReminder && (
+                <Toast 
+                    message="💾 Don't forget to backup your data! Go to Settings → Backup" 
+                    type="success" 
+                    onClose={() => setShowBackupReminder(false)} 
+                />
+            )}
             <h1 className="text-2xl sm:text-3xl font-bold text-white animate-fade-in">{getGreeting()}, {currentUser || 'Runner'}!</h1>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

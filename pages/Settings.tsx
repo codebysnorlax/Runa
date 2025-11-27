@@ -729,7 +729,7 @@ const Settings: React.FC = () => {
                     Getting Started
                   </h3>
                   <ol className="text-gray-300 text-sm space-y-2 list-decimal list-inside">
-                    <li>Login with any username and the provided password</li>
+                    <li>Sign up or sign in with your email</li>
                     <li>
                       Set up your profile in Settings (age, height, weight)
                     </li>
@@ -766,8 +766,10 @@ const Settings: React.FC = () => {
               </div>
               <div className="text-gray-300 text-sm space-y-2">
                 <p>
-                  • All your data is stored locally in your browser - no
-                  external servers
+                  • Secure authentication powered by Clerk
+                </p>
+                <p>
+                  • All your fitness data is stored locally in your browser
                 </p>
                 <p>• Your personal information never leaves your device</p>
                 <p>• Use the backup feature to save your data as JSON files</p>
