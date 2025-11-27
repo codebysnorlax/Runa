@@ -147,7 +147,7 @@ const AiInsights: React.FC = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-24 lg:pb-6">
              {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-white">AI Insights</h1>

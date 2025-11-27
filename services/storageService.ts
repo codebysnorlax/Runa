@@ -142,6 +142,8 @@ export const downloadBackup = (username: string) => {
 export const importUserData = (jsonData: string, username: string): boolean => {
   try {
     const backupData = JSON.parse(jsonData);
+    console.log('Importing backup for user:', username);
+    console.log('Backup data:', backupData);
 
     if (!backupData.profile || !backupData.runs || !backupData.goals || !backupData.insights) {
       throw new Error('Invalid backup file format');
@@ -151,6 +153,14 @@ export const importUserData = (jsonData: string, username: string): boolean => {
     saveRuns(backupData.runs, username);
     saveGoals(backupData.goals, username);
     saveInsights(backupData.insights, username);
+    
+    console.log('Data saved successfully for user:', username);
+    console.log('Checking localStorage:', {
+      profile: localStorage.getItem(`profile_${username}`),
+      runs: localStorage.getItem(`runs_${username}`),
+      goals: localStorage.getItem(`goals_${username}`),
+      insights: localStorage.getItem(`insights_${username}`)
+    });
 
     return true;
   } catch (error) {

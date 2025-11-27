@@ -22,7 +22,7 @@ root.render(
   <React.StrictMode>
     <ClerkProvider 
       publishableKey={PUBLISHABLE_KEY} 
-      afterSignOutUrl="/login"
+      afterSignOutUrl="/#/login"
       appearance={{
         baseTheme: dark,
         variables: {

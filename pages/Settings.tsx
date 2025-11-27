@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import { Goal, Profile, DistanceGoal } from "../types";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
@@ -52,6 +53,7 @@ const SettingsSkeleton: React.FC = () => (
 type ActiveTab = "profile" | "goals" | "backup" | "info";
 
 const Settings: React.FC = () => {
+  const { user } = useUser();
   const {
     profile,
     goals,
@@ -74,14 +76,19 @@ const Settings: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
-    if (profile) setProfileState({ ...profile });
+    if (profile) {
+      setProfileState({ 
+        ...profile,
+        name: currentUser || profile.name
+      });
+    }
     if (goals) {
       setGoalState({
         ...goals,
         distance_goals: goals.distance_goals || [],
       });
     }
-  }, [profile, goals]);
+  }, [profile, goals, currentUser]);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profileState) {
@@ -172,15 +179,15 @@ const Settings: React.FC = () => {
   };
 
   const handleDownloadBackup = () => {
-    if (currentUser) {
-      storage.downloadBackup(currentUser);
+    if (user?.id) {
+      storage.downloadBackup(user.id);
       setToast({ message: "Backup downloaded successfully!", type: "success" });
     }
   };
 
   const handleRecreateDataFile = () => {
-    if (currentUser) {
-      storage.recreateBackupFile(currentUser);
+    if (user?.id) {
+      storage.recreateBackupFile(user.id);
       setToast({
         message: "data.json file created successfully!",
         type: "success",
@@ -190,23 +197,46 @@ const Settings: React.FC = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && currentUser) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
+    if (!file) {
+      setToast({ message: "No file selected", type: "error" });
+      return;
+    }
+    if (!user?.id) {
+      setToast({ message: "User not authenticated", type: "error" });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
         const content = event.target?.result as string;
-        const success = storage.importUserData(content, currentUser);
+        const success = storage.importUserData(content, user.id);
         if (success) {
-          setToast({ message: "Data restored successfully!", type: "success" });
-          refreshData();
+          setToast({ message: "Data restored successfully! Reloading...", type: "success" });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
           setToast({
             message: "Failed to restore data. Invalid file format.",
             type: "error",
           });
         }
-      };
-      reader.readAsText(file);
-    }
+      } catch (error) {
+        setToast({
+          message: "Error reading file. Please try again.",
+          type: "error",
+        });
+      }
+    };
+    reader.onerror = () => {
+      setToast({
+        message: "Failed to read file.",
+        type: "error",
+      });
+    };
+    reader.readAsText(file);
+    
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";

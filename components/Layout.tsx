@@ -24,7 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Mobile/Tablet Header */}
       <header className="lg:hidden sticky top-0 z-40 bg-dark-card border-b border-dark-border px-4 py-3 flex items-center justify-between">
         <h1 className="text-xl font-bold text-brand-orange">Runa</h1>
-        <UserButton afterSignOutUrl="/login" />
+        <UserButton afterSignOutUrl="/#/login" />
       </header>
 
       {/* Sidebar for Desktop */}
@@ -51,25 +51,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </nav>
 
         <div className="flex items-center space-x-3 p-3">
-          <UserButton afterSignOutUrl="/login" />
+          <UserButton afterSignOutUrl="/#/login" />
           <span className="text-sm text-gray-400">Account</span>
         </div>
       </aside>
 
       {/* Bottom Navbar for Mobile & Tablet */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-card border-t border-dark-border flex justify-around p-2 z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-card border-t border-dark-border flex justify-around p-1.5 z-50">
          {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center p-1 rounded-md w-14 sm:w-16 md:w-20 transition-colors duration-200 ${
+                `flex flex-col items-center justify-center p-1 rounded-md w-12 sm:w-14 md:w-16 transition-colors duration-200 ${
                   isActive ? 'text-brand-orange' : 'text-gray-400 hover:text-white'
                 }`
               }
             >
-              <item.icon className="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-              <span className="text-xs sm:text-sm">{item.label}</span>
+              <item.icon className="w-5 h-5 sm:w-5 sm:h-5 mb-0.5" />
+              <span className="text-[10px] sm:text-xs">{item.label}</span>
             </NavLink>
           ))}
       </nav>

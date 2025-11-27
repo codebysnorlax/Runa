@@ -53,7 +53,7 @@ const AddRun: React.FC = () => {
 
 
     return (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-24 lg:pb-6">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 animate-fade-in">Add New Run</h1>
             <form onSubmit={handleSubmit} className="space-y-3">

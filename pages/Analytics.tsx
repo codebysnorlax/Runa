@@ -333,7 +333,7 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 lg:pb-6">
       <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
 
       <Heatmap runs={runs} />
