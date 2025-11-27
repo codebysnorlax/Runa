@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, PlusCircle, List, BarChart2, Zap, Settings } from 'lucide-react';
+import { LayoutDashboard, CirclePlus, History, TrendingUp, Sparkles, Settings } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 
 interface LayoutProps {
@@ -8,11 +8,11 @@ interface LayoutProps {
 }
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: Home },
-  { path: '/add-run', label: 'Run', icon: PlusCircle },
-  { path: '/history', label: 'History', icon: List },
-  { path: '/analytics', label: 'Analytics', icon: BarChart2 },
-  { path: '/insights', label: 'Insights', icon: Zap },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/add-run', label: 'Run', icon: CirclePlus },
+  { path: '/history', label: 'History', icon: History },
+  { path: '/analytics', label: 'Analytics', icon: TrendingUp },
+  { path: '/insights', label: 'Insights', icon: Sparkles },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
