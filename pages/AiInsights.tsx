@@ -118,7 +118,7 @@ const AiInsights: React.FC = () => {
             } else if (err.message?.includes('quota') || err.message?.includes('limit')) {
                 setError('AI service quota exceeded. Please try again later.');
             } else {
-                setError(`AI service error: ${err.message || 'Unknown error occurred. Please try again.'}`); 
+                setError(`AI service error: ${err.message || 'Unknown error occurred. Please try again.'}`);
             }
         }
         setIsGenerating(false);
@@ -141,13 +141,13 @@ const AiInsights: React.FC = () => {
             default: return 'border-dark-border';
         }
     };
-    
+
     if(contextLoading) {
         return <AiInsightsSkeleton />;
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-24 lg:pb-6">
              {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-white">AI Insights</h1>
@@ -164,12 +164,12 @@ const AiInsights: React.FC = () => {
                     ) : (
                          <>
                             <Zap className="w-5 h-5 mr-2" />
-                            Generate New Insights
+                            Generate
                         </>
                     )}
                 </button>
             </div>
-            
+
             {isGenerating ? (
                 <GeneratingContentSkeleton />
             ) : (
@@ -214,7 +214,7 @@ const AiInsights: React.FC = () => {
                             </div>
                         </Card>
                      )}
-                    
+
                     {error && (
                         <Card>
                             <div className="text-center py-12">

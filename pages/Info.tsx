@@ -68,7 +68,7 @@ const Info: React.FC = () => {
                   <span className="text-xs sm:text-sm">GitHub</span>
                 </a>
                 <a
-                  href="mailto:rr2436310@gmail.com"
+                  href="mailto:codebysnorlax@gmail.com"
                   className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
                 >
                   <Mail className="w-4 h-4 sm:w-5 sm:h-5" />

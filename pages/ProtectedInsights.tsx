@@ -51,7 +51,7 @@ const ProtectedInsights: React.FC = () => {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter access password"
+                                placeholder="Try: 10072005"
                                 className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
                             />
                         </div>
