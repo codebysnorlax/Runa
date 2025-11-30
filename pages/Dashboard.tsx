@@ -275,15 +275,15 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-4 sm:space-y-6">
                     
                     {/* Weekly Goal */}
-                    <Card className="animate-scale-in">
+                    <Card className="animate-scale-in !p-4">
                         <div className="flex items-center gap-2 mb-4">
-                            <Target className="w-5 h-5 text-orange-400" />
+                            <Target className="w-5 h-5 text-orange-400 flex-shrink-0" />
                             <h2 className="text-lg font-bold text-white">Weekly Goal</h2>
                         </div>
 
                         <div className="flex flex-col items-center py-4">
                             <div className="relative mb-6">
-                                <ProgressRing radius={70} stroke={10} progress={goalProgress} label="" />
+                                <ProgressRing radius={70} stroke={10} progress={goalProgress} />
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                                     <p className="text-2xl sm:text-3xl font-bold text-white">{Math.min(goalProgress, 100).toFixed(0)}%</p>
                                 </div>
