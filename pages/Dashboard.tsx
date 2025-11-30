@@ -4,56 +4,52 @@ import Card from '../components/Card';
 import ProgressRing from '../components/ProgressRing';
 import Skeleton from '../components/Skeleton';
 import Toast from '../components/Toast';
-import { TrendingUp, TrendingDown, ArrowRight, Trophy, Zap, Clock, Route } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowRight, Trophy, Zap, Clock, Route, Target, Activity, Flame, Award, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Run, PersonalRecords } from '../types';
 
 const DashboardSkeleton: React.FC = () => (
-    <div className="space-y-6">
-        <Skeleton className="h-9 w-3/4" />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            <Card className="flex-1 space-y-3">
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-8 w-1/3" />
-                <Skeleton className="h-4 w-3/4" />
-            </Card>
-            <Card className="flex-1 space-y-3">
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-8 w-1/3" />
-                <Skeleton className="h-4 w-3/4" />
-            </Card>
-            <Card className="flex-1 space-y-3 sm:col-span-2 lg:col-span-1">
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-8 w-1/3" />
-            </Card>
+    <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
+        {/* Header - 2 lines */}
+        <div className="space-y-2">
+            <Skeleton className="h-7 sm:h-8 w-48 sm:w-64" />
+            <Skeleton className="h-3 sm:h-4 w-32 sm:w-40" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-            <Card className="xl:col-span-1 flex flex-col items-center justify-center space-y-4 p-6">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-40 w-40 rounded-full" />
-            </Card>
-            <Card className="md:col-span-1 xl:col-span-2 space-y-4 p-6">
-                <Skeleton className="h-6 w-1/3" />
-                <Skeleton className="h-5 w-1/4" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-1/4" />
-            </Card>
+        {/* Quick Stats - 4 boxes in 2x2 mobile, 4x1 desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <Skeleton className="h-20 sm:h-24 rounded-xl" />
+            <Skeleton className="h-20 sm:h-24 rounded-xl" />
+            <Skeleton className="h-20 sm:h-24 rounded-xl" />
+            <Skeleton className="h-20 sm:h-24 rounded-xl" />
         </div>
 
-        <Card className="space-y-4 p-6">
-            <Skeleton className="h-6 w-1/4" />
-            <div className="space-y-3">
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
+        {/* Main Content Grid - Stack on mobile, 3 cols on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            
+            {/* Left - Full width mobile, 2 columns desktop */}
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                {/* Today's Run box */}
+                <Skeleton className="h-44 sm:h-48 rounded-xl" />
+                
+                {/* AI Insight box */}
+                <Skeleton className="h-36 sm:h-40 rounded-xl" />
+                
+                {/* Recent Runs box */}
+                <Skeleton className="h-52 sm:h-56 rounded-xl" />
             </div>
-        </Card>
+
+            {/* Right - Full width mobile, 1 column sidebar desktop */}
+            <div className="space-y-4 sm:space-y-6">
+                {/* Weekly Goal box */}
+                <Skeleton className="h-60 sm:h-64 rounded-xl" />
+                
+                {/* Personal Records box */}
+                <Skeleton className="h-72 sm:h-80 rounded-xl" />
+            </div>
+        </div>
     </div>
 );
-
 
 const Dashboard: React.FC = () => {
     const { profile, runs, goals, insights, loading, currentUser } = useAppContext();
@@ -64,7 +60,6 @@ const Dashboard: React.FC = () => {
         const today = new Date().toDateString();
         const hour = new Date().getHours();
         
-        // Show reminder once per day in the morning (6 AM - 12 PM)
         if (lastBackupReminder !== today && hour >= 6 && hour < 12) {
             setShowBackupReminder(true);
             localStorage.setItem('lastBackupReminder', today);
@@ -80,9 +75,7 @@ const Dashboard: React.FC = () => {
         }), { longestDistance: 0, longestDuration: 0, fastestAvgSpeed: 0 });
     }, [runs]);
 
-    if (loading) {
-        return <DashboardSkeleton />;
-    }
+    if (loading) return <DashboardSkeleton />;
 
     const today = new Date();
     today.setHours(0,0,0,0);
@@ -98,30 +91,12 @@ const Dashboard: React.FC = () => {
     const last7DaysDistance = last7DaysRuns.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
 
     const goalProgress = goals && goals.weekly_distance_km > 0 ? (last7DaysDistance / goals.weekly_distance_km) * 100 : 0;
-
     const latestInsight = insights?.insights?.[0];
-
-    const StatCard: React.FC<{title: string, value: string, change?: number, unit: string}> = ({title, value, change, unit}) => (
-        <Card className="flex-1">
-            <p className="text-gray-400 text-sm">{title}</p>
-            <p className="text-3xl font-bold text-white">{value} <span className="text-lg">{unit}</span></p>
-            {change !== undefined && (
-                <div className={`flex items-center text-sm mt-1 ${change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {change >= 0 ? <TrendingUp className="w-4 h-4 mr-1"/> : <TrendingDown className="w-4 h-4 mr-1"/>}
-                    {Math.abs(change).toFixed(1)}% vs yesterday
-                </div>
-            )}
-        </Card>
-    );
 
     const formatDuration = (seconds: number) => {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        return [h > 0 ? h : null, m, s]
-            .filter(v => v !== null)
-            .map(v => String(v).padStart(2, '0'))
-            .join(':');
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
     };
 
     const getGreeting = () => {
@@ -131,109 +106,242 @@ const Dashboard: React.FC = () => {
         return 'Good Evening';
     };
 
+    const totalDistance = runs.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
+
     return (
-        <div className="space-y-6 pb-24 lg:pb-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
             {showBackupReminder && (
                 <Toast 
-                    message="💾 Don't forget to backup your data! Go to Settings → Backup" 
+                    message="💾 Backup your data in Settings" 
                     type="success" 
                     onClose={() => setShowBackupReminder(false)} 
                 />
             )}
-            <h1 className="text-2xl sm:text-3xl font-bold text-white animate-fade-in">{getGreeting()}, {currentUser || 'Runner'}!</h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <div className="animate-slide-up" style={{animationDelay: '0.1s'}}>
-                    <StatCard title="Today's Distance" value={todayRun ? (todayRun.distance_m / 1000).toFixed(2) : '0'} unit="km" 
-                        change={todayRun && yesterdayRun && yesterdayRun.distance_m > 0 ? ((todayRun.distance_m - yesterdayRun.distance_m) / yesterdayRun.distance_m) * 100 : undefined } />
+            {/* Header */}
+            <div className="animate-fade-in">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">{getGreeting()}, {currentUser || 'Runner'}!</h1>
+                <p className="text-sm text-gray-400">Here's your fitness overview</p>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 animate-slide-up">
+                <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
+                    <Route className="w-5 h-5 text-blue-400 mb-2" />
+                    <p className="text-xs text-gray-400 mb-1">Total Distance</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{totalDistance.toFixed(0)}<span className="text-xs ml-1">km</span></p>
                 </div>
-                <div className="animate-slide-up" style={{animationDelay: '0.2s'}}>
-                    <StatCard title="Today's Avg Speed" value={todayRun ? todayRun.avg_speed_kmh.toFixed(2) : '0'} unit="km/h" 
-                        change={todayRun && yesterdayRun && yesterdayRun.avg_speed_kmh > 0 ? ((todayRun.avg_speed_kmh - yesterdayRun.avg_speed_kmh) / yesterdayRun.avg_speed_kmh) * 100 : undefined} />
+                <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
+                    <Activity className="w-5 h-5 text-green-400 mb-2" />
+                    <p className="text-xs text-gray-400 mb-1">Total Runs</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{runs.length}<span className="text-xs ml-1">runs</span></p>
                 </div>
-                <div className="animate-slide-up" style={{animationDelay: '0.3s'}}>
-                    <StatCard title="Last 7 Days" value={last7DaysDistance.toFixed(2)} unit="km" />
+                <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
+                    <Flame className="w-5 h-5 text-orange-400 mb-2" />
+                    <p className="text-xs text-gray-400 mb-1">This Week</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{last7DaysDistance.toFixed(0)}<span className="text-xs ml-1">km</span></p>
                 </div>
-                <div className="animate-slide-up" style={{animationDelay: '0.35s'}}>
-                    <StatCard title="Total Runs" value={runs.length.toString()} unit="runs" />
+                <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
+                    <Zap className="w-5 h-5 text-yellow-400 mb-2" />
+                    <p className="text-xs text-gray-400 mb-1">Streak</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">{last7DaysRuns.length}<span className="text-xs ml-1">days</span></p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-                <Card className="xl:col-span-1 flex flex-col items-center justify-center animate-scale-in" style={{animationDelay: '0.4s'}}>
-                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Weekly Goal Progress</h2>
-                    <ProgressRing radius={80} stroke={10} progress={goalProgress} label="of weekly km" />
-                </Card>
-                <Card className="md:col-span-1 xl:col-span-2 animate-slide-left" style={{animationDelay: '0.5s'}}>
-                     <h2 className="text-base sm:text-lg font-semibold text-white mb-2">Latest AI Insight</h2>
-                     {latestInsight ? (
-                        <div>
-                            <h3 className="text-brand-orange font-bold">{latestInsight.title}</h3>
-                            <p className="text-gray-300 mt-2">{latestInsight.content}</p>
-                             <Link to="/insights" className="text-brand-orange hover:underline flex items-center mt-4 text-sm font-semibold">
-                                View All Insights <ArrowRight className="w-4 h-4 ml-1" />
+            {/* Main Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                
+                {/* Left Column */}
+                <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                    
+                    {/* Today's Run */}
+                    <Card className="animate-slide-right">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-white">Today's Run</h2>
+                            {todayRun && yesterdayRun && yesterdayRun.distance_m > 0 && (
+                                <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
+                                    todayRun.distance_m > yesterdayRun.distance_m ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                                }`}>
+                                    {todayRun.distance_m > yesterdayRun.distance_m ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                    {Math.abs(((todayRun.distance_m - yesterdayRun.distance_m) / yesterdayRun.distance_m) * 100).toFixed(0)}%
+                                </div>
+                            )}
+                        </div>
+                        
+                        {todayRun ? (
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                                    <Route className="w-5 h-5 text-blue-400 mx-auto mb-2" />
+                                    <p className="text-xs text-gray-400 mb-1">Distance</p>
+                                    <p className="text-lg font-bold text-white">{(todayRun.distance_m / 1000).toFixed(2)}</p>
+                                    <p className="text-xs text-gray-500">km</p>
+                                </div>
+                                <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                                    <Clock className="w-5 h-5 text-purple-400 mx-auto mb-2" />
+                                    <p className="text-xs text-gray-400 mb-1">Time</p>
+                                    <p className="text-lg font-bold text-white">{formatDuration(todayRun.total_time_sec)}</p>
+                                    <p className="text-xs text-gray-500">duration</p>
+                                </div>
+                                <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                                    <Zap className="w-5 h-5 text-yellow-400 mx-auto mb-2" />
+                                    <p className="text-xs text-gray-400 mb-1">Speed</p>
+                                    <p className="text-lg font-bold text-white">{todayRun.avg_speed_kmh.toFixed(1)}</p>
+                                    <p className="text-xs text-gray-500">km/h</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Activity className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                                <p className="text-gray-400 text-sm mb-4">No run logged today</p>
+                                <Link to="/add-run" className="inline-block bg-brand-orange hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
+                                    Log Run
+                                </Link>
+                            </div>
+                        )}
+                    </Card>
+
+                    {/* AI Insight */}
+                    <Card className="animate-slide-left">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <Zap className="w-5 h-5 text-purple-400" />
+                                <h2 className="text-lg font-bold text-white">AI Insight</h2>
+                            </div>
+                            {latestInsight && (
+                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                    latestInsight.type === 'positive' ? 'bg-green-500/20 text-green-400' :
+                                    latestInsight.type === 'negative' ? 'bg-red-500/20 text-red-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                }`}>
+                                    {latestInsight.type}
+                                </span>
+                            )}
+                        </div>
+
+                        {latestInsight ? (
+                            <div>
+                                <h3 className="text-brand-orange font-bold mb-2">{latestInsight.title}</h3>
+                                <p className="text-sm text-gray-300 leading-relaxed mb-4">{latestInsight.content}</p>
+                                <Link to="/insights" className="inline-flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 font-semibold group">
+                                    View All <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="text-center py-6">
+                                <p className="text-sm text-gray-400 mb-3">Generate AI insights</p>
+                                <Link to="/insights" className="inline-block bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
+                                    Generate
+                                </Link>
+                            </div>
+                        )}
+                    </Card>
+
+                    {/* Recent Runs */}
+                    <Card className="animate-slide-up">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-white">Recent Runs</h2>
+                            <Link to="/history" className="text-xs text-brand-orange hover:text-orange-400 font-semibold flex items-center gap-1">
+                                View All <ChevronRight className="w-3 h-3" />
                             </Link>
                         </div>
-                    ) : (
-                        <div className="text-center py-8 flex flex-col items-center justify-center h-full">
-                            <p className="text-gray-400">No insights yet. Generate them on the AI Insights page!</p>
-                            <Link to="/insights" className="mt-4 inline-block bg-brand-orange text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">
-                                Generate Insights
-                            </Link>
+
+                        {runs.length > 0 ? (
+                            <div className="space-y-2">
+                                {runs.slice(0, 3).map((run) => (
+                                    <div key={run.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-white">{new Date(run.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                                            <p className="text-xs text-gray-400 truncate">{run.notes || 'No notes'}</p>
+                                        </div>
+                                        <div className="text-right ml-4">
+                                            <p className="text-sm font-bold text-white">{(run.distance_m / 1000).toFixed(2)} km</p>
+                                            <p className="text-xs text-gray-400">{run.avg_speed_kmh.toFixed(1)} km/h</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-6">
+                                <p className="text-sm text-gray-400 mb-3">No runs yet</p>
+                                <Link to="/add-run" className="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
+                                    Add First Run
+                                </Link>
+                            </div>
+                        )}
+                    </Card>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4 sm:space-y-6">
+                    
+                    {/* Weekly Goal */}
+                    <Card className="animate-scale-in">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Target className="w-5 h-5 text-orange-400" />
+                            <h2 className="text-lg font-bold text-white">Weekly Goal</h2>
                         </div>
-                    )}
-                </Card>
-            </div>
-            
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                 {personalRecords && (
-                    <Card className="animate-slide-right" style={{animationDelay: '0.6s'}}>
-                        <h2 className="text-base sm:text-lg font-semibold text-white mb-4 flex items-center"><Trophy className="w-5 h-5 mr-2 text-yellow-400"/> Personal Records</h2>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between hover:bg-gray-800 p-2 rounded transition-colors">
-                                <span className="text-sm sm:text-base text-gray-300 flex items-center"><Route className="w-4 h-4 mr-2"/> Longest Distance</span>
-                                <span className="font-bold text-white">{(personalRecords.longestDistance / 1000).toFixed(2)} km</span>
+
+                        <div className="flex flex-col items-center py-4">
+                            <div className="relative mb-6">
+                                <ProgressRing radius={70} stroke={10} progress={goalProgress} label="" />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <p className="text-2xl sm:text-3xl font-bold text-white">{Math.min(goalProgress, 100).toFixed(0)}%</p>
+                                </div>
                             </div>
-                             <div className="flex items-center justify-between hover:bg-gray-800 p-2 rounded transition-colors">
-                                <span className="text-sm sm:text-base text-gray-300 flex items-center"><Clock className="w-4 h-4 mr-2"/> Longest Duration</span>
-                                <span className="font-bold text-white">{formatDuration(personalRecords.longestDuration)}</span>
-                            </div>
-                             <div className="flex items-center justify-between hover:bg-gray-800 p-2 rounded transition-colors">
-                                <span className="text-sm sm:text-base text-gray-300 flex items-center"><Zap className="w-4 h-4 mr-2"/> Fastest Avg Speed</span>
-                                <span className="font-bold text-white">{personalRecords.fastestAvgSpeed.toFixed(2)} km/h</span>
+
+                            <div className="w-full space-y-2 text-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Progress</span>
+                                    <span className="font-bold text-white">{last7DaysDistance.toFixed(1)} km</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Target</span>
+                                    <span className="font-bold text-orange-400">{goals?.weekly_distance_km || 0} km</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-2 border-t border-gray-700">
+                                    <span className="text-gray-400">Remaining</span>
+                                    <span className="font-bold text-white">{Math.max(0, (goals?.weekly_distance_km || 0) - last7DaysDistance).toFixed(1)} km</span>
+                                </div>
                             </div>
                         </div>
                     </Card>
-                )}
-                 <Card className="animate-slide-left" style={{animationDelay: '0.7s'}}>
-                    <h2 className="text-base sm:text-lg font-semibold text-white mb-4">Recent Runs</h2>
-                    {runs.length > 0 ? (
-                    <ul className="space-y-3">
-                        {runs.slice(0, 3).map((run, idx) => (
-                            <li key={run.id} className="flex justify-between items-center p-3 bg-gray-800 rounded-md hover:bg-gray-750 transition-all hover:scale-[1.02]" style={{animationDelay: `${0.8 + idx * 0.1}s`}}>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-sm sm:text-base">{new Date(run.date).toLocaleDateString()}</p>
-                                    <p className="text-xs sm:text-sm text-gray-400 truncate">{run.notes || 'No notes'}</p>
+
+                    {/* Personal Records */}
+                    {personalRecords && (
+                        <Card className="animate-slide-left">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Trophy className="w-5 h-5 text-yellow-400" />
+                                <h2 className="text-lg font-bold text-white">Records</h2>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Route className="w-4 h-4 text-blue-400" />
+                                        <p className="text-xs text-gray-400">Longest Distance</p>
+                                    </div>
+                                    <p className="text-xl font-bold text-white">{(personalRecords.longestDistance / 1000).toFixed(2)} km</p>
                                 </div>
-                                <div className="text-right flex-shrink-0 ml-4">
-                                    <p className="font-bold text-sm sm:text-base">{(run.distance_m / 1000).toFixed(2)} km</p>
-                                    <p className="text-xs sm:text-sm text-gray-400">{run.avg_speed_kmh.toFixed(1)} km/h</p>
+
+                                <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Clock className="w-4 h-4 text-purple-400" />
+                                        <p className="text-xs text-gray-400">Longest Duration</p>
+                                    </div>
+                                    <p className="text-xl font-bold text-white">{formatDuration(personalRecords.longestDuration)}</p>
                                 </div>
-                            </li>
-                        ))}
-                         <Link to="/history" className="text-brand-orange hover:underline flex items-center mt-4 text-sm font-semibold">
-                            View Full History <ArrowRight className="w-4 h-4 ml-1" />
-                        </Link>
-                    </ul>
-                    ) : (
-                         <div className="text-center py-8">
-                            <p className="text-gray-400">No runs logged yet. Add your first run!</p>
-                             <Link to="/add-run" className="mt-4 inline-block bg-brand-orange text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors">
-                                Add a Run
-                            </Link>
-                        </div>
+
+                                <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Zap className="w-4 h-4 text-yellow-400" />
+                                        <p className="text-xs text-gray-400">Fastest Speed</p>
+                                    </div>
+                                    <p className="text-xl font-bold text-white">{personalRecords.fastestAvgSpeed.toFixed(2)} km/h</p>
+                                </div>
+                            </div>
+                        </Card>
                     )}
-                </Card>
+                </div>
             </div>
         </div>
     );

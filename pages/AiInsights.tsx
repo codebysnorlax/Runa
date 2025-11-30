@@ -147,14 +147,17 @@ const AiInsights: React.FC = () => {
     }
 
     return (
-        <div className="space-y-6 pb-24 lg:pb-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
              {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-white">AI Insights</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white">AI Insights</h1>
+                    <p className="text-sm text-gray-400 mt-1">Powered by Google Gemini</p>
+                </div>
                 <button
                     onClick={handleGenerate}
                     disabled={isGenerating}
-                    className="flex items-center justify-center bg-brand-orange text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500"
+                    className="w-full sm:w-auto flex items-center justify-center bg-brand-orange text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
                 >
                     {isGenerating ? (
                         <>
@@ -164,7 +167,7 @@ const AiInsights: React.FC = () => {
                     ) : (
                          <>
                             <Zap className="w-5 h-5 mr-2" />
-                            Generate
+                            Generate Insights
                         </>
                     )}
                 </button>
@@ -175,26 +178,31 @@ const AiInsights: React.FC = () => {
             ) : (
                 <>
                     {insights && insights.improvementScore > 0 && (
-                        <Card className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-lg font-semibold text-white">Overall Improvement Score</h2>
-                                <p className="text-gray-400">A measure of your progress based on recent activity.</p>
+                        <Card className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20">
+                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="text-center sm:text-left">
+                                    <h2 className="text-lg sm:text-xl font-bold text-white mb-1">Improvement Score</h2>
+                                    <p className="text-sm text-gray-400">Based on your recent activity</p>
+                                </div>
+                                 <div className="flex items-center gap-3">
+                                    <Target className="w-10 h-10 sm:w-12 sm:h-12 text-brand-orange" />
+                                    <div className="text-center">
+                                        <p className="text-4xl sm:text-5xl font-bold text-white">{insights.improvementScore}</p>
+                                        <p className="text-sm text-gray-400">out of 100</p>
+                                    </div>
+                                 </div>
                             </div>
-                             <div className="flex items-center space-x-2">
-                                <Target className="w-8 h-8 text-brand-orange" />
-                                <p className="text-4xl font-bold text-white">{insights.improvementScore}<span className="text-2xl text-gray-400">/100</span></p>
-                             </div>
                         </Card>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {insights?.insights?.map(insight => (
-                             <Card key={insight.id} className={`border-l-4 ${insightBgColor(insight.type)}`}>
-                                <div className="flex items-start space-x-4">
+                             <Card key={insight.id} className={`border-l-4 ${insightBgColor(insight.type)} hover:scale-[1.02] transition-transform`}>
+                                <div className="flex items-start gap-3">
                                    {getInsightIcon(insight.type)}
-                                    <div>
-                                        <h3 className="font-bold text-white">{insight.title}</h3>
-                                        <p className="text-sm text-gray-300 mt-1">{insight.content}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-bold text-white mb-2">{insight.title}</h3>
+                                        <p className="text-sm text-gray-300 leading-relaxed">{insight.content}</p>
                                     </div>
                                 </div>
                             </Card>
@@ -202,17 +210,17 @@ const AiInsights: React.FC = () => {
                     </div>
 
                      {insights && insights.weeklyPlan && Object.values(insights.weeklyPlan).some(p => p) && (
-                        <Card>
-                            <h2 className="text-xl font-bold text-white mb-4">Your AI-Generated Weekly Plan</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                        <div className="-mx-4 sm:mx-0">
+                            <h2 className="text-xl font-bold text-white mb-4 px-4 sm:px-0">Weekly Training Plan</h2>
+                            <div className="flex gap-3 overflow-x-auto pb-2 px-4 sm:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
                                 {Object.entries(insights.weeklyPlan).map(([day, plan]) => (
-                                    <div key={day} className="p-3 bg-gray-800 rounded-md">
-                                        <p className="font-bold capitalize text-brand-orange">{day}</p>
-                                        <p className="text-sm text-gray-300 mt-1">{plan || 'Not set'}</p>
+                                    <div key={day} className="flex-shrink-0 w-40 p-4 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-brand-orange/50 transition-all snap-start">
+                                        <p className="font-semibold capitalize text-brand-orange mb-2">{day}</p>
+                                        <p className="text-sm text-gray-300 leading-relaxed">{plan || 'Rest day'}</p>
                                     </div>
                                 ))}
                             </div>
-                        </Card>
+                        </div>
                      )}
 
                     {error && (

@@ -7,6 +7,8 @@ import AiInsights from './AiInsights';
 const ProtectedInsights: React.FC = () => {
     const [password, setPassword] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isBreaking, setIsBreaking] = useState(false);
+    const [isShaking, setIsShaking] = useState(false);
     const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
     const [showContactBtn, setShowContactBtn] = useState(false);
 
@@ -15,14 +17,13 @@ const ProtectedInsights: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (password === correctPassword) {
-            setIsAuthenticated(true);
-            setToast({ message: 'Access granted to AI Insights!', type: 'success' });
+            setIsBreaking(true);
+            setTimeout(() => setIsAuthenticated(true), 600);
         } else {
+            setIsShaking(true);
             setShowContactBtn(true);
-            setToast({
-                message: 'Access denied. Contact the developer for permission.',
-                type: 'error'
-            });
+            setToast({ message: 'Incorrect password', type: 'error' });
+            setTimeout(() => setIsShaking(false), 500);
         }
     };
 
@@ -31,51 +32,81 @@ const ProtectedInsights: React.FC = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="min-h-[75vh] flex items-center justify-center px-4 relative overflow-hidden">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <Card className="max-w-md w-full">
-                    <div className="text-center mb-6">
-                        <Lock className="w-16 h-16 mx-auto text-brand-orange mb-4" />
-                        <h2 className="text-2xl font-bold text-white mb-2">AI Insights Access</h2>
-                        <p className="text-gray-400">This feature requires special permission</p>
-                    </div>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label htmlFor="insights-password" className="block text-sm font-medium text-gray-300 mb-1">
-                                Access Password
-                            </label>
-                            <input
-                                id="insights-password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Try: 10072005"
-                                className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
-                            />
+            
+            <div className={`max-w-md w-full transition-all duration-500 ${isBreaking ? 'animate-break' : ''}`}>
+                <Card className="relative">
+                    <div className="text-center mb-8">
+                        <div className={`inline-block mb-6 transition-all duration-300 ${isBreaking ? 'scale-0 rotate-180' : ''}`}>
+                            <Lock className="w-16 h-16 text-gray-400" />
                         </div>
+                        <h2 className="text-2xl font-bold text-white mb-2">AI Insights</h2>
+                        <p className="text-sm text-gray-400">Enter password to continue</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <input
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
+                            disabled={isBreaking}
+                            className={`w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange focus:border-transparent transition-all disabled:opacity-50 ${isShaking ? 'animate-shake border-red-500' : ''}`}
+                        />
+
                         <button
                             type="submit"
-                            className="w-full flex justify-center items-center bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200 disabled:bg-gray-500"
-                            disabled={!password}
+                            disabled={!password || isBreaking}
+                            className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Lock className="w-5 h-5 mr-2" />
-                            Access AI Insights
+                            Unlock
                         </button>
-                        {showContactBtn && (
+
+                        {showContactBtn && !isBreaking && (
                             <button
                                 type="button"
                                 onClick={() => window.open('https://instagram.com/nr_snorlax', '_blank')}
-                                className="w-full flex justify-center items-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
                             >
-                                <Instagram className="w-5 h-5 mr-2" />
+                                <Instagram className="w-5 h-5" />
                                 Contact Developer
                             </button>
                         )}
                     </form>
+
+                    <p className="text-xs text-center text-gray-500 mt-6">Hint: 10072005</p>
                 </Card>
             </div>
+
+            <style>{`
+                @keyframes break {
+                    0% {
+                        transform: scale(1) rotate(0deg);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1.1) rotate(5deg);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: scale(0.8) rotate(-10deg) translateY(100px);
+                        opacity: 0;
+                    }
+                }
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                    20%, 40%, 60%, 80% { transform: translateX(10px); }
+                }
+                .animate-break {
+                    animation: break 0.6s ease-out forwards;
+                }
+                .animate-shake {
+                    animation: shake 0.5s ease-in-out;
+                }
+            `}</style>
         </div>
     );
 };
