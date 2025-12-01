@@ -147,27 +147,27 @@ const AiInsights: React.FC = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
+        <div className="max-w-7xl mx-auto space-y-4 pb-24 lg:pb-6 px-4 sm:px-0">
              {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex justify-between items-center gap-3">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white">AI Insights</h1>
-                    <p className="text-sm text-gray-400 mt-1">Powered by Google Gemini</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-white">AI Insights</h1>
+                    <p className="text-xs text-gray-500">Powered by Google Gemini</p>
                 </div>
                 <button
                     onClick={handleGenerate}
                     disabled={isGenerating}
-                    className="w-full sm:w-auto flex items-center justify-center bg-brand-orange text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center bg-brand-orange text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 text-sm"
                 >
                     {isGenerating ? (
                         <>
-                            <Loader2 className="animate-spin w-5 h-5 mr-2" />
+                            <Loader2 className="animate-spin w-4 h-4 mr-1.5" />
                             Generating...
                         </>
                     ) : (
                          <>
-                            <Zap className="w-5 h-5 mr-2" />
-                            Generate Insights
+                            <Zap className="w-4 h-4 mr-1.5" />
+                            Generate
                         </>
                     )}
                 </button>
@@ -178,17 +178,17 @@ const AiInsights: React.FC = () => {
             ) : (
                 <>
                     {insights && insights.improvementScore > 0 && (
-                        <Card className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20">
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div className="text-center sm:text-left">
-                                    <h2 className="text-lg sm:text-xl font-bold text-white mb-1">Improvement Score</h2>
-                                    <p className="text-sm text-gray-400">Based on your recent activity</p>
+                        <Card className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20 p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-base font-semibold text-white">Improvement Score</h2>
+                                    <p className="text-xs text-gray-500">Based on recent activity</p>
                                 </div>
-                                 <div className="flex items-center gap-3">
-                                    <Target className="w-10 h-10 sm:w-12 sm:h-12 text-brand-orange" />
-                                    <div className="text-center">
-                                        <p className="text-4xl sm:text-5xl font-bold text-white">{insights.improvementScore}</p>
-                                        <p className="text-sm text-gray-400">out of 100</p>
+                                 <div className="flex items-center gap-2">
+                                    <Target className="w-8 h-8 text-brand-orange" />
+                                    <div>
+                                        <p className="text-3xl font-bold text-white leading-none">{insights.improvementScore}</p>
+                                        <p className="text-xs text-gray-500">out of 100</p>
                                     </div>
                                  </div>
                             </div>
