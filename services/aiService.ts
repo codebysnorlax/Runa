@@ -24,7 +24,7 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     - Distance Goals: ${goals.distance_goals.map(g => `${g.name}: ${g.distance_km}km in ${g.target_time}`).join(', ') || 'None set'}
 
     Recent Runs (up to last 10, most recent first):
-    ${runs.slice(0, 10).map(r => 
+    ${runs.slice(0, 10).map(r =>
       `- Date: ${r.date}, Distance: ${r.distance_m}m, Time: ${r.total_time_sec}s, Avg Speed: ${r.avg_speed_kmh.toFixed(2)} km/h`
     ).join('\n')}
 
@@ -33,6 +33,8 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     2.  4-6 concise "Insight Cards". Each card should have a title, content, and a type ('positive', 'negative', 'neutral'). Focus on trends, fatigue, consistency, and goal progress.
     3.  A "Weekly Recommendation Plan" with a short, actionable suggestion for each day of the week (Monday to Sunday).
   `;
+
+  console.log('AI INPUT:', prompt);
 
   try {
     const response = await ai.models.generateContent({
@@ -81,15 +83,21 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     });
 
     const jsonText = response.text.trim();
+    console.log('AI RAW OUTPUT:', jsonText);
+
     const result = JSON.parse(jsonText);
+    console.log('AI PARSED OUTPUT:', result);
 
     // Add unique IDs to insights
     const insightsWithIds = result.insights.map((insight: any) => ({
       ...insight,
-      id: crypto.randomUUID(),
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
     }));
 
-    return { ...result, insights: insightsWithIds };
+    const finalResult = { ...result, insights: insightsWithIds };
+    console.log('AI FINAL OUTPUT:', finalResult);
+
+    return finalResult;
   } catch (error) {
     console.error("Error generating insights from Gemini API:", error);
     return null;

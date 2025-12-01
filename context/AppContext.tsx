@@ -1,7 +1,13 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
-import { Profile, Run, Goal, InsightsData } from '../types';
-import * as storage from '../services/storageService';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
+import { useUser } from "@clerk/clerk-react";
+import { Profile, Run, Goal, InsightsData } from "../types";
+import * as storage from "../services/storageService";
 
 interface AppContextType {
   profile: Profile | null;
@@ -10,7 +16,7 @@ interface AppContextType {
   insights: InsightsData | null;
   loading: boolean;
   currentUser: string | null;
-  addRun: (newRun: Omit<Run, 'id'>) => void;
+  addRun: (newRun: Omit<Run, "id">) => void;
   editRun: (updatedRun: Run) => void;
   deleteRun: (runId: string) => void;
   updateGoals: (newGoals: Goal) => void;
@@ -21,7 +27,9 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AppContextProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { user, isLoaded } = useUser();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
@@ -33,7 +41,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   useEffect(() => {
     if (isLoaded && user) {
       const username = user.id;
-      setCurrentUser(user.firstName || user.username || 'User');
+      setCurrentUser(user.firstName || user.username || "User");
       refreshUserData(username);
     } else if (isLoaded) {
       setLoading(false);
@@ -42,17 +50,23 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const refreshUserData = (username: string) => {
     setLoading(true);
-    const { profile, runs, goals, insights } = storage.initializeDefaults(username);
+    const { profile, runs, goals, insights } =
+      storage.initializeDefaults(username);
     setProfile(profile);
     setRuns(runs);
     setGoals(goals);
     setInsights(insights);
     setLoading(false);
   };
-  
-  const addRun = (newRunData: Omit<Run, 'id'>) => {
+
+  const addRun = (newRunData: Omit<Run, "id">) => {
     if (!user) return;
-    const newRun: Run = { ...newRunData, id: crypto.randomUUID() };
+
+    const newRun: Run = {
+      ...newRunData,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+
     const updatedRuns = [newRun, ...runs];
     setRuns(updatedRuns);
     storage.saveRuns(updatedRuns, user.id);
@@ -60,14 +74,16 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const editRun = (updatedRun: Run) => {
     if (!user) return;
-    const updatedRuns = runs.map(run => run.id === updatedRun.id ? updatedRun : run);
+    const updatedRuns = runs.map((run) =>
+      run.id === updatedRun.id ? updatedRun : run
+    );
     setRuns(updatedRuns);
     storage.saveRuns(updatedRuns, user.id);
   };
 
   const deleteRun = (runId: string) => {
     if (!user) return;
-    const updatedRuns = runs.filter(run => run.id !== runId);
+    const updatedRuns = runs.filter((run) => run.id !== runId);
     setRuns(updatedRuns);
     storage.saveRuns(updatedRuns, user.id);
   };
@@ -83,7 +99,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     setProfile(newProfile);
     storage.saveProfile(newProfile, user.id);
   };
-  
+
   const updateInsights = (newInsights: InsightsData) => {
     if (!user) return;
     setInsights(newInsights);
@@ -97,7 +113,23 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   return (
-    <AppContext.Provider value={{ profile, runs, goals, insights, loading, currentUser, addRun, editRun, deleteRun, updateGoals, updateProfile, updateInsights, refreshData }}>
+    <AppContext.Provider
+      value={{
+        profile,
+        runs,
+        goals,
+        insights,
+        loading,
+        currentUser,
+        addRun,
+        editRun,
+        deleteRun,
+        updateGoals,
+        updateProfile,
+        updateInsights,
+        refreshData,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
@@ -106,7 +138,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppContextProvider');
+    throw new Error("useAppContext must be used within an AppContextProvider");
   }
   return context;
 };

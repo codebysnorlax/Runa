@@ -74,11 +74,24 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
   const data = useMemo(() => {
-    const runDataByDate: { [key: string]: number } = {};
+    const runDataByDate: {
+      [key: string]: {
+        distance: number;
+        speed: number;
+        time: number;
+        count: number;
+      };
+    } = {};
+
     runs.forEach((run) => {
       const dateStr = new Date(run.date).toISOString().split("T")[0];
-      runDataByDate[dateStr] =
-        (runDataByDate[dateStr] || 0) + run.distance_m / 1000;
+      if (!runDataByDate[dateStr]) {
+        runDataByDate[dateStr] = { distance: 0, speed: 0, time: 0, count: 0 };
+      }
+      runDataByDate[dateStr].distance += run.distance_m / 1000;
+      runDataByDate[dateStr].speed += run.avg_speed_kmh;
+      runDataByDate[dateStr].time += run.total_time_sec / 60;
+      runDataByDate[dateStr].count += 1;
     });
 
     const endDate = new Date();
@@ -89,68 +102,152 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
     const days = [];
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
+      const dateStr = currentDate.toISOString().split("T")[0];
+      const dayData = runDataByDate[dateStr];
       days.push({
         date: new Date(currentDate),
-        distance: runDataByDate[currentDate.toISOString().split("T")[0]] || 0,
+        distance: dayData?.distance || 0,
+        avgSpeed: dayData ? dayData.speed / dayData.count : 0,
+        time: dayData?.time || 0,
+        intensity: dayData
+          ? dayData.distance * 0.4 +
+            (dayData.speed / dayData.count) * 0.3 +
+            dayData.time * 0.3
+          : 0,
       });
       currentDate.setDate(currentDate.getDate() + 1);
     }
     return days;
   }, [runs]);
 
-  const maxDistance = useMemo(
-    () => Math.max(...data.map((d) => d.distance), 1),
+  const maxIntensity = useMemo(
+    () => Math.max(...data.map((d) => d.intensity), 1),
     [data]
   );
-  const getColor = (distance: number) => {
-    if (distance === 0) return "bg-gray-800";
-    const intensity = Math.min(distance / (maxDistance * 0.75), 1); // Cap intensity to make colors more vibrant
-    if (intensity < 0.25) return "bg-brand-orange/20";
-    if (intensity < 0.5) return "bg-brand-orange/40";
-    if (intensity < 0.75) return "bg-brand-orange/60";
-    return "bg-brand-orange/80";
+
+  const getColor = (intensity: number) => {
+    if (intensity === 0) return "bg-gray-800";
+    const normalized = Math.min(intensity / maxIntensity, 1);
+    if (normalized < 0.2) return "bg-brand-orange/20";
+    if (normalized < 0.4) return "bg-brand-orange/40";
+    if (normalized < 0.6) return "bg-brand-orange/60";
+    if (normalized < 0.8) return "bg-brand-orange/80";
+    return "bg-brand-orange";
   };
 
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const months = [...Array(12)].map((_, i) => {
-    const d = new Date(data[0].date);
-    d.setMonth(d.getMonth() + i);
-    return d.toLocaleString("default", { month: "short" });
+  const firstDayOffset = data.length > 0 ? data[0].date.getDay() : 0;
+
+  // Group data into weeks
+  const weeks: any[][] = [];
+  let currentWeek: any[] = [];
+
+  // Add empty cells for first week offset
+  for (let i = 0; i < firstDayOffset; i++) {
+    currentWeek.push(null);
+  }
+
+  data.forEach((day, index) => {
+    currentWeek.push(day);
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
   });
 
-  const firstDayOffset = data.length > 0 ? data[0].date.getDay() : 0;
+  // Add remaining days
+  if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) {
+      currentWeek.push(null);
+    }
+    weeks.push(currentWeek);
+  }
 
   return (
     <Card>
-      <h2 className="text-lg font-semibold text-white mb-4">
-        Running Frequency Heatmap
-      </h2>
-      <div className="flex flex-col items-center overflow-x-auto">
-        <div className="grid grid-flow-col grid-rows-7 gap-1 min-w-max">
-          {[...Array(firstDayOffset)].map((_, i) => (
-            <div
-              key={`empty-${i}`}
-              className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm"
-            />
-          ))}
-          {data.map(({ date, distance }, index) => (
-            <div
-              key={index}
-              className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm ${getColor(
-                distance
-              )}`}
-              title={`${date.toDateString()}: ${distance.toFixed(1)}km`}
-            />
-          ))}
-        </div>
-        <div className="flex justify-end mt-2 text-xs text-gray-400 self-stretch items-center">
-          <span>Less</span>
-          <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-gray-800 mx-1" />
-          <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/20 mx-1" />
-          <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/40 mx-1" />
-          <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/60 mx-1" />
-          <div className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-sm bg-brand-orange/80 mx-1" />
-          <span>More</span>
+      <p className="text-xs text-gray-400 mb-3">
+        Based on distance, speed, and time
+      </p>
+      <div className="overflow-x-auto">
+        <div className="inline-block min-w-full">
+          <div className="flex gap-1">
+            {/* Day labels */}
+            <div className="flex flex-col gap-1 text-xs text-gray-400 pt-5">
+              {weekDays.map((day, i) => (
+                <div
+                  key={i}
+                  className="h-3 flex items-center"
+                  style={{ fontSize: "10px" }}
+                >
+                  {i % 2 === 1 ? day : ""}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex-1">
+              {/* Month labels */}
+              <div className="flex gap-1 mb-1 text-xs text-gray-400">
+                {weeks.map((week, weekIndex) => {
+                  const firstDay = week.find((d) => d);
+                  if (firstDay && new Date(firstDay.date).getDate() <= 7) {
+                    const month = new Date(firstDay.date).toLocaleString(
+                      "default",
+                      { month: "short" }
+                    );
+                    return (
+                      <div
+                        key={weekIndex}
+                        className="w-3"
+                        style={{ fontSize: "10px" }}
+                      >
+                        {month}
+                      </div>
+                    );
+                  }
+                  return <div key={weekIndex} className="w-3" />;
+                })}
+              </div>
+
+              {/* Heatmap grid */}
+              <div className="flex gap-1">
+                {weeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className="flex flex-col gap-1">
+                    {week.map((day, dayIndex) => (
+                      <div
+                        key={dayIndex}
+                        className={`w-3 h-3 rounded-sm ${
+                          day ? getColor(day.intensity) : "bg-transparent"
+                        }`}
+                        title={
+                          day
+                            ? `${day.date.toDateString()}\nDistance: ${day.distance.toFixed(
+                                1
+                              )}km\nAvg Speed: ${day.avgSpeed.toFixed(
+                                1
+                              )}km/h\nTime: ${day.time.toFixed(0)}min`
+                            : ""
+                        }
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="flex justify-end mt-3 text-xs text-gray-400 items-center gap-2">
+            <span>Less</span>
+            <div className="flex gap-1">
+              <div className="w-3 h-3 rounded-sm bg-gray-800" />
+              <div className="w-3 h-3 rounded-sm bg-brand-orange/20" />
+              <div className="w-3 h-3 rounded-sm bg-brand-orange/40" />
+              <div className="w-3 h-3 rounded-sm bg-brand-orange/60" />
+              <div className="w-3 h-3 rounded-sm bg-brand-orange/80" />
+              <div className="w-3 h-3 rounded-sm bg-brand-orange" />
+            </div>
+            <span>More</span>
+          </div>
         </div>
       </div>
     </Card>
