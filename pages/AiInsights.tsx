@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { generateInsightsAndPlan } from '../services/aiService';
 import Card from '../components/Card';
 import Skeleton from '../components/Skeleton';
-import { Loader2, Zap, HeartPulse, ShieldCheck, ThumbsDown, Target } from 'lucide-react';
+import { Loader2, Zap, HeartPulse, ShieldCheck, ThumbsDown, Target, Lock } from 'lucide-react';
 import Toast from '../components/Toast';
 
 const AiInsightsSkeleton: React.FC = () => (
@@ -92,6 +92,32 @@ const AiInsights: React.FC = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+    const [usageCount, setUsageCount] = useState(0);
+    const [resetTime, setResetTime] = useState('');
+
+    useEffect(() => {
+        const updateTimer = () => {
+            const today = new Date().toDateString();
+            const savedDate = localStorage.getItem('insightsDate');
+            const savedCount = parseInt(localStorage.getItem('insightsCount') || '0');
+            
+            if (savedDate === today) {
+                setUsageCount(savedCount);
+            }
+
+            // Calculate reset time
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            const hours = Math.floor((tomorrow.getTime() - Date.now()) / (1000 * 60 * 60));
+            const minutes = Math.floor(((tomorrow.getTime() - Date.now()) % (1000 * 60 * 60)) / (1000 * 60));
+            setResetTime(`${hours}h ${minutes}m`);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 60000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleGenerate = async () => {
         if (!profile || !goals || runs.length === 0) {
@@ -106,6 +132,16 @@ const AiInsights: React.FC = () => {
             if (newInsightsData) {
                 updateInsights(newInsightsData);
                 setToast({ message: 'Insights generated successfully!', type: 'success' });
+                
+                // Only increment count on successful generation
+                const today = new Date().toDateString();
+                const savedDate = localStorage.getItem('insightsDate');
+                if (savedDate === today) {
+                    const currentCount = parseInt(localStorage.getItem('insightsCount') || '0');
+                    const newCount = currentCount + 1;
+                    localStorage.setItem('insightsCount', newCount.toString());
+                    setUsageCount(newCount);
+                }
             } else {
                 setError('AI service is currently unavailable. Please try again later.');
             }
@@ -152,17 +188,23 @@ const AiInsights: React.FC = () => {
             <div className="flex justify-between items-center gap-3">
                 <div>
                     <h1 className="text-xl sm:text-2xl font-bold text-white">AI Insights</h1>
-                    <p className="text-xs text-gray-500">Powered by Google Gemini</p>
+                    <p className="text-xs text-red-500">Usage: {usageCount}/2 today</p>
                 </div>
                 <button
                     onClick={handleGenerate}
-                    disabled={isGenerating}
-                    className="flex items-center justify-center bg-brand-orange text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 text-sm"
+                    disabled={isGenerating || usageCount >= 2}
+                    className="flex items-center justify-center bg-brand-orange text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed text-sm"
+                    title={usageCount >= 2 ? 'Daily limit reached' : ''}
                 >
                     {isGenerating ? (
                         <>
                             <Loader2 className="animate-spin w-4 h-4 mr-1.5" />
                             Generating...
+                        </>
+                    ) : usageCount >= 2 ? (
+                        <>
+                            <Lock className="w-4 h-4 mr-1.5" />
+                            Resets in {resetTime}
                         </>
                     ) : (
                          <>
