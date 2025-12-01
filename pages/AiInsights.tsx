@@ -120,6 +120,11 @@ const AiInsights: React.FC = () => {
 
       if (savedDate === today) {
         setUsageCount(savedCount);
+      } else {
+        // Reset count for new day
+        localStorage.setItem("insightsDate", today);
+        localStorage.setItem("insightsCount", "0");
+        setUsageCount(0);
       }
 
       // Calculate reset time
@@ -165,9 +170,10 @@ const AiInsights: React.FC = () => {
           type: "success",
         });
 
-        // Only increment count on successful generation
+        // Increment count on successful generation
         const today = new Date().toDateString();
         const savedDate = localStorage.getItem("insightsDate");
+        
         if (savedDate === today) {
           const currentCount = parseInt(
             localStorage.getItem("insightsCount") || "0"
@@ -175,6 +181,11 @@ const AiInsights: React.FC = () => {
           const newCount = currentCount + 1;
           localStorage.setItem("insightsCount", newCount.toString());
           setUsageCount(newCount);
+        } else {
+          // First use of the day
+          localStorage.setItem("insightsDate", today);
+          localStorage.setItem("insightsCount", "1");
+          setUsageCount(1);
         }
       } else {
         setError(
