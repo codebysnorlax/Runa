@@ -210,15 +210,33 @@ const AiInsights: React.FC = () => {
                     </div>
 
                      {insights && insights.weeklyPlan && Object.values(insights.weeklyPlan).some(p => p) && (
-                        <div className="-mx-4 sm:mx-0">
-                            <h2 className="text-xl font-bold text-white mb-4 px-4 sm:px-0">Weekly Training Plan</h2>
-                            <div className="flex gap-3 overflow-x-auto pb-2 px-4 sm:px-0 snap-x snap-mandatory scroll-smooth scrollbar-hide">
-                                {Object.entries(insights.weeklyPlan).map(([day, plan]) => (
-                                    <div key={day} className="flex-shrink-0 w-40 p-4 bg-gray-800/50 rounded-lg border border-gray-700 hover:border-brand-orange/50 transition-all snap-start">
-                                        <p className="font-semibold capitalize text-brand-orange mb-2">{day}</p>
-                                        <p className="text-sm text-gray-300 leading-relaxed">{plan || 'Rest day'}</p>
-                                    </div>
-                                ))}
+                        <div>
+                            <h2 className="text-xl font-bold text-white mb-4">Weekly Training Plan</h2>
+                            {/* Mobile: Horizontal scroll */}
+                            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden">
+                                {Object.entries(insights.weeklyPlan).map(([day, plan]) => {
+                                    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                                    const isToday = day === today;
+                                    return (
+                                        <div key={day} className={`flex-shrink-0 w-40 min-h-[140px] p-4 bg-gray-800/50 rounded-lg border-2 transition-all snap-start ${isToday ? 'border-red-500' : 'border-gray-700 hover:border-brand-orange/50'}`}>
+                                            <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">{day}</p>
+                                            <p className="text-xs text-gray-300 leading-relaxed">{plan || 'Rest day'}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            {/* Desktop: Grid */}
+                            <div className="hidden lg:grid grid-cols-7 gap-3">
+                                {Object.entries(insights.weeklyPlan).map(([day, plan]) => {
+                                    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                                    const isToday = day === today;
+                                    return (
+                                        <div key={day} className={`p-4 bg-gray-800/50 rounded-lg border-2 transition-all ${isToday ? 'border-red-500' : 'border-gray-700 hover:border-brand-orange/50'}`}>
+                                            <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">{day}</p>
+                                            <p className="text-xs text-gray-300 leading-relaxed">{plan || 'Rest day'}</p>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                      )}
