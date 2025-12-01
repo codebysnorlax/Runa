@@ -4,9 +4,12 @@ import Card from '../components/Card';
 import ProgressRing from '../components/ProgressRing';
 import Skeleton from '../components/Skeleton';
 import Toast from '../components/Toast';
+import StreakHeatmap from '../components/StreakHeatmap';
+import AnimatedNumber from '../components/AnimatedNumber';
 import { TrendingUp, TrendingDown, ArrowRight, Trophy, Zap, Clock, Route, Target, Activity, Flame, Award, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Run, PersonalRecords } from '../types';
+import { calculateStreak, getHeatmapData } from '../utils/streakUtils';
 
 const DashboardSkeleton: React.FC = () => (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
@@ -75,6 +78,9 @@ const Dashboard: React.FC = () => {
         }), { longestDistance: 0, longestDuration: 0, fastestAvgSpeed: 0 });
     }, [runs]);
 
+    const streakData = useMemo(() => calculateStreak(runs), [runs]);
+    const heatmapData = useMemo(() => getHeatmapData(runs, 3), [runs]);
+
     if (loading) return <DashboardSkeleton />;
 
     const today = new Date();
@@ -129,22 +135,34 @@ const Dashboard: React.FC = () => {
                 <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
                     <Route className="w-5 h-5 text-blue-400 mb-2" />
                     <p className="text-xs text-gray-400 mb-1">Total Distance</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{totalDistance.toFixed(0)}<span className="text-xs ml-1">km</span></p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">
+                        <AnimatedNumber value={totalDistance} decimals={0} duration={1200} />
+                        <span className="text-xs ml-1">km</span>
+                    </p>
                 </div>
                 <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
                     <Activity className="w-5 h-5 text-green-400 mb-2" />
                     <p className="text-xs text-gray-400 mb-1">Total Runs</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{runs.length}<span className="text-xs ml-1">runs</span></p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">
+                        <AnimatedNumber value={runs.length} duration={1000} />
+                        <span className="text-xs ml-1">runs</span>
+                    </p>
                 </div>
                 <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
                     <Flame className="w-5 h-5 text-orange-400 mb-2" />
                     <p className="text-xs text-gray-400 mb-1">This Week</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{last7DaysDistance.toFixed(0)}<span className="text-xs ml-1">km</span></p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">
+                        <AnimatedNumber value={last7DaysDistance} decimals={0} duration={1200} />
+                        <span className="text-xs ml-1">km</span>
+                    </p>
                 </div>
                 <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/20 rounded-xl p-4 hover:scale-105 transition-transform">
                     <Zap className="w-5 h-5 text-yellow-400 mb-2" />
                     <p className="text-xs text-gray-400 mb-1">Streak</p>
-                    <p className="text-xl sm:text-2xl font-bold text-white">{last7DaysRuns.length}<span className="text-xs ml-1">days</span></p>
+                    <p className="text-xl sm:text-2xl font-bold text-white">
+                        <AnimatedNumber value={streakData.currentStreak} duration={1000} />
+                        <span className="text-xs ml-1">days</span>
+                    </p>
                 </div>
             </div>
 
@@ -341,6 +359,16 @@ const Dashboard: React.FC = () => {
                             </div>
                         </Card>
                     )}
+
+                    {/* Activity Heatmap */}
+                    <Card className="animate-slide-left">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Activity className="w-5 h-5 text-green-400" />
+                            <h2 className="text-lg font-bold text-white">Activity Heatmap</h2>
+                            <span className="text-xs text-gray-400 ml-auto">Last 3 months</span>
+                        </div>
+                        <StreakHeatmap data={heatmapData} />
+                    </Card>
                 </div>
             </div>
         </div>
