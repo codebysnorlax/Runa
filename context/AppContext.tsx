@@ -52,7 +52,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   
   const addRun = (newRunData: Omit<Run, 'id'>) => {
     if (!user) return;
-    const newRun: Run = { ...newRunData, id: crypto.randomUUID() };
+    const newRun: Run = { ...newRunData, id: Date.now().toString() + Math.random().toString(36).substr(2, 9) };
     const updatedRuns = [newRun, ...runs];
     setRuns(updatedRuns);
     storage.saveRuns(updatedRuns, user.id);
