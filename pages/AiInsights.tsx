@@ -350,8 +350,8 @@ const AiInsights: React.FC = () => {
                 <h2 className="text-xl font-bold text-white mb-4">
                   Weekly Training Plan
                 </h2>
-                {/* Mobile: Horizontal scroll */}
-                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden">
+                {/* Mobile: Horizontal scroll - full width */}
+                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 lg:hidden">
                   {Object.entries(insights.weeklyPlan).map(([day, plan]) => {
                     const today = new Date()
                       .toLocaleDateString("en-US", { weekday: "long" })
@@ -360,7 +360,7 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`flex-shrink-0 w-40 min-h-[140px] p-4 bg-gray-800/50 rounded-lg border-2 transition-all snap-start ${
+                        className={`flex-shrink-0 w-[calc(100vw-8rem)] sm:w-64 min-h-[140px] p-4 bg-gray-800/50 rounded-lg border-2 transition-all snap-start ${
                           isToday
                             ? "border-red-500"
                             : "border-gray-700 hover:border-brand-orange/50"
