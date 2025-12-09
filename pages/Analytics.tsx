@@ -339,9 +339,10 @@ const Analytics: React.FC = () => {
   const goalProgressData = useMemo(() => {
     if (!goals?.distance_goals?.length) return [];
     return goals.distance_goals.map((goal) => {
-      const relevantRuns = runs.filter(
-        (run) => run.distance_m / 1000 >= goal.distance_km * 0.8
-      );
+      const relevantRuns = runs.filter((run) => {
+        const runDistKm = run.distance_m / 1000;
+        return runDistKm >= goal.distance_km * 0.9 && runDistKm <= goal.distance_km * 1.1;
+      });
       const bestTime =
         relevantRuns.length > 0
           ? Math.min(...relevantRuns.map((run) => run.total_time_sec))
