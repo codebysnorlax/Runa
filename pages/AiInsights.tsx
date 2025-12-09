@@ -252,7 +252,7 @@ const AiInsights: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-4 pb-24 lg:pb-6 px-4 sm:px-0">
+    <div className="max-w-7xl mx-auto space-y-4 pb-24 lg:pb-6 lg:px-4">
       {toast && (
         <Toast
           message={toast.message}
@@ -260,7 +260,7 @@ const AiInsights: React.FC = () => {
           onClose={() => setToast(null)}
         />
       )}
-      <div className="flex justify-between items-center gap-3">
+      <div className="flex justify-between items-center gap-3 px-4 lg:px-0">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white">
             AI Insights
@@ -297,7 +297,7 @@ const AiInsights: React.FC = () => {
       ) : (
         <>
           {insights && insights.improvementScore > 0 && (
-            <Card className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20 p-4">
+            <Card className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20 p-4 mx-4 lg:mx-0">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-base font-semibold text-white">
@@ -320,7 +320,7 @@ const AiInsights: React.FC = () => {
             </Card>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 lg:px-0">
             {insights?.insights?.map((insight) => (
               <Card
                 key={insight.id}
@@ -347,11 +347,11 @@ const AiInsights: React.FC = () => {
             insights.weeklyPlan &&
             Object.values(insights.weeklyPlan).some((p) => p) && (
               <div>
-                <h2 className="text-xl font-bold text-white mb-4">
+                <h2 className="text-xl font-bold text-white mb-4 px-4 lg:px-0">
                   Weekly Training Plan
                 </h2>
                 {/* Mobile: Horizontal scroll - full width */}
-                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-4 px-4 lg:hidden">
+                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
                   {Object.entries(insights.weeklyPlan).map(([day, plan]) => {
                     const today = new Date()
                       .toLocaleDateString("en-US", { weekday: "long" })
@@ -360,11 +360,12 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`flex-shrink-0 w-[calc(100vw-8rem)] sm:w-64 min-h-[140px] p-4 bg-gray-800/50 rounded-lg border-2 transition-all snap-start ${
+                        className={`flex-shrink-0 w-40 p-3 bg-gray-800/50 rounded-lg border-2 transition-all snap-start first:ml-4 ${
                           isToday
                             ? "border-red-500"
                             : "border-gray-700 hover:border-brand-orange/50"
                         }`}
+                        style={{ aspectRatio: '2/3' }}
                       >
                         <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">
                           {day}
@@ -406,7 +407,7 @@ const AiInsights: React.FC = () => {
             )}
 
           {error && (
-            <Card>
+            <Card className="mx-4 lg:mx-0">
               <div className="text-center py-12">
                 <ThumbsDown className="w-16 h-16 mx-auto text-red-400 mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">
@@ -424,7 +425,7 @@ const AiInsights: React.FC = () => {
           )}
 
           {!error && (!insights || insights?.insights?.length === 0) && (
-            <Card>
+            <Card className="mx-4 lg:mx-0">
               <div className="text-center py-12">
                 <Zap className="w-16 h-16 mx-auto text-brand-orange mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">

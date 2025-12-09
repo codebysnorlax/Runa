@@ -77,10 +77,7 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     if (profile) {
-      setProfileState({
-        ...profile,
-        name: currentUser || profile.name
-      });
+      setProfileState(profile);
     }
     if (goals) {
       setGoalState({
@@ -88,7 +85,7 @@ const Settings: React.FC = () => {
         distance_goals: goals.distance_goals || [],
       });
     }
-  }, [profile, goals, currentUser]);
+  }, [profile, goals]);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profileState) {
