@@ -5,6 +5,7 @@ import { AppContextProvider } from './context/AppContext';
 import Layout from './components/Layout';
 import Card from './components/Card';
 import Skeleton from './components/Skeleton';
+import Snowfall from 'react-snowfall';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -49,6 +50,7 @@ const App: React.FC = () => {
   return (
     <AppContextProvider>
       <Router>
+        <Snowfall snowflakeCount={100} style={{ position: 'fixed', width: '100vw', height: '100vh', zIndex: 9999, pointerEvents: 'none' }} />
         <AppContent />
       </Router>
     </AppContextProvider>
