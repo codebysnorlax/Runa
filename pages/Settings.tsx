@@ -317,8 +317,15 @@ const Settings: React.FC = () => {
     if (feedbackStep < FEEDBACK_QUESTIONS.length - 1) {
       setFeedbackStep(prev => prev + 1);
     } else {
-      // Check if at least one question is answered
-      if (feedbackResponses.length === 0) {
+      // Check if at least one question is answered with non-empty value
+      const hasValidResponse = feedbackResponses.some(r => {
+        if (Array.isArray(r.answer)) {
+          return r.answer.length > 0;
+        }
+        return r.answer && r.answer.trim() !== '';
+      });
+
+      if (!hasValidResponse) {
         setToast({ message: "Please answer at least one question before submitting", type: "error" });
         return;
       }
@@ -329,8 +336,6 @@ const Settings: React.FC = () => {
         setToast({ message: "Please wait before sending another feedback", type: "error" });
         return;
       }
-
-      setFeedbackCompleted(true);
       
       // Send to Telegram with user info
       try {
@@ -339,6 +344,7 @@ const Settings: React.FC = () => {
         const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
         
         if (result.success) {
+          setFeedbackCompleted(true);
           setToast({ message: result.message, type: "success" });
         } else {
           setToast({ message: result.message, type: "error" });
