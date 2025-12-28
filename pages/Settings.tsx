@@ -23,8 +23,11 @@ import {
   Linkedin,
   Code,
   Shield,
+  MessageSquare,
 } from "lucide-react";
 import * as storage from "../services/storageService";
+import FeedbackStep, { FeedbackQuestion, UserResponse } from "../components/FeedbackStep";
+import FeedbackSummary from "../components/FeedbackSummary";
 
 const SettingsSkeleton: React.FC = () => (
   <div className="max-w-4xl mx-auto">
@@ -50,7 +53,7 @@ const SettingsSkeleton: React.FC = () => (
   </div>
 );
 
-type ActiveTab = "profile" | "goals" | "backup" | "info";
+type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
@@ -69,6 +72,50 @@ const Settings: React.FC = () => {
   const [profileState, setProfileState] = useState<Profile | null>(null);
   const [goalState, setGoalState] = useState<Goal | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Feedback state
+  const [feedbackStep, setFeedbackStep] = useState(0);
+  const [feedbackResponses, setFeedbackResponses] = useState<UserResponse[]>([]);
+  const [feedbackCompleted, setFeedbackCompleted] = useState(false);
+
+  const FEEDBACK_QUESTIONS: FeedbackQuestion[] = [
+    {
+      id: 1,
+      question: "How would you rate your overall experience with Runa?",
+      type: 'single-choice',
+      options: ['Excellent', 'Good', 'Average', 'Poor', 'Very Poor'],
+      icon: 'rating'
+    },
+    {
+      id: 2,
+      question: "Which features do you use most often?",
+      type: 'multi-choice',
+      options: ['Dashboard', 'Add Run', 'Analytics', 'Goals Tracking', 'Data Backup', 'AI Insights'],
+      icon: 'features'
+    },
+    {
+      id: 3,
+      question: "How easy is it to navigate and use the app?",
+      type: 'single-choice',
+      options: ['Very Easy', 'Easy', 'Neutral', 'Difficult', 'Very Difficult'],
+      icon: 'experience'
+    },
+    {
+      id: 4,
+      question: "What improvements would you like to see?",
+      type: 'multi-choice',
+      options: ['Better UI/UX', 'More Analytics', 'Social Features', 'Mobile App', 'Export Options', 'Custom Goals'],
+      icon: 'improvement'
+    },
+    {
+      id: 5,
+      question: "Any additional comments or suggestions?",
+      type: 'text',
+      placeholder: "Share your thoughts, suggestions, or report any issues...",
+      charLimit: 500,
+      icon: 'message'
+    }
+  ];
 
   const [toast, setToast] = useState<{
     message: string;
@@ -240,6 +287,35 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Feedback handlers
+  const handleFeedbackResponse = (questionId: number, answer: string | string[]) => {
+    setFeedbackResponses(prev => {
+      const filtered = prev.filter(r => r.questionId !== questionId);
+      return [...filtered, { questionId, answer }];
+    });
+  };
+
+  const handleFeedbackNext = () => {
+    if (feedbackStep < FEEDBACK_QUESTIONS.length - 1) {
+      setFeedbackStep(prev => prev + 1);
+    } else {
+      setFeedbackCompleted(true);
+      setToast({ message: "Thank you for your feedback!", type: "success" });
+    }
+  };
+
+  const handleFeedbackBack = () => {
+    if (feedbackStep > 0) {
+      setFeedbackStep(prev => prev - 1);
+    }
+  };
+
+  const handleFeedbackRestart = () => {
+    setFeedbackResponses([]);
+    setFeedbackStep(0);
+    setFeedbackCompleted(false);
+  };
+
   if (loading || !profileState || !goalState) {
     return <SettingsSkeleton />;
   }
@@ -280,6 +356,7 @@ const Settings: React.FC = () => {
           <TabButton tab="profile" label="Profile" icon={User} />
           <TabButton tab="goals" label="Goals" icon={Target} />
           <TabButton tab="backup" label="Backup" icon={Database} />
+          <TabButton tab="feedback" label="Feedback" icon={MessageSquare} />
           <TabButton tab="info" label="Info" icon={Info} />
         </div>
       </div>
@@ -577,6 +654,28 @@ const Settings: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+        {activeTab === "feedback" && (
+          <div className="animate-fade-in">
+            {!feedbackCompleted ? (
+              <FeedbackStep
+                question={FEEDBACK_QUESTIONS[feedbackStep]}
+                stepNumber={feedbackStep + 1}
+                totalSteps={FEEDBACK_QUESTIONS.length}
+                currentResponse={feedbackResponses.find(r => r.questionId === FEEDBACK_QUESTIONS[feedbackStep].id)}
+                onResponse={handleFeedbackResponse}
+                onNext={handleFeedbackNext}
+                onBack={handleFeedbackBack}
+                onSkip={handleFeedbackNext}
+              />
+            ) : (
+              <FeedbackSummary 
+                questions={FEEDBACK_QUESTIONS} 
+                responses={feedbackResponses} 
+                onRestart={handleFeedbackRestart} 
+              />
+            )}
           </div>
         )}
         {activeTab === "info" && (
