@@ -300,6 +300,12 @@ const Settings: React.FC = () => {
       setFeedbackStep(prev => prev + 1);
     } else {
       setFeedbackCompleted(true);
+      
+      // Send to Telegram with user info
+      import('../services/telegramService').then(({ sendFeedbackToTelegram }) => {
+        sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
+      });
+      
       setToast({ message: "Thank you for your feedback!", type: "success" });
     }
   };
