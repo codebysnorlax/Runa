@@ -90,7 +90,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
 
   const handleOptionClick = (option: string) => {
     setTappedOption(option);
-    
+
     if (question.type === 'single-choice') {
       setSelectedOptions([option]);
       onResponse(question.id, option);
@@ -98,16 +98,16 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
       const newSelection = selectedOptions.includes(option)
         ? selectedOptions.filter(o => o !== option)
         : [...selectedOptions, option];
-      
+
       setSelectedOptions(newSelection);
       onResponse(question.id, newSelection);
     }
-    
+
     setTimeout(() => setTappedOption(null), 150);
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center bg-zinc-950 selection:bg-orange-500/30 selection:text-orange-200 lg:overflow-auto relative">
+    <div className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center bg-dark-bg selection:bg-orange-500/30 selection:text-orange-200 lg:overflow-auto relative">
       {/* Background soft glow for depth in dark mode */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full -z-10 pointer-events-none opacity-20">
         <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-orange-600/20 blur-[50px] sm:blur-[75px] lg:blur-[100px] rounded-full" />
@@ -228,7 +228,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
             </div>
           </main>
 
-          <footer className="py-4 sm:py-5 md:py-6 lg:py-3 flex-shrink-0 flex items-center justify-between bg-zinc-950/95 backdrop-blur-xl border-t border-zinc-800 z-20 sticky bottom-0">
+          <footer className="py-4 sm:py-5 md:py-6 lg:py-3 flex-shrink-0 flex items-center justify-between bg-dark-bg/95 backdrop-blur-xl border-t border-zinc-800 z-20 sticky bottom-0">
             <button
               onClick={onBack}
               disabled={stepNumber === 1}
@@ -251,7 +251,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
                   : 'bg-orange-500 text-white shadow-lg hover:bg-orange-400 hover:shadow-xl'
               }`}
             >
-              {stepNumber === totalSteps ? 'Submit Feedback' : 'Continue'}
+              {stepNumber === totalSteps ? 'Submit' : 'Continue'}
               <svg className="w-5 h-5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>
@@ -266,13 +266,13 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
         }
 
         @keyframes staggerPop {
-          0% { 
-            opacity: 0; 
-            transform: translateY(10px) scale(0.99); 
+          0% {
+            opacity: 0;
+            transform: translateY(10px) scale(0.99);
           }
-          100% { 
-            opacity: 1; 
-            transform: translateY(0) scale(1); 
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
           }
         }
 

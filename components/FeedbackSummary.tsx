@@ -44,7 +44,7 @@ const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
   onRestart
 }) => {
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center bg-zinc-950 selection:bg-orange-500/30 selection:text-orange-200 lg:overflow-auto relative">
+    <div className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center bg-dark-bg selection:bg-orange-500/30 selection:text-orange-200 lg:overflow-auto relative">
       {/* Background soft glow for depth in dark mode */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full -z-10 pointer-events-none opacity-20">
         <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-orange-600/20 blur-[50px] sm:blur-[75px] lg:blur-[100px] rounded-full" />
@@ -89,7 +89,7 @@ const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
                   >
                     {/* Column 1: Sidebar */}
                     <div className="relative flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 lg:w-8 lg:h-8 xl:w-10 xl:h-10 flex items-center justify-center">
-                       <div className="absolute inset-0 bg-zinc-950 rounded-lg sm:rounded-xl lg:rounded-lg border border-zinc-800 shadow-lg sm:shadow-xl group-hover:border-orange-500/50 transition-colors duration-500" />
+                       <div className="absolute inset-0 bg-dark-bg rounded-lg sm:rounded-xl lg:rounded-lg border border-zinc-800 shadow-lg sm:shadow-xl group-hover:border-orange-500/50 transition-colors duration-500" />
                        <div className="relative w-4 h-4 sm:w-5 sm:h-5 lg:w-3 lg:h-3 xl:w-4 xl:h-4 text-orange-500 group-hover:scale-110 transition-transform duration-500">
                           {SummaryIcons[q.icon || 'message']}
                        </div>
@@ -113,15 +113,15 @@ const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
             </div>
           </div>
 
-          <footer className="py-4 sm:py-6 flex-shrink-0 border-t border-zinc-800 flex flex-col items-center gap-4 bg-zinc-950/95 backdrop-blur-md stagger-item z-30 sticky bottom-0">
+          <footer className="py-4 sm:py-6 flex-shrink-0 border-t border-zinc-800 flex flex-col items-center gap-4 bg-dark-bg/95 backdrop-blur-md stagger-item z-30 sticky bottom-0">
             <button
               onClick={onRestart}
-              className="w-full max-w-sm py-4 rounded-xl bg-orange-500 text-white text-base sm:text-lg font-bold hover:bg-orange-400 shadow-lg hover:shadow-xl transition-all active:scale-95 transform flex items-center justify-center gap-3"
+              className="px-6 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-400 transition-all active:scale-95 transform flex items-center gap-2"
             >
-              <span>Submit Another Feedback</span>
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
+              <span>Submit Another</span>
             </button>
             <p className="text-zinc-700 font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-[7px] sm:text-[8px] lg:text-[9px] xl:text-[10px]">
               Powered by Runa Fitness
