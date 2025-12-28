@@ -26,6 +26,7 @@ interface FeedbackStepProps {
   onNext: () => void;
   onBack: () => void;
   onSkip: () => void;
+  cooldownTimer?: number;
 }
 
 const Icons: Record<string, React.ReactNode> = {
@@ -67,7 +68,8 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
   onResponse,
   onNext,
   onBack,
-  onSkip
+  onSkip,
+  cooldownTimer = 0
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [localText, setLocalText] = useState('');
@@ -136,9 +138,14 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
               <div className="flex justify-end">
                 <button
                   onClick={onSkip}
-                  className="text-zinc-500 font-black text-[8px] sm:text-[9px] md:text-[9px] lg:text-[8px] hover:text-orange-400 px-2 sm:px-3 py-1 sm:py-1.5 hover:bg-zinc-900 rounded-md sm:rounded-lg transition-all uppercase tracking-widest"
+                  disabled={cooldownTimer > 0}
+                  className={`font-black text-[8px] sm:text-[9px] md:text-[9px] lg:text-[8px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg transition-all uppercase tracking-widest ${
+                    cooldownTimer > 0 
+                      ? 'text-zinc-700 cursor-not-allowed' 
+                      : 'text-zinc-500 hover:text-orange-400 hover:bg-zinc-900'
+                  }`}
                 >
-                  Skip
+                  {cooldownTimer > 0 ? `${cooldownTimer}s` : 'Skip'}
                 </button>
               </div>
             </div>
@@ -244,14 +251,15 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
 
             <button
               onClick={onNext}
-              disabled={!currentResponse?.answer}
+              disabled={!currentResponse?.answer || cooldownTimer > 0}
               className={`flex items-center gap-2 font-bold text-sm sm:text-base md:text-lg lg:text-sm px-8 sm:px-10 md:px-12 lg:px-6 py-3 sm:py-4 lg:py-2 rounded-xl transition-all transform active:scale-95 ${
-                !currentResponse?.answer
+                !currentResponse?.answer || cooldownTimer > 0
                   ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                   : 'bg-orange-500 text-white shadow-lg hover:bg-orange-400 hover:shadow-xl'
               }`}
             >
-              {stepNumber === totalSteps ? 'Submit' : 'Continue'}
+              {cooldownTimer > 0 ? `Wait ${cooldownTimer}s` : 
+               stepNumber === totalSteps ? 'Submit Feedback' : 'Continue'}
               <svg className="w-5 h-5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>

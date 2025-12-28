@@ -77,6 +77,7 @@ const Settings: React.FC = () => {
   const [feedbackStep, setFeedbackStep] = useState(0);
   const [feedbackResponses, setFeedbackResponses] = useState<UserResponse[]>([]);
   const [feedbackCompleted, setFeedbackCompleted] = useState(false);
+  const [cooldownTimer, setCooldownTimer] = useState(0);
 
   const FEEDBACK_QUESTIONS: FeedbackQuestion[] = [
     {
@@ -133,6 +134,23 @@ const Settings: React.FC = () => {
       });
     }
   }, [profile, goals]);
+
+  // Timer for rate limiting - updates every second
+  useEffect(() => {
+    // Initial check
+    import('../services/telegramService').then(({ getRemainingCooldown }) => {
+      setCooldownTimer(getRemainingCooldown());
+    });
+
+    // Update every second
+    const interval = setInterval(async () => {
+      const { getRemainingCooldown } = await import('../services/telegramService');
+      const remaining = getRemainingCooldown();
+      setCooldownTimer(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profileState) {
@@ -299,22 +317,29 @@ const Settings: React.FC = () => {
     if (feedbackStep < FEEDBACK_QUESTIONS.length - 1) {
       setFeedbackStep(prev => prev + 1);
     } else {
+      // Check cooldown before attempting to send
+      const { canSendFeedback } = await import('../services/telegramService');
+      if (!canSendFeedback()) {
+        setToast({ message: "Please wait before sending another feedback", type: "error" });
+        return;
+      }
+
       setFeedbackCompleted(true);
       
       // Send to Telegram with user info
       try {
         console.log('Sending feedback to Telegram...', { user, responses: feedbackResponses });
         const { sendFeedbackToTelegram } = await import('../services/telegramService');
-        const success = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
+        const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
         
-        if (success) {
-          setToast({ message: "Feedback sent successfully!", type: "success" });
+        if (result.success) {
+          setToast({ message: result.message, type: "success" });
         } else {
-          setToast({ message: "Feedback saved but failed to send notification", type: "error" });
+          setToast({ message: result.message, type: "error" });
         }
       } catch (error) {
         console.error('Error sending feedback:', error);
-        setToast({ message: "Feedback saved but failed to send notification", type: "error" });
+        setToast({ message: "Failed to send feedback. Please try again.", type: "error" });
       }
     }
   };
@@ -683,6 +708,7 @@ const Settings: React.FC = () => {
                 onNext={handleFeedbackNext}
                 onBack={handleFeedbackBack}
                 onSkip={handleFeedbackNext}
+                cooldownTimer={cooldownTimer}
               />
             ) : (
               <FeedbackSummary 

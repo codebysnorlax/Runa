@@ -1,11 +1,58 @@
-const TELEGRAM_BOT_TOKEN = '8274682428:AAEfuyx2Dz_zVnHThmjMh4X3gkOqSfgMYhg';
-const TELEGRAM_CHAT_ID = '5442726683';
+const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID;
+
+// Rate limiting - 2 minutes
+const RATE_LIMIT_MS = 2 * 60 * 1000; // 2 minutes
+const STORAGE_KEY = 'runa_feedback_last_sent';
+
+// Get last sent timestamp from localStorage
+const getLastSentTime = (): number => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? parseInt(stored, 10) : 0;
+  } catch {
+    return 0;
+  }
+};
+
+// Save last sent timestamp to localStorage
+const setLastSentTime = (timestamp: number): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, timestamp.toString());
+  } catch (error) {
+    console.error('Failed to save cooldown time:', error);
+  }
+};
+
+// Get remaining cooldown time in seconds
+export const getRemainingCooldown = (): number => {
+  const now = Date.now();
+  const lastSent = getLastSentTime();
+  
+  if (lastSent === 0) return 0;
+  
+  const elapsed = now - lastSent;
+  const remaining = RATE_LIMIT_MS - elapsed;
+  
+  return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
+};
+
+// Check if user can send feedback
+export const canSendFeedback = (): boolean => {
+  return getRemainingCooldown() === 0;
+};
 
 export const sendFeedbackToTelegram = async (questions: any[], responses: any[], user: any) => {
   try {
-    console.log('Starting Telegram send...', { responses, user });
+    // Check rate limit
+    const remainingCooldown = getRemainingCooldown();
+    if (remainingCooldown > 0) {
+      throw new Error(`Please wait ${remainingCooldown} seconds before sending another feedback`);
+    }
 
-    const now = new Date();
+    console.log('Starting Telegram send...', { responses, user });
+    
+    const currentTime = new Date();
     const rating = responses.find(r => r.questionId === 1)?.answer || 'Not provided';
     const features = responses.find(r => r.questionId === 2)?.answer || [];
     const ease = responses.find(r => r.questionId === 3)?.answer || 'Not provided';
@@ -41,45 +88,48 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
     else if (userAgent.includes('Safari')) browser = 'Safari';
     else if (userAgent.includes('Edge')) browser = 'Edge';
 
-    const message = `RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
-> USER INFORMATION
+    const feedbackBlock = `🌟 Overall Experience: ${rating}
+⚡ Most Used Features: ${Array.isArray(features) && features.length > 0 ? features.join(', ') : 'None selected'}
+🎯 Navigation Ease: ${ease}
+🚀 Desired Improvements: ${Array.isArray(improvements) && improvements.length > 0 ? improvements.join(', ') : 'None selected'}`;
+
+    const message = `🏃‍♂️ 💬 NEW RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
+
+👤 USER INFORMATION
 • Name: ${user.firstName || 'Anonymous'} ${user.lastName || ''}
 • Email: ${user.primaryEmailAddress?.emailAddress || 'Not provided'}
 • User ID: ${user.id}
 
-> DATE & TIME
-• Date: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-• Time: ${now.toLocaleTimeString('en-US', { hour12: true, timeZone: 'Asia/Calcutta' })} GMT+5:30
+📅 DATE & TIME
+• Date: ${currentTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+• Time: ${currentTime.toLocaleTimeString('en-US', { hour12: true, timeZone: 'Asia/Calcutta' })} GMT+5:30
 • Timezone: Asia/Calcutta
 
-> LOCATION & NETWORK
+🌍 LOCATION & NETWORK
 • IP Address: ${ipAddress}
 • Country: India
 • Language: ${language}
 
-> DEVICE INFORMATION
+💻 DEVICE INFORMATION
 • OS: ${os}
 • Browser: ${browser}
 • Platform: ${platform}
 • Screen: ${screenRes}
 
-> RUNA FEEDBACK RESPONSES
-🌟 Overall Experience: ${rating}
-⚡ Most Used Features: ${Array.isArray(features) && features.length > 0 ? features.join(', ') : 'None selected'}
-🎯 Navigation Ease: ${ease}
-🚀 Desired Improvements: ${Array.isArray(improvements) && improvements.length > 0 ? improvements.join(', ') : 'None selected'}
+📊 RUNA FEEDBACK RESPONSES
+\`\`\`
+${feedbackBlock}
+\`\`\`
 
-> MESSAGE CONTENT
+💬 MESSAGE CONTENT
+${comments && comments.trim() !== '' ? comments : 'No additional comments provided'}
 
-${comments && comments.trim() !== '' ? comments : 'SKIPED'}
-
-
-Received at: ${now.toISOString()}`;
+⏰ Received at: ${currentTime.toISOString()}`;
 
     console.log('Sending message to Telegram...');
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -93,13 +143,19 @@ Received at: ${now.toISOString()}`;
     console.log('Telegram response:', result);
 
     if (!response.ok) {
-      console.error('Telegram API error:', result);
-      return false;
+      throw new Error(result.description || `HTTP ${response.status}: Failed to send message`);
     }
 
-    return true;
+    // Save timestamp ONLY on successful send
+    setLastSentTime(Date.now());
+    
+    return { success: true, message: 'Feedback sent successfully!' };
+
   } catch (error) {
     console.error('Failed to send to Telegram:', error);
-    return false;
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Failed to send feedback. Please try again.' 
+    };
   }
 };
