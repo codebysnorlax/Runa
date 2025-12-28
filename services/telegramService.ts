@@ -4,7 +4,7 @@ const TELEGRAM_CHAT_ID = '5442726683';
 export const sendFeedbackToTelegram = async (questions: any[], responses: any[], user: any) => {
   try {
     console.log('Starting Telegram send...', { responses, user });
-    
+
     const now = new Date();
     const rating = responses.find(r => r.questionId === 1)?.answer || 'Not provided';
     const features = responses.find(r => r.questionId === 2)?.answer || [];
@@ -41,46 +41,45 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
     else if (userAgent.includes('Safari')) browser = 'Safari';
     else if (userAgent.includes('Edge')) browser = 'Edge';
 
-    const message = `🏃‍♂️ 💬 NEW RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
-
-👤 USER INFORMATION
+    const message = `RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
+> USER INFORMATION
 • Name: ${user.firstName || 'Anonymous'} ${user.lastName || ''}
 • Email: ${user.primaryEmailAddress?.emailAddress || 'Not provided'}
 • User ID: ${user.id}
 
-📅 DATE & TIME
+> DATE & TIME
 • Date: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 • Time: ${now.toLocaleTimeString('en-US', { hour12: true, timeZone: 'Asia/Calcutta' })} GMT+5:30
 • Timezone: Asia/Calcutta
 
-🌍 LOCATION & NETWORK
+> LOCATION & NETWORK
 • IP Address: ${ipAddress}
 • Country: India
 • Language: ${language}
 
-💻 DEVICE INFORMATION
+> DEVICE INFORMATION
 • OS: ${os}
 • Browser: ${browser}
 • Platform: ${platform}
 • Screen: ${screenRes}
 
-📊 RUNA FEEDBACK RESPONSES
-\`\`\`
+> RUNA FEEDBACK RESPONSES
 🌟 Overall Experience: ${rating}
 ⚡ Most Used Features: ${Array.isArray(features) && features.length > 0 ? features.join(', ') : 'None selected'}
 🎯 Navigation Ease: ${ease}
 🚀 Desired Improvements: ${Array.isArray(improvements) && improvements.length > 0 ? improvements.join(', ') : 'None selected'}
-\`\`\`
 
-💬 MESSAGE CONTENT
-${comments && comments.trim() !== '' ? comments : 'No additional comments provided'}
+> MESSAGE CONTENT
 
-⏰ Received at: ${now.toISOString()}`;
+${comments && comments.trim() !== '' ? comments : 'SKIPED'}
+
+
+Received at: ${now.toISOString()}`;
 
     console.log('Sending message to Telegram...');
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

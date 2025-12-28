@@ -50,7 +50,8 @@ const App: React.FC = () => {
   return (
     <AppContextProvider>
       <Router>
-        <Snowfall snowflakeCount={100} style={{ position: 'fixed', width: '100vw', height: '100vh', zIndex: 9999, pointerEvents: 'none' }} />
+        {/* Snowfall off */}
+        {/* <Snowfall snowflakeCount={100} style={{ position: 'fixed', width: '100vw', height: '100vh', zIndex: 9999, pointerEvents: 'none' }} /> */}
         <AppContent />
       </Router>
     </AppContextProvider>
@@ -77,8 +78,8 @@ const AppContent: React.FC = () => {
             </SignedIn>
           </>
         } />
-        <Route 
-          path="/*" 
+        <Route
+          path="/*"
           element={
             <>
               <SignedOut>
@@ -100,7 +101,7 @@ const AppContent: React.FC = () => {
                 </Layout>
               </SignedIn>
             </>
-          } 
+          }
         />
       </Routes>
     </Suspense>
