@@ -317,6 +317,12 @@ const Settings: React.FC = () => {
     if (feedbackStep < FEEDBACK_QUESTIONS.length - 1) {
       setFeedbackStep(prev => prev + 1);
     } else {
+      // Check if at least one question is answered
+      if (feedbackResponses.length === 0) {
+        setToast({ message: "Please answer at least one question before submitting", type: "error" });
+        return;
+      }
+
       // Check cooldown before attempting to send
       const { canSendFeedback } = await import('../services/telegramService');
       if (!canSendFeedback()) {

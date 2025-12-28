@@ -251,9 +251,9 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
 
             <button
               onClick={onNext}
-              disabled={!currentResponse?.answer || cooldownTimer > 0}
+              disabled={!currentResponse?.answer || cooldownTimer > 0 || (stepNumber === totalSteps && allResponses.length === 0)}
               className={`flex items-center gap-2 font-bold text-sm sm:text-base md:text-lg lg:text-sm px-8 sm:px-10 md:px-12 lg:px-6 py-3 sm:py-4 lg:py-2 rounded-xl transition-all transform active:scale-95 ${
-                !currentResponse?.answer || cooldownTimer > 0
+                !currentResponse?.answer || cooldownTimer > 0 || (stepNumber === totalSteps && allResponses.length === 0)
                   ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                   : 'bg-orange-500 text-white shadow-lg hover:bg-orange-400 hover:shadow-xl'
               }`}
