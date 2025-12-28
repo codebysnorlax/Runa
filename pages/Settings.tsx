@@ -295,18 +295,27 @@ const Settings: React.FC = () => {
     });
   };
 
-  const handleFeedbackNext = () => {
+  const handleFeedbackNext = async () => {
     if (feedbackStep < FEEDBACK_QUESTIONS.length - 1) {
       setFeedbackStep(prev => prev + 1);
     } else {
       setFeedbackCompleted(true);
       
       // Send to Telegram with user info
-      import('../services/telegramService').then(({ sendFeedbackToTelegram }) => {
-        sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
-      });
-      
-      setToast({ message: "Thank you for your feedback!", type: "success" });
+      try {
+        console.log('Sending feedback to Telegram...', { user, responses: feedbackResponses });
+        const { sendFeedbackToTelegram } = await import('../services/telegramService');
+        const success = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
+        
+        if (success) {
+          setToast({ message: "Feedback sent successfully!", type: "success" });
+        } else {
+          setToast({ message: "Feedback saved but failed to send notification", type: "error" });
+        }
+      } catch (error) {
+        console.error('Error sending feedback:', error);
+        setToast({ message: "Feedback saved but failed to send notification", type: "error" });
+      }
     }
   };
 

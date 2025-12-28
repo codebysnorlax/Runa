@@ -3,6 +3,8 @@ const TELEGRAM_CHAT_ID = '5442726683';
 
 export const sendFeedbackToTelegram = async (questions: any[], responses: any[], user: any) => {
   try {
+    console.log('Starting Telegram send...', { responses, user });
+    
     const now = new Date();
     const rating = responses.find(r => r.questionId === 1)?.answer || 'Not provided';
     const features = responses.find(r => r.questionId === 2)?.answer || [];
@@ -24,7 +26,7 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
     const language = navigator.language;
-    const screenRes = `${screen.width}x${screen.height}`;
+    const screenRes = `${window.screen.width}x${window.screen.height}`;
 
     let os = 'Unknown';
     if (userAgent.includes('Windows')) os = 'Windows';
@@ -39,44 +41,47 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
     else if (userAgent.includes('Safari')) browser = 'Safari';
     else if (userAgent.includes('Edge')) browser = 'Edge';
 
-    const message = `RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
+    const message = `🏃‍♂️ 💬 NEW RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
 
-          👤 USER INFORMATION
-          • Name: ${user.firstName || 'Anonymous'} ${user.lastName || ''}
-          • Email: ${user.primaryEmailAddress?.emailAddress || 'Not provided'}
-          • User ID: ${user.id}
+👤 USER INFORMATION
+• Name: ${user.firstName || 'Anonymous'} ${user.lastName || ''}
+• Email: ${user.primaryEmailAddress?.emailAddress || 'Not provided'}
+• User ID: ${user.id}
 
-          📅 DATE & TIME
-          • Date: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          • Time: ${now.toLocaleTimeString('en-US', { hour12: true, timeZone: 'Asia/Calcutta' })} GMT+5:30
-          • Timezone: Asia/Calcutta
+📅 DATE & TIME
+• Date: ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+• Time: ${now.toLocaleTimeString('en-US', { hour12: true, timeZone: 'Asia/Calcutta' })} GMT+5:30
+• Timezone: Asia/Calcutta
 
-          🌍 LOCATION & NETWORK
-          • IP Address: ${ipAddress}
-          • Country: India
-          • Language: ${language}
+🌍 LOCATION & NETWORK
+• IP Address: ${ipAddress}
+• Country: India
+• Language: ${language}
 
-          💻 DEVICE INFORMATION
-          • OS: ${os}
-          • Browser: ${browser}
-          • Platform: ${platform}
-          • Screen: ${screenRes}
+💻 DEVICE INFORMATION
+• OS: ${os}
+• Browser: ${browser}
+• Platform: ${platform}
+• Screen: ${screenRes}
 
-          📊 RUNA FEEDBACK RESPONSES
-          • Overall Experience: ${rating}
-          • Most Used Features: ${Array.isArray(features) ? features.join(', ') : features}
-          • Navigation Ease: ${ease}
-          • Desired Improvements: ${Array.isArray(improvements) ? improvements.join(', ') : improvements}
+📊 RUNA FEEDBACK RESPONSES
+\`\`\`
+🌟 Overall Experience: ${rating}
+⚡ Most Used Features: ${Array.isArray(features) && features.length > 0 ? features.join(', ') : 'None selected'}
+🎯 Navigation Ease: ${ease}
+🚀 Desired Improvements: ${Array.isArray(improvements) && improvements.length > 0 ? improvements.join(', ') : 'None selected'}
+\`\`\`
 
-          💬 MESSAGE CONTENT
-          ${comments}
+💬 MESSAGE CONTENT
+${comments && comments.trim() !== '' ? comments : 'No additional comments provided'}
 
-⏰ Received at: ${now.toISOString()}
-`;
+⏰ Received at: ${now.toISOString()}`;
+
+    console.log('Sending message to Telegram...');
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-    await fetch(url, {
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -84,6 +89,14 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
         text: message
       })
     });
+
+    const result = await response.json();
+    console.log('Telegram response:', result);
+
+    if (!response.ok) {
+      console.error('Telegram API error:', result);
+      return false;
+    }
 
     return true;
   } catch (error) {
