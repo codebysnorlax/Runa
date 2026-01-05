@@ -336,13 +336,13 @@ const Settings: React.FC = () => {
         setToast({ message: "Please wait before sending another feedback", type: "error" });
         return;
       }
-      
+
       // Send to Telegram with user info
       try {
         console.log('Sending feedback to Telegram...', { user, responses: feedbackResponses });
         const { sendFeedbackToTelegram } = await import('../services/telegramService');
         const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
-        
+
         if (result.success) {
           setFeedbackCompleted(true);
           setToast({ message: result.message, type: "success" });
@@ -723,10 +723,10 @@ const Settings: React.FC = () => {
                 cooldownTimer={cooldownTimer}
               />
             ) : (
-              <FeedbackSummary 
-                questions={FEEDBACK_QUESTIONS} 
-                responses={feedbackResponses} 
-                onRestart={handleFeedbackRestart} 
+              <FeedbackSummary
+                questions={FEEDBACK_QUESTIONS}
+                responses={feedbackResponses}
+                onRestart={handleFeedbackRestart}
               />
             )}
           </div>
@@ -816,7 +816,7 @@ const Settings: React.FC = () => {
                       <span className="text-xs sm:text-sm">Twitter</span>
                     </a>
                     <a
-                      href="https://linkedin.com/in/ravi-ranjan-9b338b333"
+                      href="https://linkedin.com/in/codebysnorlax"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"

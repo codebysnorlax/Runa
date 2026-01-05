@@ -28,12 +28,12 @@ const setLastSentTime = (timestamp: number): void => {
 export const getRemainingCooldown = (): number => {
   const now = Date.now();
   const lastSent = getLastSentTime();
-  
+
   if (lastSent === 0) return 0;
-  
+
   const elapsed = now - lastSent;
   const remaining = RATE_LIMIT_MS - elapsed;
-  
+
   return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
 };
 
@@ -51,7 +51,7 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
     }
 
     console.log('Starting Telegram send...', { responses, user });
-    
+
     const currentTime = new Date();
     const rating = responses.find(r => r.questionId === 1)?.answer || 'Not provided';
     const features = responses.find(r => r.questionId === 2)?.answer || [];
@@ -92,8 +92,8 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
 ⚡ Most Used Features: ${Array.isArray(features) && features.length > 0 ? features.join(', ') : 'None selected'}
 🎯 Navigation Ease: ${ease}
 🚀 Desired Improvements: ${Array.isArray(improvements) && improvements.length > 0 ? improvements.join(', ') : 'None selected'}`;
-
-    const message = `🏃‍♂️ 💬 NEW RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
+/* */
+const message = `RUNA FEEDBACK FROM: ${user.firstName || 'Anonymous'}
 
 👤 USER INFORMATION
 • Name: ${user.firstName || 'Anonymous'} ${user.lastName || ''}
@@ -117,9 +117,8 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
 • Screen: ${screenRes}
 
 📊 RUNA FEEDBACK RESPONSES
-\`\`\`
+
 ${feedbackBlock}
-\`\`\`
 
 💬 MESSAGE CONTENT
 ${comments && comments.trim() !== '' ? comments : 'No additional comments provided'}
@@ -129,7 +128,7 @@ ${comments && comments.trim() !== '' ? comments : 'No additional comments provid
     console.log('Sending message to Telegram...');
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -148,14 +147,14 @@ ${comments && comments.trim() !== '' ? comments : 'No additional comments provid
 
     // Save timestamp ONLY on successful send
     setLastSentTime(Date.now());
-    
+
     return { success: true, message: 'Feedback sent successfully!' };
 
   } catch (error) {
     console.error('Failed to send to Telegram:', error);
-    return { 
-      success: false, 
-      message: error instanceof Error ? error.message : 'Failed to send feedback. Please try again.' 
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to send feedback. Please try again.'
     };
   }
 };

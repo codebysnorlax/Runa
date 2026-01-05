@@ -1,11 +1,9 @@
 <div align="center">
-<<<<<<< HEAD
-<img width="1200" height="475" alt="GHBanner" src="images/analytics.png" />
-=======
-<img width="1200" height="475" alt="GHBanner" src="assets/analytics.png" />
->>>>>>> main
+
+<img width="1200" height="475" alt="GHBanner" src="public/images/analytics.png" />
+
 </div>
-> more screenshots at assets/ folder
+> more screenshots at public/images/ folder
 
 # AI Fitness Tracker
 
@@ -13,27 +11,27 @@ A modern, AI-powered fitness tracker designed to monitor your running progress, 
 
 ## Features
 
-### 🏃‍♂️ Core Functionality
+### Core Functionality
 - **Run Tracking**: Log runs with distance, time, pace, and personal notes
 - **Goal Setting**: Set weekly distance targets and running frequency goals
 - **Performance Analytics**: View detailed charts and trends of your progress
 - **AI Insights**: Get intelligent recommendations for improvement
 - **Progress Dashboard**: Overview of recent activities and achievements
 
-### 📊 Analytics & Visualization
+### Analytics & Visualization
 - **Pace Trends**: Track your running pace over time (MM:SS format)
 - **Speed Analysis**: Monitor average and maximum speed improvements
 - **Distance Tracking**: Weekly and monthly distance summaries
 - **Activity Heatmap**: Visual representation of running frequency
 - **Performance Charts**: Interactive graphs with detailed tooltips
 
-### 🔒 Data Management
+### Data Management
 - **Local Storage**: All data stored securely in your browser
 - **Backup & Restore**: Export/import data as JSON files
 - **Data Privacy**: No external servers, complete privacy
 - **Multi-user Support**: Username-based data separation
 
-### 🎨 User Experience
+### User Experience
 - **Responsive Design**: Works on desktop and mobile devices
 - **Dark Theme**: Easy on the eyes with modern UI
 - **Password Protection**: Secure access with environment-based authentication
@@ -139,7 +137,7 @@ Tech enthusiast who loves building innovative projects and crafting problem-solv
 - **Portfolio**: [snorlax-ai.netlify.app](https://snorlax-ai.netlify.app)
 - **Instagram**: [@nr_snorlax](https://instagram.com/nr_snorlax)
 - **Twitter**: [@codebysnorlax](https://twitter.com/codebysnorlax)
-- **LinkedIn**: [ravi-ranjan-9b338b333](https://linkedin.com/in/ravi-ranjan-9b338b333)
+- **LinkedIn**: [ravi-ranjan-9b338b333](https://linkedin.com/in/codebysnorlax)
 
 ## License
 
@@ -151,7 +149,7 @@ This project is for personal use. All rights reserved.
 - Inspired by the need for privacy-focused fitness tracking
 - Designed for runners who value data ownership
 - Created with passion for clean, functional software
-
+- 70% vibe-coded, 30% snorlax-powered
 ---
 
 *Keep running, keep improving!*

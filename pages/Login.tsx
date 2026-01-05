@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
-import dashboardImg from "../assets/dashboard.png";
-import analyticsImg from "../assets/analytics.png";
-import analytics2Img from "../assets/analytics2.png";
-import historyImg from "../assets/history.png";
-import insightsImg from "../assets/insights.png";
-import goalImg from "../assets/goal.png";
-
 const images = [
-  dashboardImg,
-  analyticsImg,
-  analytics2Img,
-  historyImg,
-  insightsImg,
-  goalImg,
+  "/Runa/images/dashboard.png",
+  "/Runa/images/analytics.png",
+  "/Runa/images/analytics2.png",
+  "/Runa/images/history.png",
+  "/Runa/images/insights.png",
+  "/Runa/images/goal.png",
+  "/Runa/images/info.png",
+  "/Runa/images/backup.png",
 ];
 
 const Login: React.FC = () => {
@@ -253,7 +248,7 @@ const Login: React.FC = () => {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com/in/ravi-ranjan-9b338b333"
+                href="https://linkedin.com/in/codebysnorlax"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-brand-orange transition-colors"
