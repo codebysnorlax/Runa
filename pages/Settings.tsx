@@ -6,6 +6,8 @@ import { Goal, Profile, DistanceGoal } from "../types";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
 import Toast from "../components/Toast";
+import AudioHelp from "../components/AudioHelp";
+import { AudioProvider } from "../context/AudioContext";
 import {
   User,
   Target,
@@ -391,7 +393,8 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
+    <AudioProvider>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
       {toast && (
         <Toast
           message={toast.message}
@@ -669,40 +672,48 @@ const Settings: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-800 p-6 rounded-lg h-fit">
-                <h4 className="text-white font-medium mb-4">How it works:</h4>
+              <div className="space-y-6">
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <h4 className="text-white font-medium mb-4">How it works:</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-white font-medium">
+                          Download Backup
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          Creates a timestamped backup file with all your data
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-white font-medium">
+                          Create data.json
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          Creates a simple "data.json" file for easy sharing
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-white font-medium">Restore</div>
+                        <div className="text-gray-400 text-sm">
+                          Upload any backup file to restore your data
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">
-                        Download Backup
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        Creates a timestamped backup file with all your data
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">
-                        Create data.json
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        Creates a simple "data.json" file for easy sharing
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">Restore</div>
-                      <div className="text-gray-400 text-sm">
-                        Upload any backup file to restore your data
-                      </div>
-                    </div>
-                  </div>
+                  <h4 className="text-white font-medium">Audio Help:</h4>
+                  <AudioHelp audioType="male" />
+                  <AudioHelp audioType="female" />
                 </div>
               </div>
             </div>
@@ -929,6 +940,7 @@ const Settings: React.FC = () => {
         )}
       </div>
     </div>
+    </AudioProvider>
   );
 };
 
