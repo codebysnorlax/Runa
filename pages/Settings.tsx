@@ -638,7 +638,7 @@ const Settings: React.FC = () => {
                   from previous saves.
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-4 mb-6">
                   <button
                     onClick={handleDownloadBackup}
                     className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
@@ -672,6 +672,8 @@ const Settings: React.FC = () => {
                     </button>
                   </div>
                 </div>
+
+                <AudioHelp audioType="male" />
               </div>
 
               <div className="space-y-6">
@@ -712,11 +714,7 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h4 className="text-white font-medium">Audio Help:</h4>
-                  <AudioHelp audioType="male" />
-                  <AudioHelp audioType="female" />
-                </div>
+                <AudioHelp audioType="female" />
               </div>
             </div>
           </div>
