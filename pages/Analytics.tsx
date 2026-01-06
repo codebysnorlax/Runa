@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, memo, useCallback } from "react";
 import { useAppContext } from "../context/AppContext";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
@@ -255,33 +255,72 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
   );
 };
 
+const FilterModal = memo(({ onClose, onApply, onClear }: {
+  onClose: () => void;
+  onApply: (time: number | null, distance: number | null) => void;
+  onClear: () => void;
+}) => {
+  const [time, setTime] = useState<number | null>(null);
+  const [distance, setDistance] = useState("");
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-dark-card border border-dark-border rounded-lg p-6 w-80" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-white font-semibold">Filter Charts</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={20} /></button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-gray-400 text-sm block mb-2">Time Period</label>
+            <div className="flex gap-2 flex-wrap">
+              {[7, 15, 30].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setTime(time === v ? null : v)}
+                  className={`px-3 py-1 rounded text-sm ${time === v ? "bg-brand-orange text-white" : "bg-gray-700 text-gray-300"}`}
+                >
+                  {v} days
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-400 text-sm block mb-2">Min Distance (meters)</label>
+            <input
+              type="text"
+              value={distance}
+              onChange={(e) => setDistance(e.target.value.replace(/\D/g, ""))}
+              placeholder="e.g. 1600"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+            />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button onClick={() => { onClear(); onClose(); }} className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm">Clear</button>
+            <button onClick={() => onApply(time, distance ? parseInt(distance) : null)} className="flex-1 px-3 py-2 bg-brand-orange hover:bg-orange-600 rounded text-white text-sm">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const Analytics: React.FC = () => {
   const { runs, goals, loading } = useAppContext();
   const [showFilter, setShowFilter] = useState(false);
-  const [timePeriod, setTimePeriod] = useState<number | null>(null);
-  const [distanceFilter, setDistanceFilter] = useState("");
+  const [appliedTime, setAppliedTime] = useState<number | null>(null);
+  const [appliedDistance, setAppliedDistance] = useState<number | null>(null);
 
-  const filteredRuns = useMemo(() => {
-    let filtered = [...runs];
-    if (timePeriod) {
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - timePeriod);
-      filtered = filtered.filter((run) => new Date(run.date) >= cutoff);
-    }
-    if (distanceFilter) {
-      const meters = parseInt(distanceFilter);
-      if (!isNaN(meters)) {
-        filtered = filtered.filter((run) => run.distance_m >= meters);
-      }
-    }
-    return filtered;
-  }, [runs, timePeriod, distanceFilter]);
+  const handleApply = useCallback((time: number | null, dist: number | null) => {
+    setAppliedTime(time);
+    setAppliedDistance(dist);
+    setShowFilter(false);
+  }, []);
 
-  const applyFilter = () => setShowFilter(false);
-  const clearFilter = () => {
-    setTimePeriod(null);
-    setDistanceFilter("");
-  };
+  const handleClear = useCallback(() => {
+    setAppliedTime(null);
+    setAppliedDistance(null);
+  }, []);
 
   const chartData = useMemo(() => {
     return runs
@@ -295,19 +334,24 @@ const Analytics: React.FC = () => {
         pace:
           run.distance_m > 0
             ? run.total_time_sec / 60 / (run.distance_m / 1000)
-            : 0, // min/km
+            : 0,
         speed: run.avg_speed_kmh,
         distance: run.distance_m / 1000,
-        time: run.total_time_sec / 60, // minutes
+        time: run.total_time_sec / 60,
       }));
   }, [runs]);
 
   const filteredChartData = useMemo(() => {
-    return filteredRuns
-      .map((run) => ({
-        ...run,
-        dateObj: new Date(run.date),
-      }))
+    let filtered = runs;
+    if (appliedTime) {
+      const cutoff = Date.now() - appliedTime * 86400000;
+      filtered = filtered.filter((run) => new Date(run.date).getTime() >= cutoff);
+    }
+    if (appliedDistance) {
+      filtered = filtered.filter((run) => run.distance_m >= appliedDistance);
+    }
+    return filtered
+      .map((run) => ({ ...run, dateObj: new Date(run.date) }))
       .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
       .map((run) => ({
         name: run.dateObj.toLocaleDateString("en-IN"),
@@ -316,7 +360,7 @@ const Analytics: React.FC = () => {
         distance: run.distance_m / 1000,
         time: run.total_time_sec / 60,
       }));
-  }, [filteredRuns]);
+  }, [runs, appliedTime, appliedDistance]);
 
   const weeklyDistanceData = useMemo(() => {
     const weeks: {
@@ -490,50 +534,11 @@ const Analytics: React.FC = () => {
         >
           <Filter size={16} />
           Filter
-          {(timePeriod || distanceFilter) && <span className="w-2 h-2 bg-brand-orange rounded-full" />}
+          {(appliedTime || appliedDistance) && <span className="w-2 h-2 bg-brand-orange rounded-full" />}
         </button>
       </div>
 
-      {showFilter && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowFilter(false)}>
-          <div className="bg-dark-card border border-dark-border rounded-lg p-6 w-80" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white font-semibold">Filter Charts</h3>
-              <button onClick={() => setShowFilter(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-gray-400 text-sm block mb-2">Time Period</label>
-                <div className="flex gap-2 flex-wrap">
-                  {[{ label: "7 days", value: 7 }, { label: "15 days", value: 15 }, { label: "30 days", value: 30 }].map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setTimePeriod(timePeriod === opt.value ? null : opt.value)}
-                      className={`px-3 py-1 rounded text-sm ${timePeriod === opt.value ? "bg-brand-orange text-white" : "bg-gray-700 text-gray-300"}`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="text-gray-400 text-sm block mb-2">Min Distance (meters)</label>
-                <input
-                  type="text"
-                  value={distanceFilter}
-                  onChange={(e) => setDistanceFilter(e.target.value.replace(/\D/g, ""))}
-                  placeholder="e.g. 1600"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button onClick={clearFilter} className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm">Clear</button>
-                <button onClick={applyFilter} className="flex-1 px-3 py-2 bg-brand-orange hover:bg-orange-600 rounded text-white text-sm">Apply</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {showFilter && <FilterModal onClose={() => setShowFilter(false)} onApply={handleApply} onClear={handleClear} />}
 
       <Heatmap runs={runs} />
 
@@ -586,7 +591,7 @@ const Analytics: React.FC = () => {
 
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart
-              data={filteredPerformanceData.slice(-14)}
+              data={(appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
               margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -638,7 +643,7 @@ const Analytics: React.FC = () => {
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart
-              data={filteredChartData.slice(-14)}
+              data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
               margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
