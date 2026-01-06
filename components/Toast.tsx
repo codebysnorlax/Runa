@@ -39,8 +39,15 @@ interface ToastProps {
 const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 5000);
+    
+    // Play error audio for error toasts
+    if (type === 'error') {
+      const audio = new Audio('/Runa/audio/error.wav');
+      audio.play().catch(() => {}); // Ignore audio play errors
+    }
+    
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, type]);
 
   const configs = {
     success: {

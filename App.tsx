@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Card from './components/Card';
 import Skeleton from './components/Skeleton';
 import Snowfall from 'react-snowfall';
+import { useLoginNotification } from './hooks/useLoginNotification';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -60,6 +61,9 @@ const App: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { loaded } = useClerk();
+  
+  // Initialize login notification hook
+  useLoginNotification();
 
   if (!loaded) {
     return <FullPageLoader />;
