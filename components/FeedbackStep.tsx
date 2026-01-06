@@ -145,8 +145,8 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
                   }}
                   disabled={cooldownTimer > 0}
                   className={`font-black text-[8px] sm:text-[9px] md:text-[9px] lg:text-[8px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg transition-all uppercase tracking-widest ${
-                    cooldownTimer > 0 
-                      ? 'text-zinc-700 cursor-not-allowed' 
+                    cooldownTimer > 0
+                      ? 'text-zinc-700 cursor-not-allowed'
                       : 'text-zinc-500 hover:text-orange-400 hover:bg-zinc-900'
                   }`}
                 >
@@ -269,8 +269,8 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
                   : 'bg-orange-500 text-white shadow-lg hover:bg-orange-400 hover:shadow-xl'
               }`}
             >
-              {cooldownTimer > 0 ? `Wait ${cooldownTimer}s` : 
-               stepNumber === totalSteps ? 'Submit Feedback' : 'Continue'}
+              {cooldownTimer > 0 ? `Wait ${cooldownTimer}s` :
+               stepNumber === totalSteps ? 'Submit' : 'Continue'}
               <svg className="w-5 h-5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>

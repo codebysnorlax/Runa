@@ -14,13 +14,12 @@ const mockUser = {
 };
 
 export const testLoginNotification = () => {
-  console.log('Testing login notification...');
   sendLoginNotification(mockUser)
     .then(result => {
-      console.log('Test notification result:', result);
+      // Test completed
     })
     .catch(error => {
-      console.error('Test notification failed:', error);
+      // Test failed
     });
 };
 

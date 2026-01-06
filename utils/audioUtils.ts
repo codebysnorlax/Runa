@@ -3,9 +3,9 @@ export const playClickSound = () => {
   try {
     const audio = new Audio('/Runa/audio/click.wav');
     audio.volume = 0.3; // Set volume to 30%
-    audio.play().catch(console.error);
+    audio.play().catch(() => {}); // Ignore errors
   } catch (error) {
-    console.error('Error playing click sound:', error);
+    // Silently handle error
   }
 };
 
@@ -13,8 +13,8 @@ export const playErrorSound = () => {
   try {
     const audio = new Audio('/Runa/audio/error.wav');
     audio.volume = 0.3;
-    audio.play().catch(console.error);
+    audio.play().catch(() => {}); // Ignore errors
   } catch (error) {
-    console.error('Error playing error sound:', error);
+    // Silently handle error
   }
 };

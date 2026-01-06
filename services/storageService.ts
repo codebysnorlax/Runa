@@ -142,8 +142,6 @@ export const downloadBackup = (username: string) => {
 export const importUserData = (jsonData: string, username: string): boolean => {
   try {
     const backupData = JSON.parse(jsonData);
-    console.log('Importing backup for user:', username);
-    console.log('Backup data:', backupData);
 
     if (!backupData.profile || !backupData.runs || !backupData.goals || !backupData.insights) {
       throw new Error('Invalid backup file format');

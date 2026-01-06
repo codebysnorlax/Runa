@@ -96,11 +96,9 @@ export const sendLoginNotification = async (user: any) => {
       throw new Error(`HTTP ${response.status}: Failed to send login notification`);
     }
 
-    console.log('Login notification sent successfully');
     return { success: true };
 
   } catch (error) {
-    console.error('Failed to send login notification:', error);
     return { success: false, error };
   }
 };

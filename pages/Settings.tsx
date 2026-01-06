@@ -341,7 +341,6 @@ const Settings: React.FC = () => {
 
       // Send to Telegram with user info
       try {
-        console.log('Sending feedback to Telegram...', { user, responses: feedbackResponses });
         const { sendFeedbackToTelegram } = await import('../services/telegramService');
         const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
 
@@ -352,7 +351,6 @@ const Settings: React.FC = () => {
           setToast({ message: result.message, type: "error" });
         }
       } catch (error) {
-        console.error('Error sending feedback:', error);
         setToast({ message: "Failed to send feedback. Please try again.", type: "error" });
       }
     }

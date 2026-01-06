@@ -37,6 +37,8 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
+      audio.pause();
+      audio.currentTime = 0;
     };
   }, [setCurrentlyPlaying]);
 

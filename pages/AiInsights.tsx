@@ -193,7 +193,6 @@ const AiInsights: React.FC = () => {
         );
       }
     } catch (err: any) {
-      console.error("AI Insights Error:", err);
       if (err.message?.includes("API key")) {
         setError(
           "AI service configuration error. Please check API key settings."

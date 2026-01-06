@@ -20,7 +20,7 @@ const setLastSentTime = (timestamp: number): void => {
   try {
     localStorage.setItem(STORAGE_KEY, timestamp.toString());
   } catch (error) {
-    console.error('Failed to save cooldown time:', error);
+    // Silently handle save error
   }
 };
 
@@ -50,8 +50,6 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
       throw new Error(`Please wait ${remainingCooldown} seconds before sending another feedback`);
     }
 
-    console.log('Starting Telegram send...', { responses, user });
-
     const currentTime = new Date();
     const rating = responses.find(r => r.questionId === 1)?.answer || 'Not provided';
     const features = responses.find(r => r.questionId === 2)?.answer || [];
@@ -66,7 +64,7 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
       const ipData = await ipResponse.json();
       ipAddress = ipData.ip;
     } catch (error) {
-      console.log('Could not fetch IP');
+      // Silently handle IP fetch failure
     }
 
     // Get device info
@@ -125,8 +123,6 @@ ${comments && comments.trim() !== '' ? comments : 'No additional comments provid
 
 ⏰ Received at: ${currentTime.toISOString()}`;
 
-    console.log('Sending message to Telegram...');
-
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
     const response = await fetch(url, {
@@ -139,7 +135,6 @@ ${comments && comments.trim() !== '' ? comments : 'No additional comments provid
     });
 
     const result = await response.json();
-    console.log('Telegram response:', result);
 
     if (!response.ok) {
       throw new Error(result.description || `HTTP ${response.status}: Failed to send message`);
@@ -151,7 +146,6 @@ ${comments && comments.trim() !== '' ? comments : 'No additional comments provid
     return { success: true, message: 'Feedback sent successfully!' };
 
   } catch (error) {
-    console.error('Failed to send to Telegram:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Failed to send feedback. Please try again.'

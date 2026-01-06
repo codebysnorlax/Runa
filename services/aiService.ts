@@ -6,7 +6,6 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
 
 export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile: Profile): Promise<InsightsData | null> => {
   if (!process.env.GEMINI_API_KEY) {
-    console.error("GEMINI_API_KEY environment variable not set.");
     return null;
   }
 
@@ -33,8 +32,6 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     2.  4-6 concise "Insight Cards". Each card should have a title, content, and a type ('positive', 'negative', 'neutral'). Focus on trends, fatigue, consistency, and goal progress.
     3.  A "Weekly Recommendation Plan" with a short, actionable suggestion for each day of the week (Monday to Sunday).
   `;
-
-  console.log('AI INPUT:', prompt);
 
   try {
     const response = await ai.models.generateContent({
@@ -83,10 +80,7 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     });
 
     const jsonText = response.text.trim();
-    console.log('AI RAW OUTPUT:', jsonText);
-
     const result = JSON.parse(jsonText);
-    console.log('AI PARSED OUTPUT:', result);
 
     // Add unique IDs to insights
     const insightsWithIds = result.insights.map((insight: any) => ({
@@ -95,7 +89,6 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     }));
 
     const finalResult = { ...result, insights: insightsWithIds };
-    console.log('AI FINAL OUTPUT:', finalResult);
 
     return finalResult;
   } catch (error) {
