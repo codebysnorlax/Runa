@@ -17,6 +17,8 @@ const RunsHistory = lazy(() => import('./pages/RunsHistory'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const ProtectedInsights = lazy(() => import('./pages/ProtectedInsights'));
 const Settings = lazy(() => import('./pages/Settings'));
+// for 404 page
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 
 // Using a more generic page skeleton for the suspense fallback
@@ -61,7 +63,7 @@ const App: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { loaded } = useClerk();
-  
+
   // Initialize login notification hook
   useLoginNotification();
 
@@ -100,6 +102,8 @@ const AppContent: React.FC = () => {
                       <Route path="/analytics" element={<Analytics />} />
                       <Route path="/insights" element={<ProtectedInsights />} />
                       <Route path="/settings" element={<Settings />} />
+                      {/* for 404 page */}
+                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>
                 </Layout>
