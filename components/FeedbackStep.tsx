@@ -113,15 +113,15 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center bg-dark-bg selection:bg-orange-500/30 selection:text-orange-200 lg:overflow-auto relative">
+    <div className="w-full flex flex-col items-center bg-dark-bg selection:bg-orange-500/30 selection:text-orange-200 relative">
       {/* Background soft glow for depth in dark mode */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full -z-10 pointer-events-none opacity-20">
         <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-orange-600/20 blur-[50px] sm:blur-[75px] lg:blur-[100px] rounded-full" />
         <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-orange-900/10 blur-[50px] sm:blur-[75px] lg:blur-[100px] rounded-full" />
       </div>
 
-      <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-4xl xl:max-w-5xl h-full flex flex-col px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 relative z-10">
-        <div className="flex flex-col h-full w-full">
+      <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-4xl xl:max-w-5xl flex flex-col px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 relative z-10">
+        <div className="flex flex-col w-full">
           <header className="flex flex-col items-center py-2 sm:py-4 md:py-5 lg:py-2 flex-shrink-0 z-10">
             <div className="w-full grid grid-cols-3 items-center mb-3 sm:mb-4 md:mb-5 lg:mb-2">
               <div className="flex items-center">
@@ -169,7 +169,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
             </div>
           </header>
 
-          <main className="flex-grow overflow-y-auto hide-scrollbar flex flex-col pb-3 sm:pb-4 lg:pb-6">
+          <main className="flex-grow flex flex-col pb-2 sm:pb-3">
             <div key={question.id} className="pt-1 sm:pt-2 lg:pt-4">
               <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-xl xl:text-2xl font-black text-white leading-[1.1] tracking-tight mb-4 sm:mb-6 md:mb-7 lg:mb-3 xl:mb-4 stagger-item">
                 {question.question}
@@ -242,7 +242,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
             </div>
           </main>
 
-          <footer className="py-4 sm:py-5 md:py-6 lg:py-3 flex-shrink-0 flex items-center justify-between bg-dark-bg/95 backdrop-blur-xl border-t border-zinc-800 z-20 sticky bottom-0">
+          <footer className="py-2 sm:py-3 flex-shrink-0 flex items-center justify-between bg-dark-bg/95 backdrop-blur-xl border-t border-zinc-800 z-20">
             <button
               onClick={() => {
                 playClickSound();

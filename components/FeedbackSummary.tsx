@@ -44,15 +44,15 @@ const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
   onRestart
 }) => {
   return (
-    <div className="min-h-screen min-h-[100dvh] w-full flex flex-col items-center bg-dark-bg selection:bg-orange-500/30 selection:text-orange-200 lg:overflow-auto relative">
+    <div className="w-full flex flex-col items-center bg-dark-bg selection:bg-orange-500/30 selection:text-orange-200 relative">
       {/* Background soft glow for depth in dark mode */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full -z-10 pointer-events-none opacity-20">
         <div className="absolute top-0 right-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-orange-600/20 blur-[50px] sm:blur-[75px] lg:blur-[100px] rounded-full" />
         <div className="absolute bottom-0 left-0 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-orange-900/10 blur-[50px] sm:blur-[75px] lg:blur-[100px] rounded-full" />
       </div>
 
-      <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-4xl xl:max-w-5xl h-full flex flex-col px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 relative z-10">
-        <div className="flex flex-col h-full w-full py-1 sm:py-3 lg:py-2 relative">
+      <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-4xl xl:max-w-5xl flex flex-col px-3 sm:px-6 md:px-8 lg:px-12 xl:px-16 relative z-10">
+        <div className="flex flex-col w-full py-1 sm:py-3 lg:py-2 relative">
           <div className="flex-grow overflow-y-auto hide-scrollbar pt-1 sm:pt-2 pb-4 sm:pb-6 lg:pb-4">
             <div className="text-center mb-6 sm:mb-8 lg:mb-4 xl:mb-6 pt-2 sm:pt-4 lg:pt-2 relative">
               <div className="seal-container relative mx-auto mb-3 sm:mb-4 lg:mb-2 w-10 h-10 sm:w-12 sm:h-12 lg:w-8 lg:h-8 xl:w-10 xl:h-10">
@@ -113,7 +113,7 @@ const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
             </div>
           </div>
 
-          <footer className="py-4 sm:py-6 flex-shrink-0 border-t border-zinc-800 flex flex-col items-center gap-4 bg-dark-bg/95 backdrop-blur-md stagger-item z-30 sticky bottom-0">
+          <footer className="py-2 sm:py-3 flex-shrink-0 border-t border-zinc-800 flex flex-col items-center gap-2 bg-dark-bg/95 backdrop-blur-md stagger-item z-30">
             <button
               onClick={onRestart}
               className="px-6 py-2 rounded-lg bg-orange-500 text-white text-sm font-medium hover:bg-orange-400 transition-all active:scale-95 transform flex items-center gap-2"

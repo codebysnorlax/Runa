@@ -396,7 +396,7 @@ const Settings: React.FC = () => {
 
   return (
     <AudioProvider>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
+      <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${activeTab === 'feedback' ? '' : 'pb-24'}`}>
       {toast && (
         <Toast
           message={toast.message}
@@ -720,7 +720,7 @@ const Settings: React.FC = () => {
           </div>
         )}
         {activeTab === "feedback" && (
-          <div className="animate-fade-in">
+          <div className="animate-fade-in -mx-4 sm:-mx-6">
             {!feedbackCompleted ? (
               <FeedbackStep
                 question={FEEDBACK_QUESTIONS[feedbackStep]}
