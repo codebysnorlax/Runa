@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import Card from "../components/Card";
 import ProgressRing from "../components/ProgressRing";
-import Skeleton from "../components/Skeleton";
+import DashboardSkeleton from "../components/DashboardSkeleton";
 import Toast from "../components/Toast";
 
 import StreakHeatmap from "../components/StreakHeatmap";
@@ -24,48 +24,6 @@ import {
 import { Link } from "react-router-dom";
 import { Run, PersonalRecords } from "../types";
 import { calculateStreak, getHeatmapData } from "../utils/streakUtils";
-
-const DashboardSkeleton: React.FC = () => (
-  <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
-    {/* Header - 2 lines */}
-    <div className="space-y-2">
-      <Skeleton className="h-7 sm:h-8 w-48 sm:w-64" />
-      <Skeleton className="h-3 sm:h-4 w-32 sm:w-40" />
-    </div>
-
-    {/* Quick Stats - 4 boxes in 2x2 mobile, 4x1 desktop */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      <Skeleton className="h-20 sm:h-24 rounded-xl" />
-      <Skeleton className="h-20 sm:h-24 rounded-xl" />
-      <Skeleton className="h-20 sm:h-24 rounded-xl" />
-      <Skeleton className="h-20 sm:h-24 rounded-xl" />
-    </div>
-
-    {/* Main Content Grid - Stack on mobile, 3 cols on desktop */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-      {/* Left - Full width mobile, 2 columns desktop */}
-      <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-        {/* Today's Run box */}
-        <Skeleton className="h-44 sm:h-48 rounded-xl" />
-
-        {/* AI Insight box */}
-        <Skeleton className="h-36 sm:h-40 rounded-xl" />
-
-        {/* Recent Runs box */}
-        <Skeleton className="h-52 sm:h-56 rounded-xl" />
-      </div>
-
-      {/* Right - Full width mobile, 1 column sidebar desktop */}
-      <div className="space-y-4 sm:space-y-6">
-        {/* Weekly Goal box */}
-        <Skeleton className="h-60 sm:h-64 rounded-xl" />
-
-        {/* Personal Records box */}
-        <Skeleton className="h-72 sm:h-80 rounded-xl" />
-      </div>
-    </div>
-  </div>
-);
 
 const Dashboard: React.FC = () => {
   const { profile, runs, goals, insights, loading, currentUser } =
