@@ -79,6 +79,7 @@ const Settings: React.FC = () => {
   const [feedbackStep, setFeedbackStep] = useState(0);
   const [feedbackResponses, setFeedbackResponses] = useState<UserResponse[]>([]);
   const [feedbackCompleted, setFeedbackCompleted] = useState(false);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [cooldownTimer, setCooldownTimer] = useState(0);
 
   const FEEDBACK_QUESTIONS: FeedbackQuestion[] = [
@@ -340,6 +341,7 @@ const Settings: React.FC = () => {
       }
 
       // Send to Telegram with user info
+      setFeedbackSubmitting(true);
       try {
         const { sendFeedbackToTelegram } = await import('../services/telegramService');
         const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
@@ -352,6 +354,8 @@ const Settings: React.FC = () => {
         }
       } catch (error) {
         setToast({ message: "Failed to send feedback. Please try again.", type: "error" });
+      } finally {
+        setFeedbackSubmitting(false);
       }
     }
   };
@@ -730,6 +734,7 @@ const Settings: React.FC = () => {
                 onBack={handleFeedbackBack}
                 onSkip={handleFeedbackNext}
                 cooldownTimer={cooldownTimer}
+                isSubmitting={feedbackSubmitting}
               />
             ) : (
               <FeedbackSummary

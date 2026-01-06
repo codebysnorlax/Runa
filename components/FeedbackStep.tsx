@@ -28,6 +28,7 @@ interface FeedbackStepProps {
   onBack: () => void;
   onSkip: () => void;
   cooldownTimer?: number;
+  isSubmitting?: boolean;
 }
 
 const Icons: Record<string, React.ReactNode> = {
@@ -70,7 +71,8 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
   onNext,
   onBack,
   onSkip,
-  cooldownTimer = 0
+  cooldownTimer = 0,
+  isSubmitting = false
 }) => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [localText, setLocalText] = useState('');
@@ -262,18 +264,26 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
                 playClickSound();
                 onNext();
               }}
-              disabled={!currentResponse?.answer || cooldownTimer > 0}
+              disabled={!currentResponse?.answer || cooldownTimer > 0 || isSubmitting}
               className={`flex items-center gap-2 font-bold text-sm sm:text-base md:text-lg lg:text-sm px-8 sm:px-10 md:px-12 lg:px-6 py-3 sm:py-4 lg:py-2 rounded-xl transition-all transform active:scale-95 ${
-                !currentResponse?.answer || cooldownTimer > 0
+                !currentResponse?.answer || cooldownTimer > 0 || isSubmitting
                   ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
                   : 'bg-orange-500 text-white shadow-lg hover:bg-orange-400 hover:shadow-xl'
               }`}
             >
               {cooldownTimer > 0 ? `Wait ${cooldownTimer}s` :
+               isSubmitting ? 'Submitting...' :
                stepNumber === totalSteps ? 'Submit' : 'Continue'}
-              <svg className="w-5 h-5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-              </svg>
+              {isSubmitting ? (
+                <svg className="w-5 h-5 lg:w-4 lg:h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              )}
             </button>
           </footer>
         </div>
