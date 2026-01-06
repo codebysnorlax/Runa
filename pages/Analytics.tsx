@@ -638,21 +638,139 @@ const Analytics: React.FC = () => {
       </Card>
 
       {/* Monthly Overview */}
-      <Card>
+      <div>
         <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
           Monthly Progress Rings
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+        {/* Mobile: Horizontal scroll */}
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
           {monthlyData.map((month, index) => {
             const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
             const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
             const distanceProgress = (month.distance / maxDistance) * 100;
             const runsProgress = (month.runs / maxRuns) * 100;
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthDate = new Date(month.name + "-01");
+            const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
 
             return (
               <div
                 key={index}
-                className="flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors"
+                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${
+                  isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                }`}
+                style={{ minWidth: '140px' }}
+              >
+                <div className="relative w-20 h-20 mb-3">
+                  <svg
+                    className="w-20 h-20 transform -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    {/* Background circles */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      stroke="#374151"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="30"
+                      stroke="#374151"
+                      strokeWidth="6"
+                      fill="none"
+                    />
+
+                    {/* Distance progress */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      stroke="#FF7A00"
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 40}`}
+                      strokeDashoffset={`${
+                        2 * Math.PI * 40 * (1 - distanceProgress / 100)
+                      }`}
+                      className="transition-all duration-1000 ease-out"
+                    />
+
+                    {/* Runs progress */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="30"
+                      stroke="#8884d8"
+                      strokeWidth="6"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 30}`}
+                      strokeDashoffset={`${
+                        2 * Math.PI * 30 * (1 - runsProgress / 100)
+                      }`}
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  </svg>
+
+                  {/* Center text */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-bold text-white">
+                      {new Date(month.name + "-01").toLocaleDateString("en", {
+                        month: "short",
+                      })}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {new Date(month.name + "-01").getFullYear()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="text-center space-y-1">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+                    <span className="text-xs text-white font-semibold">
+                      {month.distance.toFixed(1)}km
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span className="text-xs text-gray-300">
+                      {month.runs} runs
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {month.time.toFixed(1)}h total
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Desktop: Grid */}
+        <div className="hidden lg:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+          {monthlyData.map((month, index) => {
+            const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
+            const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
+            const distanceProgress = (month.distance / maxDistance) * 100;
+            const runsProgress = (month.runs / maxRuns) * 100;
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthDate = new Date(month.name + "-01");
+            const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
+
+            return (
+              <div
+                key={index}
+                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${
+                  isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                }`}
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
                   <svg
@@ -744,7 +862,7 @@ const Analytics: React.FC = () => {
             );
           })}
         </div>
-      </Card>
+      </div>
     </div>
   );
 };
