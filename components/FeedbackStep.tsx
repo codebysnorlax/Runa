@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { playClickSound } from '../utils/audioUtils';
 
 export type QuestionType = 'single-choice' | 'multi-choice' | 'text';
 
@@ -91,6 +92,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
   }, [question.id, currentResponse]);
 
   const handleOptionClick = (option: string) => {
+    playClickSound();
     setTappedOption(option);
 
     if (question.type === 'single-choice') {
@@ -137,7 +139,10 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
 
               <div className="flex justify-end">
                 <button
-                  onClick={onSkip}
+                  onClick={() => {
+                    playClickSound();
+                    onSkip();
+                  }}
                   disabled={cooldownTimer > 0}
                   className={`font-black text-[8px] sm:text-[9px] md:text-[9px] lg:text-[8px] px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg transition-all uppercase tracking-widest ${
                     cooldownTimer > 0 
@@ -237,7 +242,10 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
 
           <footer className="py-4 sm:py-5 md:py-6 lg:py-3 flex-shrink-0 flex items-center justify-between bg-dark-bg/95 backdrop-blur-xl border-t border-zinc-800 z-20 sticky bottom-0">
             <button
-              onClick={onBack}
+              onClick={() => {
+                playClickSound();
+                onBack();
+              }}
               disabled={stepNumber === 1}
               className={`flex items-center gap-2 font-bold text-sm sm:text-base md:text-base lg:text-sm px-4 py-3 lg:px-3 lg:py-2 rounded-xl transition-all ${
                 stepNumber === 1 ? 'opacity-0 pointer-events-none' : 'text-zinc-300 hover:text-white hover:bg-zinc-800'
@@ -250,7 +258,10 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
             </button>
 
             <button
-              onClick={onNext}
+              onClick={() => {
+                playClickSound();
+                onNext();
+              }}
               disabled={!currentResponse?.answer || cooldownTimer > 0}
               className={`flex items-center gap-2 font-bold text-sm sm:text-base md:text-lg lg:text-sm px-8 sm:px-10 md:px-12 lg:px-6 py-3 sm:py-4 lg:py-2 rounded-xl transition-all transform active:scale-95 ${
                 !currentResponse?.answer || cooldownTimer > 0
