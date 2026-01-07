@@ -26,10 +26,12 @@ import {
   Code,
   Shield,
   MessageSquare,
+  HelpCircle,
 } from "lucide-react";
 import * as storage from "../services/storageService";
 import FeedbackStep, { FeedbackQuestion, UserResponse } from "../components/FeedbackStep";
 import FeedbackSummary from "../components/FeedbackSummary";
+import FAQ from "../components/FAQ";
 
 const SettingsSkeleton: React.FC = () => (
   <div className="max-w-4xl mx-auto">
@@ -55,7 +57,7 @@ const SettingsSkeleton: React.FC = () => (
   </div>
 );
 
-type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "info";
+type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "faq" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
@@ -414,6 +416,7 @@ const Settings: React.FC = () => {
           <TabButton tab="goals" label="Goals" icon={Target} />
           <TabButton tab="backup" label="Backup" icon={Database} />
           <TabButton tab="feedback" label="Feedback" icon={MessageSquare} />
+          <TabButton tab="faq" label="FAQ" icon={HelpCircle} />
           <TabButton tab="info" label="Info" icon={Info} />
         </div>
       </div>
@@ -743,6 +746,7 @@ const Settings: React.FC = () => {
             )}
           </div>
         )}
+        {activeTab === "faq" && <FAQ />}
         {activeTab === "info" && (
           <div className="space-y-6 animate-fade-in">
             {/* Developer Information */}
