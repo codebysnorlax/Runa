@@ -349,6 +349,14 @@ const Settings: React.FC = () => {
         const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
 
         if (result.success) {
+          // Send confirmation email
+          if (user?.primaryEmailAddress?.emailAddress && user?.fullName) {
+            const { sendFeedbackConfirmation } = await import('../services/emailService');
+            await sendFeedbackConfirmation(
+              user.primaryEmailAddress.emailAddress,
+              user.fullName || user.firstName || 'User'
+            );
+          }
           setFeedbackCompleted(true);
           setToast({ message: result.message, type: "success" });
         } else {
