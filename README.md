@@ -158,7 +158,7 @@ Tech enthusiast who loves building innovative projects and crafting problem-solv
 - **Portfolio**: [snorlax-ai.netlify.app](https://snorlax-ai.netlify.app)
 - **Instagram**: [@nr_snorlax](https://instagram.com/nr_snorlax)
 - **Twitter**: [@codebysnorlax](https://twitter.com/codebysnorlax)
-- **LinkedIn**: [ravi-ranjan-9b338b333](https://linkedin.com/in/codebysnorlax)
+- **LinkedIn**: [ravi-ranjan](https://linkedin.com/in/codebysnorlax)
 
 ## License
 
