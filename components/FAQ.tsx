@@ -89,7 +89,66 @@ const FAQ: React.FC = () => {
       </div>
       <div className="space-y-2.5">
         {faqData.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">Loading FAQs...</div>
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="loader-container">
+              <div className="loader-bar">
+                <div className="loader-progress" />
+              </div>
+              <div className="loader-text" />
+            </div>
+            <style>{`
+              .loader-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+              }
+              .loader-bar {
+                width: 100px;
+                height: 3px;
+                background-color: rgb(31, 41, 55);
+                border-radius: 20px;
+                overflow: hidden;
+              }
+              .loader-progress {
+                width: 60px;
+                height: 3px;
+                background-color: #ff7a00;
+                border-radius: 20px;
+                margin-left: -60px;
+                animation: go 1s 0s infinite;
+              }
+              @keyframes go {
+                from {
+                  margin-left: -100px;
+                  width: 80px;
+                }
+                to {
+                  width: 30px;
+                  margin-left: 110px;
+                }
+              }
+              .loader-text {
+                width: 150px;
+                height: 30px;
+                margin-top: 20px;
+                text-align: center;
+                color: white;
+                font-size: 14px;
+                white-space: nowrap;
+              }
+              .loader-text::before {
+                content: "Fetching FAQs";
+                color: #9ca3af;
+                animation: text 1s 0s infinite;
+              }
+              @keyframes text {
+                0% { content: "Fetching FAQs"; }
+                30% { content: "Fetching FAQs."; }
+                60% { content: "Fetching FAQs.."; }
+                100% { content: "Fetching FAQs..."; }
+              }
+            `}</style>
+          </div>
         ) : (
           faqData.map((item, index) => (
             <FAQItem
