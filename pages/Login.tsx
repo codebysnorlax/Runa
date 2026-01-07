@@ -3,14 +3,14 @@ import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { Volume2 } from "lucide-react";
 import AudioLoader from "../components/AudioLoader";
 const images = [
-  "/Runa/images/dashboard.png",
-  "/Runa/images/analytics.png",
-  "/Runa/images/analytics2.png",
-  "/Runa/images/history.png",
-  "/Runa/images/insights.png",
-  "/Runa/images/goal.png",
-  "/Runa/images/info.png",
-  "/Runa/images/backup.png",
+  "/Runa/images/1_image.png",
+  "/Runa/images/2_image.png",
+  "/Runa/images/3_image.png",
+  "/Runa/images/4_image.png",
+  "/Runa/images/5_image.png",
+  "/Runa/images/6_image.png",
+  "/Runa/images/7_image.png",
+  "/Runa/images/8_image.png",
 ];
 
 const Login: React.FC = () => {
