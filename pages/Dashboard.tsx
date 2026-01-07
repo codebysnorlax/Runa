@@ -161,9 +161,9 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Left Column */}
-        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Left Column - Main Content */}
+        <div className="space-y-4 sm:space-y-6">
           {/* Today's Run */}
           <Card className="animate-slide-right">
             <div className="flex items-center justify-between mb-4">
@@ -301,7 +301,7 @@ const Dashboard: React.FC = () => {
 
             {runs.length > 0 ? (
               <div className="space-y-2">
-                {runs.slice(0, 3).map((run) => (
+                {runs.slice(0, 4).map((run) => (
                   <div
                     key={run.id}
                     className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg hover:bg-gray-800 transition-colors"
@@ -342,7 +342,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Right Column */}
+        {/* Right Column - Sidebar */}
         <div className="space-y-4 sm:space-y-6">
           {/* Weekly Goal */}
           <Card className="animate-scale-in !p-4">
