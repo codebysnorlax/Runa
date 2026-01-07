@@ -46,8 +46,8 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
     if (type === 'success' || type === 'error') {
       audioRef = new Audio(
         type === 'success' 
-          ? '/Runa/audio/success.wav' 
-          : '/Runa/audio/error.wav'
+          ? `${import.meta.env.BASE_URL}audio/success.wav`
+          : `${import.meta.env.BASE_URL}audio/error.wav`
       );
       audioRef.play().catch(() => {}); // Ignore audio play errors
     }

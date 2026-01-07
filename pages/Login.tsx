@@ -3,14 +3,14 @@ import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { Volume2 } from "lucide-react";
 import AudioLoader from "../components/AudioLoader";
 const images = [
-  "/Runa/images/1_image.png",
-  "/Runa/images/2_image.png",
-  "/Runa/images/3_image.png",
-  "/Runa/images/4_image.png",
-  "/Runa/images/5_image.png",
-  "/Runa/images/6_image.png",
-  "/Runa/images/7_image.png",
-  "/Runa/images/8_image.png",
+  `${import.meta.env.BASE_URL}images/1_image.png`,
+  `${import.meta.env.BASE_URL}images/2_image.png`,
+  `${import.meta.env.BASE_URL}images/3_image.png`,
+  `${import.meta.env.BASE_URL}images/4_image.png`,
+  `${import.meta.env.BASE_URL}images/5_image.png`,
+  `${import.meta.env.BASE_URL}images/6_image.png`,
+  `${import.meta.env.BASE_URL}images/7_image.png`,
+  `${import.meta.env.BASE_URL}images/8_image.png`,
 ];
 
 const Login: React.FC = () => {
@@ -28,7 +28,7 @@ const Login: React.FC = () => {
 
   const handleAudioPlay = () => {
     if (!audioRef.current) {
-      audioRef.current = new Audio('/Runa/audio/RunaIntro.wav');
+      audioRef.current = new Audio(`${import.meta.env.BASE_URL}audio/RunaIntro.wav`);
       audioRef.current.addEventListener('ended', () => {
         setShowAudioModal(false);
         setAudioProgress(0);

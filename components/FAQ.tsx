@@ -60,7 +60,8 @@ const FAQ: React.FC = () => {
   const [lastFetch, setLastFetch] = useState(Date.now());
 
   const loadFAQs = () => {
-    fetch(`/Runa/json/faq.json?t=${Date.now()}`)
+
+    fetch(`${import.meta.env.BASE_URL}json/faq.json?t=${Date.now()}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch');
         return res.json();
