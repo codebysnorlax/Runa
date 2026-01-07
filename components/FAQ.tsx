@@ -60,7 +60,7 @@ const FAQ: React.FC = () => {
   const [lastFetch, setLastFetch] = useState(Date.now());
 
   const loadFAQs = () => {
-    fetch(`/json/faq.json?t=${Date.now()}`)
+    fetch(`/Runa/json/faq.json?t=${Date.now()}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch');
         return res.json();
@@ -71,20 +71,6 @@ const FAQ: React.FC = () => {
       })
       .catch(err => {
         console.error('Failed to load FAQ:', err);
-        setFaqData([
-          { question: "What is Runa?", answer: "Runa is an AI-powered running fitness app that helps you track runs, analyze performance, build streaks, and improve consistency with smart insights." },
-          { question: "Is my data safe on Runa?", answer: "Yes. Your data is stored locally in your browser, giving you full control and strong privacy. You can also download a backup anytime." },
-          { question: "Do I need an account to use Runa?", answer: "Yes. An account keeps your data secure and personalized, ensuring it stays separate from other users." },
-          { question: "What can I track with Runa?", answer: "You can log your run distance, time, speed, notes, and view detailed stats, analytics, and progress over time." },
-          { question: "Can I edit or delete my runs?", answer: "Yes. All runs can be edited or deleted at any time, and your stats update instantly." },
-          { question: "Does Runa support goals and streaks?", answer: "Yes. Runa helps you set weekly goals and track running streaks to stay motivated and consistent." },
-          { question: "What are AI Insights?", answer: "AI Insights analyze your running data and provide personalized tips, feedback, and training suggestions to help you improve." },
-          { question: "Can I see analytics and charts?", answer: "Yes. Runa offers easy-to-read charts, heatmaps, and performance trends to track your progress visually." },
-          { question: "Can I back up my data?", answer: "Yes. You can download your data as a backup file and restore it whenever needed." },
-          { question: "Will Runa support cloud backup in the future?", answer: "Yes. Optional cloud backup is planned, allowing secure cross-device access while keeping you in control of your data." },
-          { question: "Does Runa work on mobile devices?", answer: "Yes. Runa is fully responsive and works smoothly on mobile, tablet, and desktop." },
-          { question: "How can I give feedback?", answer: "You can share feedback directly inside the app to help improve future updates." }
-        ]);
       });
   };
 
@@ -99,7 +85,7 @@ const FAQ: React.FC = () => {
           <HelpCircle className="w-5 h-5 text-brand-orange" />
           <h3 className="text-lg font-semibold text-white">Frequently Asked Questions</h3>
         </div>
-        <span className="text-xs text-gray-500">({faqData.length} FAQs)</span>
+        {/* <span className="text-xs text-gray-500">({faqData.length} FAQs)</span> */}
       </div>
       <div className="space-y-2.5">
         {faqData.length === 0 ? (
