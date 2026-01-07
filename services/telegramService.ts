@@ -64,11 +64,20 @@ export const sendFeedbackToTelegram = async (questions: any[], responses: any[],
     // Get IP address
     let ipAddress = 'Unknown';
     try {
-      const ipResponse = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipResponse.json();
-      ipAddress = ipData.ip;
+      const ipResponse = await fetch('https://ipapi.co/json/');
+      if (ipResponse.ok) {
+        const ipData = await ipResponse.json();
+        ipAddress = ipData.ip || 'Unknown';
+      }
     } catch (error) {
-      // Silently handle IP fetch failure
+      // Fallback to ipify
+      try {
+        const fallback = await fetch('https://api.ipify.org?format=json');
+        const data = await fallback.json();
+        ipAddress = data.ip || 'Unknown';
+      } catch {
+        ipAddress = 'Unknown';
+      }
     }
 
     // Get device info
