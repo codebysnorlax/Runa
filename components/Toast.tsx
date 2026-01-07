@@ -39,8 +39,28 @@ interface ToastProps {
 const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 5000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
+    
+    // Play audio based on toast type - only once per toast
+    let audioRef: HTMLAudioElement | null = null;
+    
+    if (type === 'success' || type === 'error') {
+      audioRef = new Audio(
+        type === 'success' 
+          ? '/Runa/audio/success.wav' 
+          : '/Runa/audio/error.wav'
+      );
+      audioRef.play().catch(() => {}); // Ignore audio play errors
+    }
+    
+    return () => {
+      clearTimeout(timer);
+      if (audioRef) {
+        audioRef.pause();
+        audioRef.currentTime = 0;
+        audioRef = null;
+      }
+    };
+  }, [onClose, type]);
 
   const configs = {
     success: {

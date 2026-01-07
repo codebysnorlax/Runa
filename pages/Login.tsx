@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
-import dashboardImg from "../assets/dashboard.png";
-import analyticsImg from "../assets/analytics.png";
-import analytics2Img from "../assets/analytics2.png";
-import historyImg from "../assets/history.png";
-import insightsImg from "../assets/insights.png";
-import goalImg from "../assets/goal.png";
-
+import { Volume2 } from "lucide-react";
+import AudioLoader from "../components/AudioLoader";
 const images = [
-  dashboardImg,
-  analyticsImg,
-  analytics2Img,
-  historyImg,
-  insightsImg,
-  goalImg,
+  "/Runa/images/1_image.png",
+  "/Runa/images/2_image.png",
+  "/Runa/images/3_image.png",
+  "/Runa/images/4_image.png",
+  "/Runa/images/5_image.png",
+  "/Runa/images/6_image.png",
+  "/Runa/images/7_image.png",
+  "/Runa/images/8_image.png",
 ];
 
 const Login: React.FC = () => {
   const [currentImage, setCurrentImage] = useState(0);
+  const [showAudioModal, setShowAudioModal] = useState(false);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -26,13 +26,65 @@ const Login: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleAudioPlay = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/Runa/audio/RunaIntro.wav');
+      audioRef.current.addEventListener('ended', () => {
+        setShowAudioModal(false);
+        setAudioProgress(0);
+      });
+      audioRef.current.addEventListener('timeupdate', () => {
+        if (audioRef.current) {
+          const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+          setAudioProgress(Math.round(progress));
+        }
+      });
+      audioRef.current.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        setShowAudioModal(false);
+        setAudioProgress(0);
+      });
+    }
+    setShowAudioModal(true);
+    setAudioProgress(0);
+    audioRef.current.play().catch(err => {
+      console.error('Play error:', err);
+      setShowAudioModal(false);
+    });
+  };
+
+  const handleCloseModal = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setShowAudioModal(false);
+    setAudioProgress(0);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       <header className="border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <h1 className="text-xl sm:text-2xl font-semibold text-white">
             <span className="text-brand-orange">Runa</span>
           </h1>
+          <button
+            onClick={handleAudioPlay}
+            className="flex items-center gap-2 bg-brand-orange/10 hover:bg-brand-orange/20 border border-brand-orange/30 text-brand-orange px-4 py-2 rounded-lg transition-all hover:scale-105"
+          >
+            <Volume2 className="w-4 h-4" />
+            <span className="text-sm font-medium">Intro</span>
+          </button>
         </div>
       </header>
 
@@ -177,6 +229,15 @@ const Login: React.FC = () => {
         </div>
       </main>
 
+      {showAudioModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={handleCloseModal}>
+          <div className="bg-gray-800/40 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-gray-700/50" onClick={(e) => e.stopPropagation()}>
+            <AudioLoader progress={audioProgress} />
+            <p className="text-center text-gray-300 mt-4 text-sm">Playing Runa Intro...</p>
+          </div>
+        </div>
+      )}
+
       <footer className="border-t border-gray-800 py-4 sm:py-6 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -253,7 +314,7 @@ const Login: React.FC = () => {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com/in/ravi-ranjan-9b338b333"
+                href="https://linkedin.com/in/codebysnorlax"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-brand-orange transition-colors"

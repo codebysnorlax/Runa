@@ -6,6 +6,8 @@ import { Goal, Profile, DistanceGoal } from "../types";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
 import Toast from "../components/Toast";
+import AudioHelp from "../components/AudioHelp";
+import { AudioProvider } from "../context/AudioContext";
 import {
   User,
   Target,
@@ -23,8 +25,13 @@ import {
   Linkedin,
   Code,
   Shield,
+  MessageSquare,
+  HelpCircle,
 } from "lucide-react";
 import * as storage from "../services/storageService";
+import FeedbackStep, { FeedbackQuestion, UserResponse } from "../components/FeedbackStep";
+import FeedbackSummary from "../components/FeedbackSummary";
+import FAQ from "../components/FAQ";
 
 const SettingsSkeleton: React.FC = () => (
   <div className="max-w-4xl mx-auto">
@@ -50,7 +57,7 @@ const SettingsSkeleton: React.FC = () => (
   </div>
 );
 
-type ActiveTab = "profile" | "goals" | "backup" | "info";
+type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "faq" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
@@ -70,6 +77,52 @@ const Settings: React.FC = () => {
   const [goalState, setGoalState] = useState<Goal | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Feedback state
+  const [feedbackStep, setFeedbackStep] = useState(0);
+  const [feedbackResponses, setFeedbackResponses] = useState<UserResponse[]>([]);
+  const [feedbackCompleted, setFeedbackCompleted] = useState(false);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [cooldownTimer, setCooldownTimer] = useState(0);
+
+  const FEEDBACK_QUESTIONS: FeedbackQuestion[] = [
+    {
+      id: 1,
+      question: "How would you rate your overall experience with Runa?",
+      type: 'single-choice',
+      options: ['Excellent', 'Good', 'Average', 'Poor', 'Very Poor'],
+      icon: 'rating'
+    },
+    {
+      id: 2,
+      question: "Which features do you use most often?",
+      type: 'multi-choice',
+      options: ['Dashboard', 'Add Run', 'Analytics', 'Goals Tracking', 'Data Backup', 'AI Insights'],
+      icon: 'features'
+    },
+    {
+      id: 3,
+      question: "How easy is it to navigate and use the app?",
+      type: 'single-choice',
+      options: ['Very Easy', 'Easy', 'Neutral', 'Difficult', 'Very Difficult'],
+      icon: 'experience'
+    },
+    {
+      id: 4,
+      question: "What improvements would you like to see?",
+      type: 'multi-choice',
+      options: ['Better UI/UX', 'More Analytics', 'Social Features', 'Mobile App', 'Export Options', 'Custom Goals'],
+      icon: 'improvement'
+    },
+    {
+      id: 5,
+      question: "Any additional comments or suggestions?",
+      type: 'text',
+      placeholder: "Share your thoughts, suggestions, or report any issues...",
+      charLimit: 500,
+      icon: 'message'
+    }
+  ];
+
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -86,6 +139,23 @@ const Settings: React.FC = () => {
       });
     }
   }, [profile, goals]);
+
+  // Timer for rate limiting - updates every second
+  useEffect(() => {
+    // Initial check
+    import('../services/telegramService').then(({ getRemainingCooldown }) => {
+      setCooldownTimer(getRemainingCooldown());
+    });
+
+    // Update every second
+    const interval = setInterval(async () => {
+      const { getRemainingCooldown } = await import('../services/telegramService');
+      const remaining = getRemainingCooldown();
+      setCooldownTimer(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profileState) {
@@ -240,6 +310,78 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Feedback handlers
+  const handleFeedbackResponse = (questionId: number, answer: string | string[]) => {
+    setFeedbackResponses(prev => {
+      const filtered = prev.filter(r => r.questionId !== questionId);
+      return [...filtered, { questionId, answer }];
+    });
+  };
+
+  const handleFeedbackNext = async () => {
+    if (feedbackStep < FEEDBACK_QUESTIONS.length - 1) {
+      setFeedbackStep(prev => prev + 1);
+    } else {
+      // Check if at least one question is answered with non-empty value
+      const hasValidResponse = feedbackResponses.some(r => {
+        if (Array.isArray(r.answer)) {
+          return r.answer.length > 0;
+        }
+        return r.answer && r.answer.trim() !== '';
+      });
+
+      if (!hasValidResponse) {
+        setToast({ message: "Please answer at least one question before submitting", type: "error" });
+        return;
+      }
+
+      // Check cooldown before attempting to send
+      const { canSendFeedback } = await import('../services/telegramService');
+      if (!canSendFeedback()) {
+        setToast({ message: "Please wait before sending another feedback", type: "error" });
+        return;
+      }
+
+      // Send to Telegram with user info
+      setFeedbackSubmitting(true);
+      try {
+        const { sendFeedbackToTelegram } = await import('../services/telegramService');
+        const result = await sendFeedbackToTelegram(FEEDBACK_QUESTIONS, feedbackResponses, user);
+
+        if (result.success) {
+          // Send confirmation email
+          if (user?.primaryEmailAddress?.emailAddress && user?.fullName) {
+            const { sendFeedbackConfirmation } = await import('../services/emailService');
+            await sendFeedbackConfirmation(
+              user.primaryEmailAddress.emailAddress,
+              user.fullName || user.firstName || 'User'
+            );
+          }
+          setFeedbackCompleted(true);
+          setToast({ message: result.message, type: "success" });
+        } else {
+          setToast({ message: result.message, type: "error" });
+        }
+      } catch (error) {
+        setToast({ message: "Failed to send feedback. Please try again.", type: "error" });
+      } finally {
+        setFeedbackSubmitting(false);
+      }
+    }
+  };
+
+  const handleFeedbackBack = () => {
+    if (feedbackStep > 0) {
+      setFeedbackStep(prev => prev - 1);
+    }
+  };
+
+  const handleFeedbackRestart = () => {
+    setFeedbackResponses([]);
+    setFeedbackStep(0);
+    setFeedbackCompleted(false);
+  };
+
   if (loading || !profileState || !goalState) {
     return <SettingsSkeleton />;
   }
@@ -263,7 +405,8 @@ const Settings: React.FC = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24">
+    <AudioProvider>
+      <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${activeTab === 'feedback' ? '' : 'pb-24'}`}>
       {toast && (
         <Toast
           message={toast.message}
@@ -280,6 +423,8 @@ const Settings: React.FC = () => {
           <TabButton tab="profile" label="Profile" icon={User} />
           <TabButton tab="goals" label="Goals" icon={Target} />
           <TabButton tab="backup" label="Backup" icon={Database} />
+          <TabButton tab="feedback" label="Feedback" icon={MessageSquare} />
+          <TabButton tab="faq" label="FAQ" icon={HelpCircle} />
           <TabButton tab="info" label="Info" icon={Info} />
         </div>
       </div>
@@ -504,7 +649,7 @@ const Settings: React.FC = () => {
                   from previous saves.
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-4 mb-6">
                   <button
                     onClick={handleDownloadBackup}
                     className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
@@ -538,47 +683,78 @@ const Settings: React.FC = () => {
                     </button>
                   </div>
                 </div>
+
+                <AudioHelp audioType="male" />
               </div>
 
-              <div className="bg-gray-800 p-6 rounded-lg h-fit">
-                <h4 className="text-white font-medium mb-4">How it works:</h4>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">
-                        Download Backup
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        Creates a timestamped backup file with all your data
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">
-                        Create data.json
-                      </div>
-                      <div className="text-gray-400 text-sm">
-                        Creates a simple "data.json" file for easy sharing
+              <div className="space-y-6">
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <h4 className="text-white font-medium mb-4">How it works:</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-white font-medium">
+                          Download Backup
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          Creates a timestamped backup file with all your data
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <div className="text-white font-medium">Restore</div>
-                      <div className="text-gray-400 text-sm">
-                        Upload any backup file to restore your data
+                    <div className="flex items-start space-x-3">
+                      <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-white font-medium">
+                          Create data.json
+                        </div>
+                        <div className="text-gray-400 text-sm">
+                          Creates a simple "data.json" file for easy sharing
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="text-white font-medium">Restore</div>
+                        <div className="text-gray-400 text-sm">
+                          Upload any backup file to restore your data
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <AudioHelp audioType="female" />
               </div>
             </div>
           </div>
         )}
+        {activeTab === "feedback" && (
+          <div className="animate-fade-in -mx-4 sm:-mx-6">
+            {!feedbackCompleted ? (
+              <FeedbackStep
+                question={FEEDBACK_QUESTIONS[feedbackStep]}
+                stepNumber={feedbackStep + 1}
+                totalSteps={FEEDBACK_QUESTIONS.length}
+                currentResponse={feedbackResponses.find(r => r.questionId === FEEDBACK_QUESTIONS[feedbackStep].id)}
+                onResponse={handleFeedbackResponse}
+                onNext={handleFeedbackNext}
+                onBack={handleFeedbackBack}
+                onSkip={handleFeedbackNext}
+                cooldownTimer={cooldownTimer}
+                isSubmitting={feedbackSubmitting}
+              />
+            ) : (
+              <FeedbackSummary
+                questions={FEEDBACK_QUESTIONS}
+                responses={feedbackResponses}
+                onRestart={handleFeedbackRestart}
+              />
+            )}
+          </div>
+        )}
+        {activeTab === "faq" && <FAQ />}
         {activeTab === "info" && (
           <div className="space-y-6 animate-fade-in">
             {/* Developer Information */}
@@ -664,7 +840,7 @@ const Settings: React.FC = () => {
                       <span className="text-xs sm:text-sm">Twitter</span>
                     </a>
                     <a
-                      href="https://linkedin.com/in/ravi-ranjan-9b338b333"
+                      href="https://linkedin.com/in/codebysnorlax"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
@@ -777,6 +953,7 @@ const Settings: React.FC = () => {
         )}
       </div>
     </div>
+    </AudioProvider>
   );
 };
 

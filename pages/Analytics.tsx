@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, memo, useCallback } from "react";
 import { useAppContext } from "../context/AppContext";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
+import { Filter, X } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -254,8 +255,72 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
   );
 };
 
+const FilterModal = memo(({ onClose, onApply, onClear }: {
+  onClose: () => void;
+  onApply: (time: number | null, distance: number | null) => void;
+  onClear: () => void;
+}) => {
+  const [time, setTime] = useState<number | null>(null);
+  const [distance, setDistance] = useState("");
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+      <div className="bg-dark-card border border-dark-border rounded-lg p-6 w-80" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-white font-semibold">Filter Charts</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={20} /></button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-gray-400 text-sm block mb-2">Time Period</label>
+            <div className="flex gap-2 flex-wrap">
+              {[7, 15, 30].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setTime(time === v ? null : v)}
+                  className={`px-3 py-1 rounded text-sm ${time === v ? "bg-brand-orange text-white" : "bg-gray-700 text-gray-300"}`}
+                >
+                  {v} days
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-gray-400 text-sm block mb-2">Min Distance (meters)</label>
+            <input
+              type="text"
+              value={distance}
+              onChange={(e) => setDistance(e.target.value.replace(/\D/g, ""))}
+              placeholder="e.g. 1600"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+            />
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button onClick={() => { onClear(); onClose(); }} className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm">Clear</button>
+            <button onClick={() => onApply(time, distance ? parseInt(distance) : null)} className="flex-1 px-3 py-2 bg-brand-orange hover:bg-orange-600 rounded text-white text-sm">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const Analytics: React.FC = () => {
   const { runs, goals, loading } = useAppContext();
+  const [showFilter, setShowFilter] = useState(false);
+  const [appliedTime, setAppliedTime] = useState<number | null>(null);
+  const [appliedDistance, setAppliedDistance] = useState<number | null>(null);
+
+  const handleApply = useCallback((time: number | null, dist: number | null) => {
+    setAppliedTime(time);
+    setAppliedDistance(dist);
+    setShowFilter(false);
+  }, []);
+
+  const handleClear = useCallback(() => {
+    setAppliedTime(null);
+    setAppliedDistance(null);
+  }, []);
 
   const chartData = useMemo(() => {
     return runs
@@ -269,12 +334,33 @@ const Analytics: React.FC = () => {
         pace:
           run.distance_m > 0
             ? run.total_time_sec / 60 / (run.distance_m / 1000)
-            : 0, // min/km
+            : 0,
         speed: run.avg_speed_kmh,
         distance: run.distance_m / 1000,
-        time: run.total_time_sec / 60, // minutes
+        time: run.total_time_sec / 60,
       }));
   }, [runs]);
+
+  const filteredChartData = useMemo(() => {
+    let filtered = runs;
+    if (appliedTime) {
+      const cutoff = Date.now() - appliedTime * 86400000;
+      filtered = filtered.filter((run) => new Date(run.date).getTime() >= cutoff);
+    }
+    if (appliedDistance) {
+      filtered = filtered.filter((run) => run.distance_m >= appliedDistance);
+    }
+    return filtered
+      .map((run) => ({ ...run, dateObj: new Date(run.date) }))
+      .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
+      .map((run) => ({
+        name: run.dateObj.toLocaleDateString("en-IN"),
+        pace: run.distance_m > 0 ? run.total_time_sec / 60 / (run.distance_m / 1000) : 0,
+        speed: run.avg_speed_kmh,
+        distance: run.distance_m / 1000,
+        time: run.total_time_sec / 60,
+      }));
+  }, [runs, appliedTime, appliedDistance]);
 
   const weeklyDistanceData = useMemo(() => {
     const weeks: {
@@ -373,6 +459,14 @@ const Analytics: React.FC = () => {
     }));
   }, [chartData]);
 
+  const filteredPerformanceData = useMemo(() => {
+    return filteredChartData.map((item, index) => ({
+      ...item,
+      cumDistance: filteredChartData.slice(0, index + 1).reduce((sum, run) => sum + run.distance, 0),
+      efficiency: item.speed / (item.pace || 1),
+    }));
+  }, [filteredChartData]);
+
   if (loading) {
     return <AnalyticsSkeleton />;
   }
@@ -432,7 +526,19 @@ const Analytics: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-24 lg:pb-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
+        <button
+          onClick={() => setShowFilter(true)}
+          className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white text-sm"
+        >
+          <Filter size={16} />
+          Filter
+          {(appliedTime || appliedDistance) && <span className="w-2 h-2 bg-brand-orange rounded-full" />}
+        </button>
+      </div>
+
+      {showFilter && <FilterModal onClose={() => setShowFilter(false)} onApply={handleApply} onClear={handleClear} />}
 
       <Heatmap runs={runs} />
 
@@ -485,7 +591,7 @@ const Analytics: React.FC = () => {
 
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart
-              data={performanceData.slice(-14)}
+              data={(appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
               margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -537,7 +643,7 @@ const Analytics: React.FC = () => {
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart
-              data={chartData.slice(-14)}
+              data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
               margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -638,21 +744,139 @@ const Analytics: React.FC = () => {
       </Card>
 
       {/* Monthly Overview */}
-      <Card>
+      <div>
         <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
           Monthly Progress Rings
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+        {/* Mobile: Horizontal scroll */}
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
           {monthlyData.map((month, index) => {
             const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
             const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
             const distanceProgress = (month.distance / maxDistance) * 100;
             const runsProgress = (month.runs / maxRuns) * 100;
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthDate = new Date(month.name + "-01");
+            const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
 
             return (
               <div
                 key={index}
-                className="flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors"
+                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${
+                  isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                }`}
+                style={{ minWidth: '140px' }}
+              >
+                <div className="relative w-20 h-20 mb-3">
+                  <svg
+                    className="w-20 h-20 transform -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    {/* Background circles */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      stroke="#374151"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="30"
+                      stroke="#374151"
+                      strokeWidth="6"
+                      fill="none"
+                    />
+
+                    {/* Distance progress */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      stroke="#FF7A00"
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 40}`}
+                      strokeDashoffset={`${
+                        2 * Math.PI * 40 * (1 - distanceProgress / 100)
+                      }`}
+                      className="transition-all duration-1000 ease-out"
+                    />
+
+                    {/* Runs progress */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="30"
+                      stroke="#8884d8"
+                      strokeWidth="6"
+                      fill="none"
+                      strokeDasharray={`${2 * Math.PI * 30}`}
+                      strokeDashoffset={`${
+                        2 * Math.PI * 30 * (1 - runsProgress / 100)
+                      }`}
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  </svg>
+
+                  {/* Center text */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-xs font-bold text-white">
+                      {new Date(month.name + "-01").toLocaleDateString("en", {
+                        month: "short",
+                      })}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {new Date(month.name + "-01").getFullYear()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="text-center space-y-1">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+                    <span className="text-xs text-white font-semibold">
+                      {month.distance.toFixed(1)}km
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                    <span className="text-xs text-gray-300">
+                      {month.runs} runs
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {month.time.toFixed(1)}h total
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Desktop: Grid */}
+        <div className="hidden lg:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+          {monthlyData.map((month, index) => {
+            const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
+            const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
+            const distanceProgress = (month.distance / maxDistance) * 100;
+            const runsProgress = (month.runs / maxRuns) * 100;
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthDate = new Date(month.name + "-01");
+            const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
+
+            return (
+              <div
+                key={index}
+                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${
+                  isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                }`}
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
                   <svg
@@ -744,7 +968,7 @@ const Analytics: React.FC = () => {
             );
           })}
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

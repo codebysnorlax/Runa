@@ -193,7 +193,6 @@ const AiInsights: React.FC = () => {
         );
       }
     } catch (err: any) {
-      console.error("AI Insights Error:", err);
       if (err.message?.includes("API key")) {
         setError(
           "AI service configuration error. Please check API key settings."
@@ -426,18 +425,37 @@ const AiInsights: React.FC = () => {
 
           {!error && (!insights || insights?.insights?.length === 0) && (
             <Card className="mx-4 lg:mx-0">
-              <div className="text-center py-12">
-                <Zap className="w-16 h-16 mx-auto text-brand-orange mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  No AI Insights Available
+              <div className="text-center py-6 sm:py-8 px-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                  AI is Judging Your Silence
                 </h3>
-                <p className="text-gray-400 mb-4">
-                  Generate personalized insights based on your running data
+                <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6 max-w-xs sm:max-w-md mx-auto px-2">
+                  Your AI coach is sitting here, tapping its digital fingers, waiting for some data to roast you with insights
                 </p>
-                <p className="text-sm text-gray-500">
-                  Make sure you have profile, goals, and at least one run
-                  recorded
-                </p>
+
+                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 max-w-xs sm:max-w-sm mx-auto mb-4 sm:mb-6">
+                  <p className="text-sm text-gray-300 mb-2 sm:mb-3">What's missing:</p>
+                  <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400">
+                    <div>• Complete your profile</div>
+                    <div>• Set some goals</div>
+                    <div>• Actually go for a run</div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center px-4">
+                  <button
+                    onClick={() => window.location.hash = '#/add-run'}
+                    className="bg-brand-orange hover:bg-orange-600 text-white font-medium px-4 sm:px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
+                  >
+                    Add First Run
+                  </button>
+                  <button
+                    onClick={() => window.location.hash = '#/settings'}
+                    className="bg-gray-700 hover:bg-gray-600 text-white font-medium px-4 sm:px-6 py-3 rounded-lg transition-colors text-sm sm:text-base"
+                  >
+                    Setup Profile
+                  </button>
+                </div>
               </div>
             </Card>
           )}

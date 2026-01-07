@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Card from './components/Card';
 import Skeleton from './components/Skeleton';
 import Snowfall from 'react-snowfall';
+import { useLoginNotification } from './hooks/useLoginNotification';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('./pages/Login'));
@@ -16,6 +17,8 @@ const RunsHistory = lazy(() => import('./pages/RunsHistory'));
 const Analytics = lazy(() => import('./pages/Analytics'));
 const ProtectedInsights = lazy(() => import('./pages/ProtectedInsights'));
 const Settings = lazy(() => import('./pages/Settings'));
+// for 404 page
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 
 // Using a more generic page skeleton for the suspense fallback
@@ -50,7 +53,8 @@ const App: React.FC = () => {
   return (
     <AppContextProvider>
       <Router>
-        <Snowfall snowflakeCount={100} style={{ position: 'fixed', width: '100vw', height: '100vh', zIndex: 9999, pointerEvents: 'none' }} />
+        {/* Snowfall off */}
+        {/* <Snowfall snowflakeCount={100} style={{ position: 'fixed', width: '100vw', height: '100vh', zIndex: 9999, pointerEvents: 'none' }} /> */}
         <AppContent />
       </Router>
     </AppContextProvider>
@@ -59,6 +63,9 @@ const App: React.FC = () => {
 
 const AppContent: React.FC = () => {
   const { loaded } = useClerk();
+
+  // Initialize login notification hook
+  useLoginNotification();
 
   if (!loaded) {
     return <FullPageLoader />;
@@ -77,8 +84,8 @@ const AppContent: React.FC = () => {
             </SignedIn>
           </>
         } />
-        <Route 
-          path="/*" 
+        <Route
+          path="/*"
           element={
             <>
               <SignedOut>
@@ -95,12 +102,14 @@ const AppContent: React.FC = () => {
                       <Route path="/analytics" element={<Analytics />} />
                       <Route path="/insights" element={<ProtectedInsights />} />
                       <Route path="/settings" element={<Settings />} />
+                      {/* for 404 page */}
+                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>
                 </Layout>
               </SignedIn>
             </>
-          } 
+          }
         />
       </Routes>
     </Suspense>
