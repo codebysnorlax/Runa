@@ -44,10 +44,6 @@ export const canSendFeedback = (): boolean => {
 
 export const sendFeedbackToTelegram = async (questions: any[], responses: any[], user: any) => {
   try {
-    // Debug log
-    console.log('Telegram Token:', TELEGRAM_BOT_TOKEN ? 'Set' : 'UNDEFINED');
-    console.log('Telegram Chat ID:', TELEGRAM_CHAT_ID ? 'Set' : 'UNDEFINED');
-    
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       throw new Error('Telegram credentials not configured');
     }

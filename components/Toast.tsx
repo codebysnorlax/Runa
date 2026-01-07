@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 const toastStyles = `
   @keyframes progressBar {
@@ -37,29 +37,23 @@ interface ToastProps {
 }
 
 const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
+  const hasPlayedAudio = useRef(false);
+  
   useEffect(() => {
     const timer = setTimeout(onClose, 5000);
     
-    // Play audio based on toast type - only once per toast
-    let audioRef: HTMLAudioElement | null = null;
-    
-    if (type === 'success' || type === 'error') {
-      audioRef = new Audio(
+    // Play audio only once per toast instance
+    if (!hasPlayedAudio.current && (type === 'success' || type === 'error')) {
+      const audio = new Audio(
         type === 'success' 
           ? `${import.meta.env.BASE_URL}audio/success.wav`
           : `${import.meta.env.BASE_URL}audio/error.wav`
       );
-      audioRef.play().catch(() => {}); // Ignore audio play errors
+      audio.play().catch(() => {});
+      hasPlayedAudio.current = true;
     }
     
-    return () => {
-      clearTimeout(timer);
-      if (audioRef) {
-        audioRef.pause();
-        audioRef.currentTime = 0;
-        audioRef = null;
-      }
-    };
+    return () => clearTimeout(timer);
   }, [onClose, type]);
 
   const configs = {
