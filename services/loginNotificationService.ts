@@ -10,13 +10,27 @@ interface LocationData {
 
 const getLocationData = async (): Promise<LocationData> => {
   try {
-    const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json();
+    const response = await fetch('https://ipapi.co/json/');
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        ip: data.ip || 'Unknown',
+        country: data.country_name || 'Unknown',
+        city: data.city || 'Unknown',
+        region: data.region || 'Unknown'
+      };
+    }
+  } catch {}
+  
+  // Fallback to ipify (IP only)
+  try {
+    const fallback = await fetch('https://api.ipify.org?format=json');
+    const data = await fallback.json();
     return {
-      ip: data.query || 'Unknown',
-      country: data.country || 'Unknown',
-      city: data.city || 'Unknown',
-      region: data.regionName || 'Unknown'
+      ip: data.ip || 'Unknown',
+      country: 'Unknown',
+      city: 'Unknown',
+      region: 'Unknown'
     };
   } catch {
     return { ip: 'Unknown', country: 'Unknown', city: 'Unknown', region: 'Unknown' };
