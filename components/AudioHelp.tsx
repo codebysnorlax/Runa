@@ -15,8 +15,8 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
 
   const audioId = `audio-${audioType}`;
   const audioFile = audioType === 'male' 
-    ? '/Runa/audio/MaleJsonHelp.wav' 
-    : '/Runa/audio/femaleJsonHelp.wav';
+    ? `${import.meta.env.BASE_URL}audio/MaleJsonHelp.wav` 
+    : `${import.meta.env.BASE_URL}audio/femaleJsonHelp.wav`;
 
   useEffect(() => {
     const audio = audioRef.current;

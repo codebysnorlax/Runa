@@ -10,7 +10,7 @@ interface LocationData {
 
 const getLocationData = async (): Promise<LocationData> => {
   try {
-    const response = await fetch('http://ip-api.com/json/');
+    const response = await fetch('https://api.ipify.org?format=json');
     const data = await response.json();
     return {
       ip: data.query || 'Unknown',
