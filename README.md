@@ -1,52 +1,60 @@
 <div align="center">
 
-<img width="1200" height="475" alt="GHBanner" src="public/images/analytics.png" />
+<img width="1200" height="475" alt="Runa Banner" src="public/images/1_image.png" />
 
 </div>
-> more screenshots at public/images/ folder
 
-# AI Fitness Tracker
+> More screenshots available in public/images/ folder
 
-A modern, AI-powered fitness tracker designed to monitor your running progress, set personalized goals, and provide intelligent insights into your performance. Built with React and TypeScript for a seamless user experience.
+# Runa - AI Fitness Tracker
+
+A modern, AI-powered fitness tracking application designed to monitor your running progress, set personalized goals, and provide intelligent insights into your performance. Built with React, TypeScript, and powered by Google Gemini AI.
 
 ## Features
 
 ### Core Functionality
-- **Run Tracking**: Log runs with distance, time, pace, and personal notes
-- **Goal Setting**: Set weekly distance targets and running frequency goals
-- **Performance Analytics**: View detailed charts and trends of your progress
-- **AI Insights**: Get intelligent recommendations for improvement
-- **Progress Dashboard**: Overview of recent activities and achievements
+- Run Tracking: Log runs with distance, time, pace, and personal notes
+- Goal Setting: Set weekly distance targets and running frequency goals
+- Performance Analytics: View detailed charts and trends of your progress
+- AI Insights: Get intelligent recommendations powered by Google Gemini
+- Progress Dashboard: Overview of recent activities and achievements
+- Audio Feedback: Success and error sounds for better user experience
+- Voice Help: Male and female voice assistance for guidance
 
 ### Analytics & Visualization
-- **Pace Trends**: Track your running pace over time (MM:SS format)
-- **Speed Analysis**: Monitor average and maximum speed improvements
-- **Distance Tracking**: Weekly and monthly distance summaries
-- **Activity Heatmap**: Visual representation of running frequency
-- **Performance Charts**: Interactive graphs with detailed tooltips
+- Pace Trends: Track your running pace over time in MM:SS format
+- Speed Analysis: Monitor average and maximum speed improvements
+- Distance Tracking: Weekly and monthly distance summaries
+- Activity Heatmap: Visual representation of running frequency
+- Performance Charts: Interactive graphs with detailed tooltips
+- Statistics Overview: Total runs, distance, and time tracking
 
 ### Data Management
-- **Local Storage**: All data stored securely in your browser
-- **Backup & Restore**: Export/import data as JSON files
-- **Data Privacy**: No external servers, complete privacy
-- **Multi-user Support**: Username-based data separation
+- Local Storage: All data stored securely in your browser
+- Backup & Restore: Export and import data as JSON files
+- Data Privacy: Complete privacy with no external data storage
+- User Authentication: Secure access with Clerk authentication
+- Profile Management: Customize your personal information and preferences
 
 ### User Experience
-- **Responsive Design**: Works on desktop and mobile devices
-- **Dark Theme**: Easy on the eyes with modern UI
-- **Password Protection**: Secure access with environment-based authentication
-- **Toast Notifications**: User-friendly feedback system
-- **Smooth Navigation**: Intuitive routing and lazy loading
+- Responsive Design: Optimized for desktop and mobile devices
+- Modern Dark Theme: Easy on the eyes with sleek UI
+- Toast Notifications: User-friendly feedback with audio cues
+- Smooth Navigation: Intuitive routing with lazy loading
+- FAQ Section: Built-in help with animated typing effects
+- Image Carousel: Visual showcase on login page
 
 ## Technology Stack
 
-- **Frontend**: React 19.2.0 with TypeScript
-- **Routing**: React Router DOM 7.9.6
-- **Charts**: Recharts 3.4.1 for data visualization
-- **Icons**: Lucide React for modern iconography
-- **Styling**: Tailwind CSS via CDN
-- **Build Tool**: Vite 6.2.0
-- **AI Integration**: Google Gemini API for insights
+- Frontend: React 19.2.0 with TypeScript
+- Routing: React Router DOM 7.9.6
+- Authentication: Clerk for secure user management
+- Charts: Recharts 3.4.1 for data visualization
+- Icons: Lucide React for modern iconography
+- Styling: Tailwind CSS via CDN
+- Build Tool: Vite 6.2.0
+- AI Integration: Google Gemini API for intelligent insights
+- Deployment: Vercel with optimized production builds
 
 ## Getting Started
 
@@ -71,7 +79,7 @@ A modern, AI-powered fitness tracker designed to monitor your running progress, 
    Create a `.env.local` file in the root directory:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
-   GETIN_PASSWORD=your_login_password_here
+   VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
    ```
 
 4. **Start the development server**
@@ -84,43 +92,56 @@ A modern, AI-powered fitness tracker designed to monitor your running progress, 
 
 ### Usage
 
-1. **Login**: Enter any username and the configured password
-2. **Setup Profile**: Add your personal information in Settings
-3. **Set Goals**: Define your weekly running targets
-4. **Track Runs**: Use "Add Run" to log your activities
-5. **View Analytics**: Monitor your progress in the Analytics section
-6. **Get Insights**: Check AI-powered recommendations
-7. **Backup Data**: Export your data regularly from Settings
+1. Login: Sign in using Clerk authentication
+2. Setup Profile: Add your personal information in Settings
+3. Set Goals: Define your weekly running targets and frequency
+4. Track Runs: Use "Add Run" to log your activities with distance, time, and notes
+5. View Analytics: Monitor your progress with interactive charts
+6. Get AI Insights: Receive personalized recommendations from Google Gemini
+7. Backup Data: Export your data as JSON from Settings
+8. FAQ Help: Access built-in help section for common questions
 
 ## Project Structure
 
 ```
-aifit/
+Runa/
 ├── components/          # Reusable UI components
 │   ├── Card.tsx        # Container component
 │   ├── Layout.tsx      # Main layout with navigation
 │   ├── Modal.tsx       # Modal dialogs
-│   ├── Toast.tsx       # Notification system
-│   └── ...
+│   ├── Toast.tsx       # Notification system with audio
+│   ├── FAQ.tsx         # FAQ section with typing animation
+│   ├── AudioLoader.tsx # Audio playback loader
+│   └── AudioHelp.tsx   # Voice assistance component
 ├── pages/              # Main application pages
-│   ├── Dashboard.tsx   # Home overview
+│   ├── Dashboard.tsx   # Home overview with recent runs
 │   ├── AddRun.tsx      # Run logging form
+│   ├── EditRun.tsx     # Edit existing runs
 │   ├── Analytics.tsx   # Charts and statistics
-│   ├── Settings.tsx    # User preferences
-│   └── ...
-├── context/            # React context for state management
+│   ├── Settings.tsx    # User preferences and backup
+│   ├── Login.tsx       # Authentication page with carousel
+│   └── AIInsights.tsx  # AI-powered recommendations
 ├── services/           # Data services and API calls
-├── types.ts           # TypeScript type definitions
-└── ...
+│   ├── dataService.ts  # Local storage management
+│   └── geminiService.ts # AI insights integration
+├── utils/              # Utility functions
+│   └── audioUtils.ts   # Audio playback helpers
+├── types.ts            # TypeScript type definitions
+├── public/
+│   ├── images/         # App screenshots and assets
+│   ├── audio/          # Sound effects and voice files
+│   └── json/           # FAQ and configuration data
+└── vite.config.ts      # Vite configuration
 ```
 
 ## Data Privacy & Security
 
-- **Local Storage Only**: All personal data stays on your device
-- **No External Tracking**: No analytics or tracking services
-- **Password Protection**: Configurable access control
-- **Backup Control**: You control your data exports
-- **Open Source**: Transparent codebase for security review
+- Local Storage Only: All running data stays on your device
+- No External Tracking: No analytics or tracking services
+- Secure Authentication: Clerk-based user authentication
+- Backup Control: You control your data exports and imports
+- Privacy First: AI insights processed without storing personal data
+- Open Source: Transparent codebase for security review
 
 ## Contributing
 
@@ -143,13 +164,23 @@ Tech enthusiast who loves building innovative projects and crafting problem-solv
 
 This project is for personal use. All rights reserved.
 
+## Key Features Highlights
+
+- Privacy-focused fitness tracking with local data storage
+- AI-powered insights using Google Gemini API
+- Modern responsive design for all devices
+- Interactive charts and performance analytics
+- Audio feedback for enhanced user experience
+- Built-in FAQ with animated typing effects
+- Secure authentication with Clerk
+- Easy data backup and restore functionality
+
 ## Acknowledgments
 
 - Built with modern web technologies
 - Inspired by the need for privacy-focused fitness tracking
 - Designed for runners who value data ownership
 - Created with passion for clean, functional software
-- 70% vibe-coded, 30% snorlax-powered
 ---
 
 *Keep running, keep improving!*
