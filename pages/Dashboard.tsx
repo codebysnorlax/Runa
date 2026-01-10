@@ -70,15 +70,24 @@ const Dashboard: React.FC = () => {
     (run) => new Date(run.date).setHours(0, 0, 0, 0) === yesterday.getTime()
   );
 
-  const last7Days = new Date(today);
-  last7Days.setDate(today.getDate() - 7);
-  const last7DaysRuns = runs.filter((run) => new Date(run.date) >= last7Days);
-  const last7DaysDistance =
-    last7DaysRuns.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
+  // Calculate current week (Monday to Sunday)
+  const currentWeekStart = new Date(today);
+  const dayOfWeek = currentWeekStart.getDay();
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday, go back 6 days, else go to Monday
+  currentWeekStart.setDate(currentWeekStart.getDate() + diff);
+  currentWeekStart.setHours(0, 0, 0, 0);
+
+  const currentWeekRuns = runs.filter((run) => {
+    const runDate = new Date(run.date);
+    runDate.setHours(0, 0, 0, 0);
+    return runDate >= currentWeekStart && runDate <= today;
+  });
+  
+  const currentWeekDistance = currentWeekRuns.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
 
   const goalProgress =
     goals && goals.weekly_distance_km > 0
-      ? (last7DaysDistance / goals.weekly_distance_km) * 100
+      ? (currentWeekDistance / goals.weekly_distance_km) * 100
       : 0;
   const latestInsight = insights?.insights?.[0];
 
@@ -143,7 +152,7 @@ const Dashboard: React.FC = () => {
           <p className="text-xs text-gray-400 mb-1">This Week</p>
           <p className="text-xl sm:text-2xl font-bold text-white">
             <AnimatedNumber
-              value={last7DaysDistance}
+              value={currentWeekDistance}
               decimals={0}
               duration={1200}
             />
@@ -365,7 +374,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Progress</span>
                   <span className="font-bold text-white">
-                    {last7DaysDistance.toFixed(1)} km
+                    {currentWeekDistance.toFixed(1)} km
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -379,7 +388,7 @@ const Dashboard: React.FC = () => {
                   <span className="font-bold text-white">
                     {Math.max(
                       0,
-                      (goals?.weekly_distance_km || 0) - last7DaysDistance
+                      (goals?.weekly_distance_km || 0) - currentWeekDistance
                     ).toFixed(1)}{" "}
                     km
                   </span>

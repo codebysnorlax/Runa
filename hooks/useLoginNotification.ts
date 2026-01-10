@@ -2,22 +2,22 @@ import { useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { sendLoginNotification } from '../services/loginNotificationService';
 
-const LAST_LOGIN_KEY = 'runa_last_login_notification';
+const NOTIFIED_USERS_KEY = 'runa_notified_users';
 
 export const useLoginNotification = () => {
   const { user, isSignedIn } = useUser();
 
   useEffect(() => {
     if (isSignedIn && user) {
-      const lastLoginTime = localStorage.getItem(LAST_LOGIN_KEY);
-      const currentTime = Date.now();
+      const notifiedUsers = JSON.parse(localStorage.getItem(NOTIFIED_USERS_KEY) || '[]');
       
-      // Check if this is a new login (more than 5 minutes since last notification)
-      const shouldNotify = !lastLoginTime || (currentTime - parseInt(lastLoginTime)) > 5 * 60 * 1000;
-      
-      if (shouldNotify) {
-        sendLoginNotification(user).then(() => {
-          localStorage.setItem(LAST_LOGIN_KEY, currentTime.toString());
+      // Check if this user has already been notified
+      if (!notifiedUsers.includes(user.id)) {
+        sendLoginNotification(user).then((result) => {
+          if (result.success) {
+            notifiedUsers.push(user.id);
+            localStorage.setItem(NOTIFIED_USERS_KEY, JSON.stringify(notifiedUsers));
+          }
         });
       }
     }
