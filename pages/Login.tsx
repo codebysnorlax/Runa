@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { Volume2 } from "lucide-react";
-import AudioLoader from "../components/AudioLoader";
+import { AudioOrbIntro } from "../components/AudioOrbIntro";
 const images = [
   `${import.meta.env.BASE_URL}images/1_image.png`,
   `${import.meta.env.BASE_URL}images/2_image.png`,
@@ -13,11 +13,9 @@ const images = [
   `${import.meta.env.BASE_URL}images/8_image.png`,
 ];
 
-const Login: React.FC = () => {
+const Login = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [showAudioModal, setShowAudioModal] = useState(false);
-  const [audioProgress, setAudioProgress] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,49 +25,13 @@ const Login: React.FC = () => {
   }, []);
 
   const handleAudioPlay = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(`${import.meta.env.BASE_URL}audio/RunaIntro.wav`);
-      audioRef.current.addEventListener('ended', () => {
-        setShowAudioModal(false);
-        setAudioProgress(0);
-      });
-      audioRef.current.addEventListener('timeupdate', () => {
-        if (audioRef.current) {
-          const progress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-          setAudioProgress(Math.round(progress));
-        }
-      });
-      audioRef.current.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        setShowAudioModal(false);
-        setAudioProgress(0);
-      });
-    }
     setShowAudioModal(true);
-    setAudioProgress(0);
-    audioRef.current.play().catch(err => {
-      console.error('Play error:', err);
-      setShowAudioModal(false);
-    });
   };
 
-  const handleCloseModal = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+  const handleCloseAudio = () => {
     setShowAudioModal(false);
-    setAudioProgress(0);
   };
 
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -230,12 +192,11 @@ const Login: React.FC = () => {
       </main>
 
       {showAudioModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={handleCloseModal}>
-          <div className="bg-gray-800/40 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-gray-700/50" onClick={(e) => e.stopPropagation()}>
-            <AudioLoader progress={audioProgress} />
-            <p className="text-center text-gray-300 mt-4 text-sm">Playing Runa Intro...</p>
-          </div>
-        </div>
+        <AudioOrbIntro 
+          audioSrc={`${import.meta.env.BASE_URL}audio/RunaIntro.wav`}
+          onComplete={handleCloseAudio}
+          onCancel={handleCloseAudio}
+        />
       )}
 
       <footer className="border-t border-gray-800 py-4 sm:py-6 mt-auto">
