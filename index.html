@@ -1,76 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="AI-powered fitness tracker for monitoring running progress and performance">
-    <title>Runa Fit</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
-    <link rel="manifest" href="/favicon/site.webmanifest" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered fitness tracker for monitoring running progress and performance">
+  <title>Runa Fit</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+  <link rel="manifest" href="/favicon/site.webmanifest" />
 
-    <!-- Styles -->
-    <link rel="preload" href="/index.css" as="style">
-    <link rel="stylesheet" href="/index.css">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cookie&display=swap"
+    rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cookie&display=swap"
+      rel="stylesheet">
+  </noscript>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Styles -->
+  <link rel="preload" href="/index.css" as="style">
+  <link rel="stylesheet" href="/index.css">
 
-    <!-- Tailwind Config -->
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'system-ui', 'sans-serif'],
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            cookie: ['Cookie', 'cursive'],
+          },
+          colors: {
+            'brand-orange': '#FF7A00',
+            'dark-bg': '#121212',
+            'dark-card': '#1E1E1E',
+            'dark-border': '#2D2D2D',
+          },
+          animation: {
+            pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'pop-in': 'pop-in 0.3s ease-out forwards',
+            'fade-in': 'fade-in 0.2s ease-out forwards',
+            'slide-in-right': 'slide-in-right 0.5s ease-out forwards',
+          },
+          keyframes: {
+            pulse: {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0.5 },
             },
-            colors: {
-              'brand-orange': '#FF7A00',
-              'dark-bg': '#121212',
-              'dark-card': '#1E1E1E',
-              'dark-border': '#2D2D2D',
+            'pop-in': {
+              '0%': { opacity: '0', transform: 'scale(0.9)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
             },
-            animation: {
-              pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'pop-in': 'pop-in 0.3s ease-out forwards',
-              'fade-in': 'fade-in 0.2s ease-out forwards',
-              'slide-in-right': 'slide-in-right 0.5s ease-out forwards',
+            'fade-in': {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
             },
-            keyframes: {
-              pulse: {
-                '0%, 100%': { opacity: 1 },
-                '50%': { opacity: 0.5 },
-              },
-              'pop-in': {
-                '0%': { opacity: '0', transform: 'scale(0.9)' },
-                '100%': { opacity: '1', transform: 'scale(1)' },
-              },
-              'fade-in': {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              },
-              'slide-in-right': {
-                '0%': { transform: 'translateX(20px)', opacity: '0' },
-                '100%': { transform: 'translateX(0)', opacity: '1' },
-              },
+            'slide-in-right': {
+              '0%': { transform: 'translateX(20px)', opacity: '0' },
+              '100%': { transform: 'translateX(0)', opacity: '1' },
             },
           },
         },
-      }
-    </script>
+      },
+    }
+  </script>
 
-    <!-- Import Map -->
-    <script type="importmap">
+  <!-- Import Map -->
+  <script type="importmap">
       {
         "imports": {
           "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
@@ -83,9 +89,11 @@
         }
       }
     </script>
-  </head>
-  <body class="bg-dark-bg">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+</head>
+
+<body class="bg-dark-bg">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
