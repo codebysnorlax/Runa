@@ -775,10 +775,10 @@ const Settings: React.FC = () => {
                       href="http://buymeacoffee.com/codebysnorlax"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 bg-brand-orange text-white font-cookie text-2xl px-3 py-0.5 rounded-full hover:bg-orange-600 transition-colors"
+                      className="inline-flex items-center space-x-1 sm:space-x-2 bg-brand-orange text-white font-cookie text-lg sm:text-xl lg:text-2xl px-2 sm:px-3 py-0.5 rounded-full hover:bg-orange-600 transition-colors"
                     >
-                      <Coffee className="w-5 h-5" />
-                      <span className="mt-1">Buy me a coffee</span>
+                      <Coffee className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="mt-0.5 sm:mt-1">Buy me a coffee</span>
                     </a>
                   </div>
                 </div>

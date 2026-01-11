@@ -97,8 +97,8 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
 
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setFullYear(endDate.getFullYear() - 1);
-    startDate.setDate(1);
+    // Start from 52 weeks ago (364 days) so today is at the far right
+    startDate.setDate(endDate.getDate() - 364);
 
     const days = [];
     let currentDate = new Date(startDate);
@@ -112,8 +112,8 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
         time: dayData?.time || 0,
         intensity: dayData
           ? dayData.distance * 0.4 +
-            (dayData.speed / dayData.count) * 0.3 +
-            dayData.time * 0.3
+          (dayData.speed / dayData.count) * 0.3 +
+          dayData.time * 0.3
           : 0,
       });
       currentDate.setDate(currentDate.getDate() + 1);
@@ -171,14 +171,14 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
       </p>
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full">
-          <div className="flex gap-1">
+          <div className="flex gap-0.5 sm:gap-1">
             {/* Day labels */}
-            <div className="flex flex-col gap-1 text-xs text-gray-400 pt-5">
+            <div className="flex flex-col gap-0.5 sm:gap-1 text-xs text-gray-400 pt-4 sm:pt-5">
               {weekDays.map((day, i) => (
                 <div
                   key={i}
-                  className="h-3 flex items-center"
-                  style={{ fontSize: "10px" }}
+                  className="h-2 sm:h-3 flex items-center"
+                  style={{ fontSize: "8px" }}
                 >
                   {i % 2 === 1 ? day : ""}
                 </div>
@@ -187,49 +187,50 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
 
             <div className="flex-1">
               {/* Month labels */}
-              <div className="flex gap-1 mb-1 text-xs text-gray-400">
+              <div className="flex gap-0.5 sm:gap-1 mb-1 text-xs text-gray-400">
                 {weeks.map((week, weekIndex) => {
                   const firstDay = week.find((d) => d);
                   if (firstDay && new Date(firstDay.date).getDate() <= 7) {
-                    const month = new Date(firstDay.date).toLocaleString(
-                      "default",
-                      { month: "short" }
-                    );
+                    const dateObj = new Date(firstDay.date);
+                    const month = dateObj.toLocaleString("default", { month: "short" });
+                    const isJanuary = dateObj.getMonth() === 0;
+                    const year = dateObj.getFullYear().toString().slice(-2);
                     return (
                       <div
                         key={weekIndex}
-                        className="w-3"
-                        style={{ fontSize: "10px" }}
+                        className="w-2 sm:w-3"
+                        style={{ fontSize: "8px" }}
                       >
-                        {month}
+                        {isJanuary ? `'${year}` : month}
                       </div>
                     );
                   }
-                  return <div key={weekIndex} className="w-3" />;
+                  return <div key={weekIndex} className="w-2 sm:w-3" />;
                 })}
               </div>
 
               {/* Heatmap grid */}
-              <div className="flex gap-1">
+              <div className="flex gap-0.5 sm:gap-1">
                 {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-1">
-                    {week.map((day, dayIndex) => (
-                      <div
-                        key={dayIndex}
-                        className={`w-3 h-3 rounded-sm ${
-                          day ? getColor(day.intensity) : "bg-transparent"
-                        }`}
-                        title={
-                          day
-                            ? `${day.date.toDateString()}\nDistance: ${day.distance.toFixed(
+                  <div key={weekIndex} className="flex flex-col gap-0.5 sm:gap-1">
+                    {week.map((day, dayIndex) => {
+                      const isToday = day && day.date.toDateString() === new Date().toDateString();
+                      return (
+                        <div
+                          key={dayIndex}
+                          className={`w-2 h-2 sm:w-3 sm:h-3 rounded-sm ${day ? getColor(day.intensity) : "bg-transparent"} ${isToday ? "ring-1 ring-red-500" : ""}`}
+                          title={
+                            day
+                              ? `${day.date.toDateString()}\nDistance: ${day.distance.toFixed(
                                 1
                               )}km\nAvg Speed: ${day.avgSpeed.toFixed(
                                 1
                               )}km/h\nTime: ${day.time.toFixed(0)}min`
-                            : ""
-                        }
-                      />
-                    ))}
+                              : ""
+                          }
+                        />
+                      );
+                    })}
                   </div>
                 ))}
               </div>
@@ -237,17 +238,17 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
           </div>
 
           {/* Legend */}
-          <div className="flex justify-end mt-3 text-xs text-gray-400 items-center gap-2">
-            <span>Less</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-gray-800" />
-              <div className="w-3 h-3 rounded-sm bg-brand-orange/20" />
-              <div className="w-3 h-3 rounded-sm bg-brand-orange/40" />
-              <div className="w-3 h-3 rounded-sm bg-brand-orange/60" />
-              <div className="w-3 h-3 rounded-sm bg-brand-orange/80" />
-              <div className="w-3 h-3 rounded-sm bg-brand-orange" />
+          <div className="flex justify-end mt-2 sm:mt-3 text-xs text-gray-400 items-center gap-1 sm:gap-2">
+            <span className="text-[10px] sm:text-xs">Less</span>
+            <div className="flex gap-0.5 sm:gap-1">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-gray-800" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/20" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/40" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/60" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/80" />
+              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange" />
             </div>
-            <span>More</span>
+            <span className="text-[10px] sm:text-xs">More</span>
           </div>
         </div>
       </div>
@@ -755,7 +756,7 @@ const Analytics: React.FC = () => {
             const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
             const distanceProgress = (month.distance / maxDistance) * 100;
             const runsProgress = (month.runs / maxRuns) * 100;
-            
+
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
             const monthDate = new Date(month.name + "-01");
@@ -764,9 +765,8 @@ const Analytics: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${
-                  isCurrentMonth ? 'border-red-500' : 'border-transparent'
-                }`}
+                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                  }`}
                 style={{ minWidth: '140px' }}
               >
                 <div className="relative w-20 h-20 mb-3">
@@ -801,9 +801,8 @@ const Analytics: React.FC = () => {
                       strokeWidth="8"
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 40}`}
-                      strokeDashoffset={`${
-                        2 * Math.PI * 40 * (1 - distanceProgress / 100)
-                      }`}
+                      strokeDashoffset={`${2 * Math.PI * 40 * (1 - distanceProgress / 100)
+                        }`}
                       className="transition-all duration-1000 ease-out"
                     />
 
@@ -816,9 +815,8 @@ const Analytics: React.FC = () => {
                       strokeWidth="6"
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 30}`}
-                      strokeDashoffset={`${
-                        2 * Math.PI * 30 * (1 - runsProgress / 100)
-                      }`}
+                      strokeDashoffset={`${2 * Math.PI * 30 * (1 - runsProgress / 100)
+                        }`}
                       className="transition-all duration-1000 ease-out"
                     />
                   </svg>
@@ -865,7 +863,7 @@ const Analytics: React.FC = () => {
             const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
             const distanceProgress = (month.distance / maxDistance) * 100;
             const runsProgress = (month.runs / maxRuns) * 100;
-            
+
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
             const monthDate = new Date(month.name + "-01");
@@ -874,9 +872,8 @@ const Analytics: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${
-                  isCurrentMonth ? 'border-red-500' : 'border-transparent'
-                }`}
+                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                  }`}
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
                   <svg
@@ -910,9 +907,8 @@ const Analytics: React.FC = () => {
                       strokeWidth="8"
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 40}`}
-                      strokeDashoffset={`${
-                        2 * Math.PI * 40 * (1 - distanceProgress / 100)
-                      }`}
+                      strokeDashoffset={`${2 * Math.PI * 40 * (1 - distanceProgress / 100)
+                        }`}
                       className="transition-all duration-1000 ease-out"
                     />
 
@@ -925,9 +921,8 @@ const Analytics: React.FC = () => {
                       strokeWidth="6"
                       fill="none"
                       strokeDasharray={`${2 * Math.PI * 30}`}
-                      strokeDashoffset={`${
-                        2 * Math.PI * 30 * (1 - runsProgress / 100)
-                      }`}
+                      strokeDashoffset={`${2 * Math.PI * 30 * (1 - runsProgress / 100)
+                        }`}
                       className="transition-all duration-1000 ease-out"
                     />
                   </svg>
