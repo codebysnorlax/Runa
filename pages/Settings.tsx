@@ -534,7 +534,9 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Input Fields */}
-              <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4 mb-6">
+              {/* Input Fields */}
+              <div className="space-y-4 mb-6">
+                {/* Name Input - Full Width */}
                 <div className="group">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
                     <User className="w-4 h-4 text-brand-orange" />
@@ -549,47 +551,51 @@ const Settings: React.FC = () => {
                     placeholder="Enter your name"
                   />
                 </div>
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                    <Target className="w-4 h-4 text-brand-orange" />
-                    Age
-                  </label>
-                  <input
-                    name="age"
-                    type="number"
-                    value={profileState.age}
-                    onChange={handleProfileChange}
-                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                    placeholder="Your age"
-                  />
-                </div>
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                    <Code className="w-4 h-4 text-brand-orange" />
-                    Height (cm)
-                  </label>
-                  <input
-                    name="height_cm"
-                    type="number"
-                    value={profileState.height_cm}
-                    onChange={handleProfileChange}
-                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                    placeholder="Height in cm"
-                  />
-                </div>
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                    <Database className="w-4 h-4 text-brand-orange" />
-                    Weight (kg)
-                  </label>
-                  <input
-                    name="weight_kg"
-                    type="number"
-                    value={profileState.weight_kg}
-                    onChange={handleProfileChange}
-                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                    placeholder="Weight in kg"
-                  />
+
+                {/* Age, Height, Weight - Single Row */}
+                <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                  <div className="group">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2 truncate">
+                      <Target className="w-4 h-4 text-brand-orange" />
+                      Age
+                    </label>
+                    <input
+                      name="age"
+                      type="number"
+                      value={profileState.age}
+                      onChange={handleProfileChange}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                      placeholder="Age"
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2 truncate">
+                      <Code className="w-4 h-4 text-brand-orange" />
+                      Height
+                    </label>
+                    <input
+                      name="height_cm"
+                      type="number"
+                      value={profileState.height_cm}
+                      onChange={handleProfileChange}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                      placeholder="cm"
+                    />
+                  </div>
+                  <div className="group">
+                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2 truncate">
+                      <Database className="w-4 h-4 text-brand-orange" />
+                      Weight
+                    </label>
+                    <input
+                      name="weight_kg"
+                      type="number"
+                      value={profileState.weight_kg}
+                      onChange={handleProfileChange}
+                      className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                      placeholder="kg"
+                    />
+                  </div>
                 </div>
               </div>
 
