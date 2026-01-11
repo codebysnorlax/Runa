@@ -888,17 +888,22 @@ const Settings: React.FC = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <h2 className="text-xl font-semibold text-white">Developer</h2>
+                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-500 via-white via-gray-500 to-gray-500 animate-text-shine bg-[length:200%_auto]">
+                      Developer
+                    </h2>
                   </div>
                   <div className="flex justify-end lg:block lg:text-left">
                     <a
                       href="http://buymeacoffee.com/codebysnorlax"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1 sm:space-x-2 bg-brand-orange text-white font-cookie text-lg sm:text-xl lg:text-2xl px-2 sm:px-3 py-0.5 rounded-full hover:bg-orange-600 transition-colors"
+                      className="relative inline-flex group overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange"
                     >
-                      <Coffee className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span className="mt-0.5 sm:mt-1">Buy me a coffee</span>
+                      <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#FFD700_0%,#FFA500_50%,#FFD700_100%)]" />
+                      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-brand-orange px-2 sm:px-3 py-0.5 text-lg sm:text-xl lg:text-2xl font-cookie font-medium text-white backdrop-blur-3xl transition-all group-hover:bg-orange-600 space-x-1 sm:space-x-2">
+                        <Coffee className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="mt-0.5 sm:mt-1">Buy me a coffee</span>
+                      </span>
                     </a>
                   </div>
                 </div>
