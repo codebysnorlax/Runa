@@ -70,6 +70,7 @@ const Settings: React.FC = () => {
     loading,
     currentUser,
     refreshData,
+    runs,
   } = useAppContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>("profile");
@@ -404,6 +405,47 @@ const Settings: React.FC = () => {
     </button>
   );
 
+  /* User Status Logic */
+  const getUserStatus = () => {
+    if (!runs || runs.length === 0) return { label: "New Runner", color: "text-blue-400" };
+
+    const sortedRuns = [...runs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const lastRunDate = new Date(sortedRuns[0].date);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const isToday = lastRunDate.toDateString() === today.toDateString();
+    const isYesterday = lastRunDate.toDateString() === yesterday.toDateString();
+
+    if (isToday) {
+      // Check for streak (run yesterday too)
+      const runYesterday = sortedRuns.some(r => new Date(r.date).toDateString() === yesterday.toDateString());
+      if (runYesterday) return { label: "Streak Pro", color: "text-orange-500" };
+      return { label: "Active Today", color: "text-yellow-400" };
+    }
+
+    if (isYesterday) return { label: "Ran Yesterday", color: "text-green-400" };
+
+    const diffTime = Math.abs(today.getTime() - lastRunDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 3) return { label: "Missed a run", color: "text-red-400" };
+    return { label: "Off Track", color: "text-gray-400" };
+  };
+
+  const getBMIStatus = (height: number, weight: number) => {
+    if (!height || !weight) return null;
+    const bmi = weight / Math.pow(height / 100, 2);
+    if (bmi < 18.5) return { label: "Underweight", color: "text-blue-400" };
+    if (bmi < 25) return { label: "Healthy", color: "text-green-400" };
+    if (bmi < 30) return { label: "Overweight", color: "text-yellow-400" };
+    return { label: "Obese", color: "text-red-400" };
+  };
+
+  const status = getUserStatus();
+  const bmiStatus = profileState ? getBMIStatus(profileState.height_cm, profileState.weight_kg) : null;
+
   return (
     <AudioProvider>
       <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${activeTab === 'feedback' ? '' : 'pb-24'}`}>
@@ -432,9 +474,70 @@ const Settings: React.FC = () => {
         <div>
           {activeTab === "profile" && (
             <form onSubmit={handleProfileSubmit} className="animate-fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+              {/* Profile Header with Avatar on Left, Stats on Right */}
+              <div className="mb-6 p-4 sm:p-5 bg-gray-800/50 border border-gray-700/50 rounded-2xl flex flex-col items-center">
+                <div className="flex items-center gap-4 sm:gap-6 w-full mb-3">
+                  {/* Avatar - Left Side */}
+                  <div className="relative flex-shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-brand-orange via-orange-500 to-pink-500 p-0.5">
+                      <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        {user?.imageUrl ? (
+                          <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                        )}
+                      </div>
+                    </div>
+                    {/* Status Dot */}
+                    <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-gray-900 ${status.label.includes("Streak") || status.label.includes("Active") ? "bg-green-500" : "bg-gray-500"}`} />
+                  </div>
+
+                  {/* Stats - Right Side */}
+                  <div className="flex-1 flex items-center justify-around">
+                    <div className="text-center px-1 sm:px-2">
+                      <div className="text-lg sm:text-2xl font-bold text-white">{profileState.age || "—"}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-400">Age</div>
+                    </div>
+                    <div className="w-px h-8 bg-gray-700" />
+                    <div className="text-center px-1 sm:px-2">
+                      <div className="text-lg sm:text-2xl font-bold text-white">{profileState.height_cm || "—"}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-400">Height</div>
+                    </div>
+                    <div className="w-px h-8 bg-gray-700" />
+                    <div className="text-center px-1 sm:px-2">
+                      <div className="text-lg sm:text-2xl font-bold text-white">{profileState.weight_kg || "—"}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-400">Weight</div>
+                    </div>
+                    <div className="w-px h-8 bg-gray-700" />
+                    <div className="text-center px-1 sm:px-2">
+                      <div className="text-lg sm:text-2xl font-bold text-white">
+                        {profileState.height_cm && profileState.weight_kg
+                          ? (profileState.weight_kg / Math.pow(profileState.height_cm / 100, 2)).toFixed(1)
+                          : "—"}
+                      </div>
+                      <div className="text-[10px] sm:text-xs text-gray-400">BMI</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Labels - Status Left, BMI Right */}
+                <div className="w-full flex justify-between items-center px-2">
+                  <div className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-gray-900/80 border border-gray-700/50 ${status.color}`}>
+                    {status.label}
+                  </div>
+                  {bmiStatus && (
+                    <div className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-gray-900/80 border border-gray-700/50 ${bmiStatus.color}`}>
+                      {bmiStatus.label}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Input Fields */}
+              <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4 mb-6">
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                    <User className="w-4 h-4 text-brand-orange" />
                     Name
                   </label>
                   <input
@@ -442,11 +545,13 @@ const Settings: React.FC = () => {
                     type="text"
                     value={profileState.name}
                     onChange={handleProfileChange}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
+                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                    placeholder="Enter your name"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                    <Target className="w-4 h-4 text-brand-orange" />
                     Age
                   </label>
                   <input
@@ -454,11 +559,13 @@ const Settings: React.FC = () => {
                     type="number"
                     value={profileState.age}
                     onChange={handleProfileChange}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
+                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                    placeholder="Your age"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                    <Code className="w-4 h-4 text-brand-orange" />
                     Height (cm)
                   </label>
                   <input
@@ -466,11 +573,13 @@ const Settings: React.FC = () => {
                     type="number"
                     value={profileState.height_cm}
                     onChange={handleProfileChange}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
+                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                    placeholder="Height in cm"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="group">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                    <Database className="w-4 h-4 text-brand-orange" />
                     Weight (kg)
                   </label>
                   <input
@@ -478,18 +587,23 @@ const Settings: React.FC = () => {
                     type="number"
                     value={profileState.weight_kg}
                     onChange={handleProfileChange}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-brand-orange focus:border-brand-orange"
+                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
+                    placeholder="Weight in kg"
                   />
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200"
-                >
+
+              {/* Save Button */}
+              <button
+                type="submit"
+                className="w-full relative group overflow-hidden bg-gradient-to-r from-brand-orange to-orange-600 text-white font-bold py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <Shield className="w-5 h-5" />
                   Save Profile
-                </button>
-              </div>
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              </button>
             </form>
           )}
           {activeTab === "goals" && (
