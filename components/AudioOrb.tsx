@@ -55,7 +55,7 @@ export const AudioOrb = ({ audioSrc, onComplete, onCancel }: AudioOrbProps) => {
         analyser.smoothingTimeConstant = 0.8;
 
         const source = ctx.createMediaElementSource(audio);
-        source.connect(analyser);
+        source.connect(analyser);=
         analyser.connect(ctx.destination);
 
         contextRef.current = { ctx, analyser, data: new Uint8Array(analyser.frequencyBinCount) };
@@ -116,8 +116,8 @@ export const AudioOrb = ({ audioSrc, onComplete, onCancel }: AudioOrbProps) => {
       if (!contextRef.current) {
         // We need to set it up here if not done yet.
         // Re-using the logic from effect might be tricky due to closures/refs.
-        // Let's rely on a helper or just duplicate the simple setup if needed, 
-        // OR assume the effect setup handles it? 
+        // Let's rely on a helper or just duplicate the simple setup if needed,
+        // OR assume the effect setup handles it?
         // Actually the effect setup was removed in the replacement to be inside toggle/play.
         // Let's add the setup logic cleanly.
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
