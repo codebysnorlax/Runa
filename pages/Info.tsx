@@ -3,7 +3,7 @@ import Card from "../components/Card";
 import {
   Github,
   Mail,
-  Globe,
+  BookOpen,
   Instagram,
   Twitter,
   Linkedin,
@@ -75,13 +75,13 @@ const Info: React.FC = () => {
                   <span className="text-xs sm:text-sm">Email</span>
                 </a>
                 <a
-                  href="https://github.com/codebysnorlax"
+                  href="https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
                 >
-                  <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Portfolio</span>
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm">Blogs</span>
                 </a>
                 <a
                   href="https://instagram.com/nr_snorlax"
