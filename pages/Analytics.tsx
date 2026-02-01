@@ -1,8 +1,9 @@
-import React, { useMemo, useState, memo, useCallback } from "react";
+import React, { useMemo, useState, memo, useCallback, useRef } from "react";
 import { useAppContext } from "../context/AppContext";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Download, Loader2 } from "lucide-react";
+import { toBlob } from "html-to-image";
 import {
   LineChart,
   Line,
@@ -55,6 +56,64 @@ const formatPace = (paceMinutes: number) => {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
+const DownloadButton = ({ elementRef, fileName }: { elementRef: React.RefObject<HTMLDivElement | null>, fileName: string }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!elementRef.current) {
+      console.error("Download failed: elementRef.current is null");
+      return;
+    }
+
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+    try {
+      // Use toBlob for better performance and browser support with large images
+      const blob = await toBlob(elementRef.current, {
+        backgroundColor: "#1E1E1E",
+        cacheBust: true,
+        pixelRatio: 2, // Higher quality
+        fontEmbedCSS: '', // Avoid font embedding issues (trim error)
+      });
+
+      if (!blob) throw new Error("Could not generate image blob");
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `${fileName}.png`;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download image", err);
+      alert("Failed to download chart. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleDownload}
+      disabled={isDownloading}
+      className={`absolute top-3 right-3 p-1.5 bg-gray-800/80 hover:bg-gray-700 text-white rounded-full transition-all z-20 group shadow-lg ${isDownloading ? 'opacity-70' : ''}`}
+      title="Download Chart"
+    >
+      {isDownloading ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <Download size={14} className="group-hover:scale-110 transition-transform" />
+      )}
+    </button>
+  );
+};
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -74,6 +133,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
+  const heatmapRef = useRef<HTMLDivElement>(null);
   const data = useMemo(() => {
     const runDataByDate: {
       [key: string]: {
@@ -165,90 +225,93 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
   }
 
   return (
-    <Card>
-      <p className="text-xs text-gray-400 mb-3">
-        Based on distance, speed, and time
-      </p>
-      <div className="overflow-x-auto">
-        <div className="inline-block min-w-full">
-          <div className="flex gap-0.5 sm:gap-1">
-            {/* Day labels */}
-            <div className="flex flex-col gap-0.5 sm:gap-1 text-xs text-gray-400 pt-4 sm:pt-5">
-              {weekDays.map((day, i) => (
-                <div
-                  key={i}
-                  className="h-2 sm:h-3 flex items-center"
-                  style={{ fontSize: "8px" }}
-                >
-                  {i % 2 === 1 ? day : ""}
-                </div>
-              ))}
-            </div>
-
-            <div className="flex-1">
-              {/* Month labels */}
-              <div className="flex gap-0.5 sm:gap-1 mb-1 text-xs text-gray-400">
-                {weeks.map((week, weekIndex) => {
-                  const firstDay = week.find((d) => d);
-                  if (firstDay && new Date(firstDay.date).getDate() <= 7) {
-                    const dateObj = new Date(firstDay.date);
-                    const month = dateObj.toLocaleString("default", { month: "short" });
-                    const isJanuary = dateObj.getMonth() === 0;
-                    const year = dateObj.getFullYear().toString().slice(-2);
-                    return (
-                      <div
-                        key={weekIndex}
-                        className="w-2 sm:w-3"
-                        style={{ fontSize: "8px" }}
-                      >
-                        {isJanuary ? `'${year}` : month}
-                      </div>
-                    );
-                  }
-                  return <div key={weekIndex} className="w-2 sm:w-3" />;
-                })}
-              </div>
-
-              {/* Heatmap grid */}
-              <div className="flex gap-0.5 sm:gap-1">
-                {weeks.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-0.5 sm:gap-1">
-                    {week.map((day, dayIndex) => {
-                      const isToday = day && day.date.toDateString() === new Date().toDateString();
-                      return (
-                        <div
-                          key={dayIndex}
-                          className={`w-2 h-2 sm:w-3 sm:h-3 rounded-sm ${day ? getColor(day.intensity) : "bg-transparent"} ${isToday ? "ring-1 ring-red-500" : ""}`}
-                          title={
-                            day
-                              ? `${day.date.toDateString()}\nDistance: ${day.distance.toFixed(
-                                1
-                              )}km\nAvg Speed: ${day.avgSpeed.toFixed(
-                                1
-                              )}km/h\nTime: ${day.time.toFixed(0)}min`
-                              : ""
-                          }
-                        />
-                      );
-                    })}
+    <Card className="relative">
+      <DownloadButton elementRef={heatmapRef} fileName="running-heatmap" />
+      <div ref={heatmapRef} className="bg-dark-card">
+        <p className="text-xs text-gray-400 mb-3">
+          Based on distance, speed, and time
+        </p>
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full">
+            <div className="flex gap-0.5 sm:gap-1">
+              {/* Day labels */}
+              <div className="flex flex-col gap-0.5 sm:gap-1 text-xs text-gray-400 pt-4 sm:pt-5">
+                {weekDays.map((day, i) => (
+                  <div
+                    key={i}
+                    className="h-2 sm:h-3 flex items-center"
+                    style={{ fontSize: "8px" }}
+                  >
+                    {i % 2 === 1 ? day : ""}
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
 
-          {/* Legend */}
-          <div className="flex justify-end mt-2 sm:mt-3 text-xs text-gray-400 items-center gap-1 sm:gap-2">
-            <span className="text-[10px] sm:text-xs">Less</span>
-            <div className="flex gap-0.5 sm:gap-1">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-gray-800" />
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/20" />
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/40" />
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/60" />
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/80" />
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange" />
+              <div className="flex-1">
+                {/* Month labels */}
+                <div className="flex gap-0.5 sm:gap-1 mb-1 text-xs text-gray-400">
+                  {weeks.map((week, weekIndex) => {
+                    const firstDay = week.find((d) => d);
+                    if (firstDay && new Date(firstDay.date).getDate() <= 7) {
+                      const dateObj = new Date(firstDay.date);
+                      const month = dateObj.toLocaleString("default", { month: "short" });
+                      const isJanuary = dateObj.getMonth() === 0;
+                      const year = dateObj.getFullYear().toString().slice(-2);
+                      return (
+                        <div
+                          key={weekIndex}
+                          className="w-2 sm:w-3"
+                          style={{ fontSize: "8px" }}
+                        >
+                          {isJanuary ? `'${year}` : month}
+                        </div>
+                      );
+                    }
+                    return <div key={weekIndex} className="w-2 sm:w-3" />;
+                  })}
+                </div>
+
+                {/* Heatmap grid */}
+                <div className="flex gap-0.5 sm:gap-1">
+                  {weeks.map((week, weekIndex) => (
+                    <div key={weekIndex} className="flex flex-col gap-0.5 sm:gap-1">
+                      {week.map((day, dayIndex) => {
+                        const isToday = day && day.date.toDateString() === new Date().toDateString();
+                        return (
+                          <div
+                            key={dayIndex}
+                            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-sm ${day ? getColor(day.intensity) : "bg-transparent"} ${isToday ? "ring-1 ring-red-500" : ""}`}
+                            title={
+                              day
+                                ? `${day.date.toDateString()}\nDistance: ${day.distance.toFixed(
+                                  1
+                                )}km\nAvg Speed: ${day.avgSpeed.toFixed(
+                                  1
+                                )}km/h\nTime: ${day.time.toFixed(0)}min`
+                                : ""
+                            }
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <span className="text-[10px] sm:text-xs">More</span>
+
+            {/* Legend */}
+            <div className="flex justify-end mt-2 sm:mt-3 text-xs text-gray-400 items-center gap-1 sm:gap-2">
+              <span className="text-[10px] sm:text-xs">Less</span>
+              <div className="flex gap-0.5 sm:gap-1">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-gray-800" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/20" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/40" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/60" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange/80" />
+                <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-sm bg-brand-orange" />
+              </div>
+              <span className="text-[10px] sm:text-xs">More</span>
+            </div>
           </div>
         </div>
       </div>
@@ -311,6 +374,11 @@ const Analytics: React.FC = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [appliedTime, setAppliedTime] = useState<number | null>(null);
   const [appliedDistance, setAppliedDistance] = useState<number | null>(null);
+
+  const performanceRef = useRef<HTMLDivElement>(null);
+  const distanceRef = useRef<HTMLDivElement>(null);
+  const weeklyRef = useRef<HTMLDivElement>(null);
+  const monthlyRef = useRef<HTMLDivElement>(null);
 
   const handleApply = useCallback((time: number | null, dist: number | null) => {
     setAppliedTime(time);
@@ -585,66 +653,128 @@ const Analytics: React.FC = () => {
       {/* Advanced Performance Charts */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <Card>
-          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-            Performance Trend
-          </h2>
+        <Card className="relative">
+          <DownloadButton elementRef={performanceRef} fileName="performance-trend" />
+          <div ref={performanceRef} className="bg-dark-card pt-2">
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
+              Performance Trend
+            </h2>
 
-          <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart
-              data={(appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
-              margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
-              <XAxis
-                dataKey="name"
-                stroke="#888"
-                fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
-              />
-              <YAxis
-                yAxisId="left"
-                stroke="#888"
-                fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
-              />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                stroke="#888"
-                fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Area
-                yAxisId="left"
-                type="monotone"
-                dataKey="distance"
-                fill="#FF7A00"
-                fillOpacity={0.3}
-                stroke="#FF7A00"
-                name="Distance (km)"
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="pace"
-                stroke="#8884d8"
-                strokeWidth={2}
-                name="Pace (min/km)"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart
+                data={(appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
+                margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#888"
+                  fontSize={10}
+                  tick={{ fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  stroke="#888"
+                  fontSize={10}
+                  tick={{ fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  stroke="#888"
+                  fontSize={10}
+                  tick={{ fill: "#9CA3AF" }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Area
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="distance"
+                  fill="#FF7A00"
+                  fillOpacity={0.3}
+                  stroke="#FF7A00"
+                  name="Distance (km)"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="pace"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                  name="Pace (min/km)"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
 
-        <Card>
+        <Card className="relative">
+          <DownloadButton elementRef={distanceRef} fileName="distance-and-time" />
+          <div ref={distanceRef} className="bg-dark-card pt-2">
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
+              Distance & Time per Run
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart
+                data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
+                margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+                <XAxis
+                  dataKey="name"
+                  stroke="#888"
+                  fontSize={10}
+                  tick={{ fill: "#9CA3AF" }}
+                />
+                <YAxis
+                  yAxisId="left"
+                  stroke="#888"
+                  fontSize={10}
+                  tick={{ fill: "#9CA3AF" }}
+                  unit=" km"
+                />
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  stroke="#888"
+                  fontSize={10}
+                  tick={{ fill: "#9CA3AF" }}
+                  unit=" min"
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Bar
+                  yAxisId="left"
+                  dataKey="distance"
+                  fill="#82ca9d"
+                  name="Distance (km)"
+                  animationDuration={800}
+                />
+                <Bar
+                  yAxisId="right"
+                  dataKey="time"
+                  fill="#ff6b6b"
+                  name="Time (min)"
+                  animationDuration={800}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+      </div>
+
+      {/* Weekly Analysis with Goals */}
+      <Card className="relative">
+        <DownloadButton elementRef={weeklyRef} fileName="weekly-performance" />
+        <div ref={weeklyRef} className="bg-dark-card pt-2">
           <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-            Distance & Time per Run
+            Weekly Performance vs Goals
           </h2>
-          <ResponsiveContainer width="100%" height={300}>
+
+          <ResponsiveContainer width="100%" height={350}>
             <ComposedChart
-              data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
+              data={weeklyDistanceData}
               margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
@@ -667,302 +797,254 @@ const Analytics: React.FC = () => {
                 stroke="#888"
                 fontSize={10}
                 tick={{ fill: "#9CA3AF" }}
-                unit=" min"
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
               <Bar
                 yAxisId="left"
                 dataKey="distance"
-                fill="#82ca9d"
+                fill="#FF7A00"
                 name="Distance (km)"
-                animationDuration={800}
               />
-              <Bar
-                yAxisId="right"
-                dataKey="time"
-                fill="#ff6b6b"
-                name="Time (min)"
-                animationDuration={800}
-              />
+              <Bar yAxisId="right" dataKey="runs" fill="#8884d8" name="Runs" />
+              {goals?.weekly_distance_km && (
+                <ReferenceLine
+                  yAxisId="left"
+                  y={goals.weekly_distance_km}
+                  stroke="#ef4444"
+                  strokeDasharray="5 5"
+                  label="Goal"
+                />
+              )}
             </ComposedChart>
           </ResponsiveContainer>
-        </Card>
-      </div>
-
-      {/* Weekly Analysis with Goals */}
-      <Card>
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-          Weekly Performance vs Goals
-        </h2>
-
-        <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart
-            data={weeklyDistanceData}
-            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
-            <XAxis
-              dataKey="name"
-              stroke="#888"
-              fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
-            />
-            <YAxis
-              yAxisId="left"
-              stroke="#888"
-              fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
-              unit=" km"
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              stroke="#888"
-              fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Bar
-              yAxisId="left"
-              dataKey="distance"
-              fill="#FF7A00"
-              name="Distance (km)"
-            />
-            <Bar yAxisId="right" dataKey="runs" fill="#8884d8" name="Runs" />
-            {goals?.weekly_distance_km && (
-              <ReferenceLine
-                yAxisId="left"
-                y={goals.weekly_distance_km}
-                stroke="#ef4444"
-                strokeDasharray="5 5"
-                label="Goal"
-              />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
+        </div>
       </Card>
 
       {/* Monthly Overview */}
-      <div>
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-          Monthly Progress Rings
-        </h2>
-        {/* Mobile: Horizontal scroll */}
-        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
-          {monthlyData.map((month, index) => {
-            const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
-            const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
-            const distanceProgress = (month.distance / maxDistance) * 100;
-            const runsProgress = (month.runs / maxRuns) * 100;
+      <div className="relative">
+        <Card className="relative overflow-hidden mt-6">
+          <DownloadButton elementRef={monthlyRef} fileName="monthly-summary" />
+          <div ref={monthlyRef} className="bg-dark-card p-2 pt-4">
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
+              Monthly Progress Rings
+            </h2>
+            {/* Mobile: Horizontal scroll */}
+            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
+              {monthlyData.map((month, index) => {
+                const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
+                const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
+                const distanceProgress = (month.distance / maxDistance) * 100;
+                const runsProgress = (month.runs / maxRuns) * 100;
 
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const monthDate = new Date(month.name + "-01");
-            const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                const monthDate = new Date(month.name + "-01");
+                const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
 
-            return (
-              <div
-                key={index}
-                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
-                  }`}
-                style={{ minWidth: '140px' }}
-              >
-                <div className="relative w-20 h-20 mb-3">
-                  <svg
-                    className="w-20 h-20 transform -rotate-90"
-                    viewBox="0 0 100 100"
+                return (
+                  <div
+                    key={index}
+                    className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                      }`}
+                    style={{ minWidth: '140px' }}
                   >
-                    {/* Background circles */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      stroke="#374151"
-                      strokeWidth="8"
-                      fill="none"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="30"
-                      stroke="#374151"
-                      strokeWidth="6"
-                      fill="none"
-                    />
+                    <div className="relative w-20 h-20 mb-3">
+                      <svg
+                        className="w-20 h-20 transform -rotate-90"
+                        viewBox="0 0 100 100"
+                      >
+                        {/* Background circles */}
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          stroke="#374151"
+                          strokeWidth="8"
+                          fill="none"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="30"
+                          stroke="#374151"
+                          strokeWidth="6"
+                          fill="none"
+                        />
 
-                    {/* Distance progress */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      stroke="#FF7A00"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 40}`}
-                      strokeDashoffset={`${2 * Math.PI * 40 * (1 - distanceProgress / 100)
-                        }`}
-                      className="transition-all duration-1000 ease-out"
-                    />
+                        {/* Distance progress */}
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          stroke="#FF7A00"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 40}`}
+                          strokeDashoffset={`${2 * Math.PI * 40 * (1 - distanceProgress / 100)
+                            }`}
+                          className="transition-all duration-1000 ease-out"
+                        />
 
-                    {/* Runs progress */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="30"
-                      stroke="#8884d8"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 30}`}
-                      strokeDashoffset={`${2 * Math.PI * 30 * (1 - runsProgress / 100)
-                        }`}
-                      className="transition-all duration-1000 ease-out"
-                    />
-                  </svg>
+                        {/* Runs progress */}
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="30"
+                          stroke="#8884d8"
+                          strokeWidth="6"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 30}`}
+                          strokeDashoffset={`${2 * Math.PI * 30 * (1 - runsProgress / 100)
+                            }`}
+                          className="transition-all duration-1000 ease-out"
+                        />
+                      </svg>
 
-                  {/* Center text */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-bold text-white">
-                      {new Date(month.name + "-01").toLocaleDateString("en", {
-                        month: "short",
-                      })}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(month.name + "-01").getFullYear()}
-                    </span>
+                      {/* Center text */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-bold text-white">
+                          {new Date(month.name + "-01").toLocaleDateString("en", {
+                            month: "short",
+                          })}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(month.name + "-01").getFullYear()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="text-center space-y-1">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+                        <span className="text-xs text-white font-semibold">
+                          {month.distance.toFixed(1)}km
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <span className="text-xs text-gray-300">
+                          {month.runs} runs
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {month.time.toFixed(1)}h total
+                      </div>
+                    </div>
                   </div>
-                </div>
+                );
+              })}
+            </div>
+            {/* Desktop: Grid */}
+            <div className="hidden lg:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+              {monthlyData.map((month, index) => {
+                const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
+                const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
+                const distanceProgress = (month.distance / maxDistance) * 100;
+                const runsProgress = (month.runs / maxRuns) * 100;
 
-                {/* Stats */}
-                <div className="text-center space-y-1">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
-                    <span className="text-xs text-white font-semibold">
-                      {month.distance.toFixed(1)}km
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span className="text-xs text-gray-300">
-                      {month.runs} runs
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {month.time.toFixed(1)}h total
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {/* Desktop: Grid */}
-        <div className="hidden lg:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-          {monthlyData.map((month, index) => {
-            const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
-            const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
-            const distanceProgress = (month.distance / maxDistance) * 100;
-            const runsProgress = (month.runs / maxRuns) * 100;
+                const currentMonth = new Date().getMonth();
+                const currentYear = new Date().getFullYear();
+                const monthDate = new Date(month.name + "-01");
+                const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
 
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            const monthDate = new Date(month.name + "-01");
-            const isCurrentMonth = monthDate.getMonth() === currentMonth && monthDate.getFullYear() === currentYear;
-
-            return (
-              <div
-                key={index}
-                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
-                  }`}
-              >
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
-                  <svg
-                    className="w-20 h-20 sm:w-24 sm:h-24 transform -rotate-90"
-                    viewBox="0 0 100 100"
+                return (
+                  <div
+                    key={index}
+                    className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                      }`}
                   >
-                    {/* Background circles */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      stroke="#374151"
-                      strokeWidth="8"
-                      fill="none"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="30"
-                      stroke="#374151"
-                      strokeWidth="6"
-                      fill="none"
-                    />
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
+                      <svg
+                        className="w-20 h-20 sm:w-24 sm:h-24 transform -rotate-90"
+                        viewBox="0 0 100 100"
+                      >
+                        {/* Background circles */}
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          stroke="#374151"
+                          strokeWidth="8"
+                          fill="none"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="30"
+                          stroke="#374151"
+                          strokeWidth="6"
+                          fill="none"
+                        />
 
-                    {/* Distance progress */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      stroke="#FF7A00"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 40}`}
-                      strokeDashoffset={`${2 * Math.PI * 40 * (1 - distanceProgress / 100)
-                        }`}
-                      className="transition-all duration-1000 ease-out"
-                    />
+                        {/* Distance progress */}
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          stroke="#FF7A00"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 40}`}
+                          strokeDashoffset={`${2 * Math.PI * 40 * (1 - distanceProgress / 100)
+                            }`}
+                          className="transition-all duration-1000 ease-out"
+                        />
 
-                    {/* Runs progress */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="30"
-                      stroke="#8884d8"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 30}`}
-                      strokeDashoffset={`${2 * Math.PI * 30 * (1 - runsProgress / 100)
-                        }`}
-                      className="transition-all duration-1000 ease-out"
-                    />
-                  </svg>
+                        {/* Runs progress */}
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="30"
+                          stroke="#8884d8"
+                          strokeWidth="6"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 30}`}
+                          strokeDashoffset={`${2 * Math.PI * 30 * (1 - runsProgress / 100)
+                            }`}
+                          className="transition-all duration-1000 ease-out"
+                        />
+                      </svg>
 
-                  {/* Center text */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-xs font-bold text-white">
-                      {new Date(month.name + "-01").toLocaleDateString("en", {
-                        month: "short",
-                      })}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(month.name + "-01").getFullYear()}
-                    </span>
+                      {/* Center text */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="text-xs font-bold text-white">
+                          {new Date(month.name + "-01").toLocaleDateString("en", {
+                            month: "short",
+                          })}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(month.name + "-01").getFullYear()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="text-center space-y-1">
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
+
+                        <span className="text-xs sm:text-sm text-white font-semibold">
+                          {month.distance.toFixed(1)}km
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        <span className="text-xs sm:text-sm text-gray-300">
+                          {month.runs} runs
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {month.time.toFixed(1)}h total
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                {/* Stats */}
-                <div className="text-center space-y-1">
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-2 h-2 bg-brand-orange rounded-full"></div>
-
-                    <span className="text-xs sm:text-sm text-white font-semibold">
-                      {month.distance.toFixed(1)}km
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span className="text-xs sm:text-sm text-gray-300">
-                      {month.runs} runs
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {month.time.toFixed(1)}h total
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
