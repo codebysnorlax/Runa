@@ -119,9 +119,12 @@ const Dashboard: React.FC = () => {
 
       {/* Header */}
       <div className="animate-fade-in">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">
-          {getGreeting()}, {currentUser || "Runner"}!
-        </h1>
+        <div className="flex items-center gap-2 mb-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            {getGreeting()}, {currentUser || "Runner"}!
+          </h1>
+          <span className="px-2 py-0.5 text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30">BETA</span>
+        </div>
         <p className="text-sm text-gray-400">Here's your fitness overview</p>
       </div>
 

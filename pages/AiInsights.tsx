@@ -260,11 +260,12 @@ const AiInsights: React.FC = () => {
         />
       )}
       <div className="flex justify-between items-center gap-3 px-4 lg:px-0">
-        <div>
+        <div className="flex items-center gap-2">
           <h1 className="text-xl sm:text-2xl font-bold text-white">
             AI Insights
           </h1>
-          <p className="text-xs text-red-500">Usage: {usageCount}/2 today</p>
+          <span className="px-2 py-0.5 text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30">BETA</span>
+          <p className="text-xs text-red-500 ml-2">Usage: {usageCount}/2 today</p>
         </div>
         <button
           onClick={handleGenerate}

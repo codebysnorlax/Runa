@@ -2,7 +2,8 @@ import React, { useMemo, useState, memo, useCallback } from "react";
 import { useAppContext } from "../context/AppContext";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Download } from "lucide-react";
+import { exportChartToImage } from "../utils/chartExport";
 import {
   LineChart,
   Line,
@@ -528,7 +529,10 @@ const Analytics: React.FC = () => {
   return (
     <div className="space-y-6 pb-24 lg:pb-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
+          <span className="px-2 py-0.5 text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30">BETA</span>
+        </div>
         <button
           onClick={() => setShowFilter(true)}
           className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white text-sm"
@@ -586,9 +590,18 @@ const Analytics: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card>
-          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-            Performance Trend
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-white">
+              Performance Trend
+            </h2>
+            <button
+              onClick={() => exportChartToImage((appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14), 'performance', 'Performance Trend')}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              title="Download chart"
+            >
+              <Download size={18} className="text-gray-400" />
+            </button>
+          </div>
 
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart
@@ -639,9 +652,18 @@ const Analytics: React.FC = () => {
         </Card>
 
         <Card>
-          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-            Distance & Time per Run
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-white">
+              Distance & Time per Run
+            </h2>
+            <button
+              onClick={() => exportChartToImage((appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14), 'distance-time', 'Distance & Time per Run')}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              title="Download chart"
+            >
+              <Download size={18} className="text-gray-400" />
+            </button>
+          </div>
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart
               data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
@@ -692,9 +714,18 @@ const Analytics: React.FC = () => {
 
       {/* Weekly Analysis with Goals */}
       <Card>
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-          Weekly Performance vs Goals
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-base sm:text-lg font-semibold text-white">
+            Weekly Performance vs Goals
+          </h2>
+          <button
+            onClick={() => exportChartToImage(weeklyDistanceData, 'weekly', 'Weekly Performance')}
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            title="Download chart"
+          >
+            <Download size={18} className="text-gray-400" />
+          </button>
+        </div>
 
         <ResponsiveContainer width="100%" height={350}>
           <ComposedChart
@@ -746,12 +777,21 @@ const Analytics: React.FC = () => {
 
       {/* Monthly Overview */}
       <div>
-        <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
-          Monthly Progress Rings
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-base sm:text-lg font-semibold text-white">
+            Monthly Progress Rings
+          </h2>
+          <button
+            onClick={() => exportChartToImage(monthlyData, 'monthly', 'Monthly Progress')}
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            title="Download chart"
+          >
+            <Download size={18} className="text-gray-400" />
+          </button>
+        </div>
         {/* Mobile: Horizontal scroll */}
         <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
-          {monthlyData.map((month, index) => {
+          {[...monthlyData].reverse().map((month, index) => {
             const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
             const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
             const distanceProgress = (month.distance / maxDistance) * 100;
@@ -858,7 +898,7 @@ const Analytics: React.FC = () => {
         </div>
         {/* Desktop: Grid */}
         <div className="hidden lg:grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-          {monthlyData.map((month, index) => {
+          {[...monthlyData].reverse().map((month, index) => {
             const maxDistance = Math.max(...monthlyData.map((m) => m.distance));
             const maxRuns = Math.max(...monthlyData.map((m) => m.runs));
             const distanceProgress = (month.distance / maxDistance) * 100;
