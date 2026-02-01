@@ -39,10 +39,6 @@ import {
   AlertCircle,
   HeartCrack,
   Moon,
-  Calendar,
-  Award,
-  MapPin,
-  Timer,
 } from "lucide-react";
 import * as storage from "../services/storageService";
 import FeedbackStep, { FeedbackQuestion, UserResponse } from "../components/FeedbackStep";
@@ -523,71 +519,6 @@ const Settings: React.FC = () => {
   const StatusIcon = status.icon;
   const bmiStatus = profileState ? getBMIStatus(profileState.height_cm, profileState.weight_kg) : null;
 
-  // Calculate running stats with safety checks
-  let runningStats = null;
-  let achievements = [];
-  
-  try {
-    if (runs && Array.isArray(runs) && runs.length > 0) {
-      const totalRuns = runs.length;
-      const totalDistance = runs.reduce((sum, run) => sum + (run?.distance_km || 0), 0);
-      const totalTime = runs.reduce((sum, run) => {
-        if (!run?.time) return sum;
-        const parts = run.time.split(':');
-        if (parts.length !== 2) return sum;
-        const [min, sec] = parts.map(Number);
-        if (isNaN(min) || isNaN(sec)) return sum;
-        return sum + (min * 60 + sec);
-      }, 0);
-      const avgPace = totalDistance > 0 ? totalTime / totalDistance : 0;
-      const avgPaceMin = Math.floor(avgPace / 60);
-      const avgPaceSec = Math.floor(avgPace % 60);
-      
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const thisWeekRuns = runs.filter(r => r?.date && new Date(r.date) >= sevenDaysAgo).length;
-      
-      runningStats = { totalRuns, totalDistance, avgPaceMin, avgPaceSec, thisWeekRuns };
-      
-      // Calculate achievements
-      const today2 = new Date();
-      today2.setHours(0, 0, 0, 0);
-      let streak = 0;
-      let checkDate = new Date(today2);
-      const runDates = new Set(runs.filter(r => r?.date).map(r => {
-        const d = new Date(r.date);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime();
-      }));
-      while (runDates.has(checkDate.getTime())) {
-        streak++;
-        checkDate.setDate(checkDate.getDate() - 1);
-      }
-      if (streak === 0) {
-        checkDate = new Date(today2);
-        checkDate.setDate(checkDate.getDate() - 1);
-        while (runDates.has(checkDate.getTime())) {
-          streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        }
-      }
-      
-      if (totalRuns >= 100) achievements.push({ icon: Award, label: "Century Club", color: "text-yellow-400" });
-      else if (totalRuns >= 50) achievements.push({ icon: Award, label: "Half Century", color: "text-blue-400" });
-      else if (totalRuns >= 10) achievements.push({ icon: Award, label: "Committed", color: "text-green-400" });
-      
-      if (totalDistance >= 500) achievements.push({ icon: MapPin, label: "500km Hero", color: "text-purple-400" });
-      else if (totalDistance >= 100) achievements.push({ icon: MapPin, label: "100km Warrior", color: "text-cyan-400" });
-      
-      if (streak >= 30) achievements.push({ icon: Flame, label: "30 Day Streak", color: "text-orange-500" });
-      else if (streak >= 7) achievements.push({ icon: Flame, label: "Week Warrior", color: "text-orange-400" });
-    }
-  } catch (error) {
-    console.error('Error calculating stats:', error);
-  }
-
   return (
     <AudioProvider>
       <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${activeTab === 'feedback' ? '' : 'pb-24'}`}>
@@ -675,61 +606,6 @@ const Settings: React.FC = () => {
                   )}
                 </div>
               </div>
-
-              {/* Running Stats Section */}
-              {runningStats && (
-                <div className="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Activity className="w-4 h-4 text-blue-400" />
-                      <span className="text-xs text-gray-400">Total Runs</span>
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-white">{runningStats.totalRuns}</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <MapPin className="w-4 h-4 text-green-400" />
-                      <span className="text-xs text-gray-400">Distance</span>
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-white">{runningStats.totalDistance.toFixed(1)}<span className="text-sm text-gray-400 ml-1">km</span></div>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Timer className="w-4 h-4 text-purple-400" />
-                      <span className="text-xs text-gray-400">Avg Pace</span>
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-white">{runningStats.avgPaceMin}:{runningStats.avgPaceSec.toString().padStart(2, '0')}<span className="text-sm text-gray-400 ml-1">/km</span></div>
-                  </div>
-                  <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Calendar className="w-4 h-4 text-orange-400" />
-                      <span className="text-xs text-gray-400">This Week</span>
-                    </div>
-                    <div className="text-xl sm:text-2xl font-bold text-white">{runningStats.thisWeekRuns}<span className="text-sm text-gray-400 ml-1">runs</span></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Achievements Section */}
-              {achievements.length > 0 && (
-                <div className="mb-6 bg-gray-800/30 border border-gray-700/30 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Award className="w-5 h-5 text-brand-orange" />
-                    <h3 className="text-sm font-semibold text-white">Achievements</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {achievements.map((achievement, idx) => {
-                      const Icon = achievement.icon;
-                      return (
-                        <div key={idx} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-900/50 border border-gray-700/50 ${achievement.color}`}>
-                          <Icon className="w-3.5 h-3.5" />
-                          <span className="text-xs font-medium">{achievement.label}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
               {/* Input Fields */}
               {/* Input Fields */}
