@@ -10,7 +10,8 @@ interface ProgressRingProps {
 const ProgressRing: React.FC<ProgressRingProps> = ({ radius, stroke, progress }) => {
   const normalizedRadius = radius - stroke * 2;
   const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset = circumference - (progress / 100) * circumference;
+  const cappedProgress = Math.min(progress, 100);
+  const strokeDashoffset = circumference - (cappedProgress / 100) * circumference;
 
   return (
     <svg

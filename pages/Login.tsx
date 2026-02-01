@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { Volume2 } from "lucide-react";
 import { AudioOrbIntro } from "../components/AudioOrbIntro";
+
+const fontStyle = `
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Julee&family=Rock+Salt&display=swap');
+  .custom-heading { font-family: 'Caveat', cursive; font-weight: 700; }
+`;
 const images = [
   `${import.meta.env.BASE_URL}images/1_image.png`,
   `${import.meta.env.BASE_URL}images/2_image.png`,
@@ -34,11 +39,13 @@ const Login = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
+    <>
+      <style>{fontStyle}</style>
+      <div className="min-h-screen bg-gray-900 flex flex-col">
       <header className="border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <h1 className="text-xl sm:text-2xl font-semibold text-white">
-            <span className="text-brand-orange">Runa</span>
+          <h1 className="text-xl sm:text-2xl font-semibold julee-regular gradient-text">
+            Runa
           </h1>
           <button
             onClick={handleAudioPlay}
@@ -55,7 +62,7 @@ const Login = () => {
           {/* Mobile/Tablet Layout */}
           <div className="lg:hidden flex flex-col gap-8 md:gap-10 max-w-5xl mx-auto">
             <div className="text-center">
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
+              <h2 className="custom-heading text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                 AI-Powered Fitness Tracker
               </h2>
               <p className="text-lg md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
@@ -125,7 +132,7 @@ const Login = () => {
           {/* Desktop Layout */}
           <div className="hidden lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
             <div className="flex flex-col justify-center">
-              <h2 className="text-5xl xl:text-6xl font-bold text-white mb-4">
+              <h2 className="custom-heading text-5xl xl:text-6xl font-bold text-white mb-4">
                 AI-Powered Fitness Tracker
               </h2>
               <p className="text-xl text-gray-400 mb-8">
@@ -294,6 +301,7 @@ const Login = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

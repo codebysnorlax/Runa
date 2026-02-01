@@ -181,10 +181,10 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="flex flex-col items-center flex-grow justify-center py-2">
-            <div className="relative mb-6">
+            <div className="relative mb-6 w-40 h-40 flex items-center justify-center">
               <ProgressRing radius={70} stroke={10} progress={goalProgress} />
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-2xl sm:text-3xl font-bold text-white">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-lg font-bold text-white">
                   {Math.min(goalProgress, 100).toFixed(0)}%
                 </p>
               </div>

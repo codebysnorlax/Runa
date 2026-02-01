@@ -1,3 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Julee&family=Rock+Salt&display=swap');
+
+.julee-regular {
+  font-family: "Julee", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@keyframes gradient-shine {
+  0% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+  100% {
+    background-position: 0% center;
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #FFA500, #FF7A00, #FF6B00, #FF7A00, #FFA500);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 900;
+  animation: gradient-shine 2.5s ease-in-out infinite;
+}
+
+.rock-salt-regular {
+  font-family: "Rock Salt", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
