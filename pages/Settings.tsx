@@ -28,6 +28,17 @@ import {
   MessageSquare,
   HelpCircle,
   Coffee,
+  Flame,
+  Zap,
+  TrendingUp,
+  CheckCircle,
+  Activity,
+  Heart,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
+  HeartCrack,
+  Moon,
 } from "lucide-react";
 import * as storage from "../services/storageService";
 import FeedbackStep, { FeedbackQuestion, UserResponse } from "../components/FeedbackStep";
@@ -406,32 +417,93 @@ const Settings: React.FC = () => {
   );
 
   /* User Status Logic */
-  const getUserStatus = () => {
-    if (!runs || runs.length === 0) return { label: "New Runner", color: "text-blue-400" };
+  const getUserStatus = (): { label: string; color: string; icon: React.ElementType } => {
+    if (!runs || runs.length === 0) return { label: "New Runner", color: "text-blue-400", icon: User };
 
     const sortedRuns = [...runs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    const lastRunDate = new Date(sortedRuns[0].date);
     const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const isToday = lastRunDate.toDateString() === today.toDateString();
-    const isYesterday = lastRunDate.toDateString() === yesterday.toDateString();
-
-    if (isToday) {
-      // Check for streak (run yesterday too)
-      const runYesterday = sortedRuns.some(r => new Date(r.date).toDateString() === yesterday.toDateString());
-      if (runYesterday) return { label: "Streak Pro", color: "text-orange-500" };
-      return { label: "Active Today", color: "text-yellow-400" };
+    today.setHours(0, 0, 0, 0);
+    
+    // Calculate streak
+    let streak = 0;
+    let checkDate = new Date(today);
+    const runDates = new Set(sortedRuns.map(r => {
+      const d = new Date(r.date);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    }));
+    
+    while (runDates.has(checkDate.getTime())) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
     }
-
-    if (isYesterday) return { label: "Ran Yesterday", color: "text-green-400" };
-
-    const diffTime = Math.abs(today.getTime() - lastRunDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 3) return { label: "Missed a run", color: "text-red-400" };
-    return { label: "Off Track", color: "text-gray-400" };
+    
+    // If no run today, check if yesterday started a streak
+    if (streak === 0) {
+      checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - 1);
+      while (runDates.has(checkDate.getTime())) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      }
+    }
+    
+    const lastRunDate = new Date(sortedRuns[0].date);
+    lastRunDate.setHours(0, 0, 0, 0);
+    const daysSinceLastRun = Math.floor((today.getTime() - lastRunDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Get last 7 days activity
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentRuns = runs.filter(r => new Date(r.date) >= sevenDaysAgo);
+    const runsThisWeek = recentRuns.length;
+    
+    // Get last 30 days for consistency check
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const monthRuns = runs.filter(r => new Date(r.date) >= thirtyDaysAgo);
+    const avgRunsPerWeek = (monthRuns.length / 30) * 7;
+    
+    // Priority 1: Active streaks (ran today)
+    if (daysSinceLastRun === 0) {
+      if (streak >= 30) return { label: "Legend", color: "text-purple-400", icon: Flame };
+      if (streak >= 14) return { label: "On Fire", color: "text-orange-500", icon: Flame };
+      if (streak >= 7) return { label: "Week Streak", color: "text-yellow-400", icon: Zap };
+      if (streak >= 3) return { label: "Streak Pro", color: "text-green-400", icon: TrendingUp };
+      if (runsThisWeek >= 4) return { label: "Crushing It", color: "text-cyan-400", icon: Target };
+      return { label: "Active Today", color: "text-green-300", icon: CheckCircle };
+    }
+    
+    // Priority 2: Recent activity (1-2 days ago)
+    if (daysSinceLastRun === 1) {
+      if (streak >= 7) return { label: "Streak Alive", color: "text-orange-400", icon: Flame };
+      if (runsThisWeek >= 3) return { label: "Consistent", color: "text-green-400", icon: Heart };
+      return { label: "Ran Yesterday", color: "text-lime-400", icon: Activity };
+    }
+    
+    if (daysSinceLastRun === 2) {
+      if (avgRunsPerWeek >= 4) return { label: "Time to Run", color: "text-yellow-400", icon: Clock };
+      return { label: "2 Days Ago", color: "text-yellow-300", icon: Clock };
+    }
+    
+    // Priority 3: Warning zone (3-7 days)
+    if (daysSinceLastRun <= 7) {
+      if (avgRunsPerWeek >= 3) return { label: "Getting Lazy", color: "text-orange-400", icon: AlertTriangle };
+      return { label: "Need Motivation", color: "text-orange-300", icon: AlertTriangle };
+    }
+    
+    // Priority 4: Inactive (7-14 days)
+    if (daysSinceLastRun <= 14) {
+      return { label: "Comeback Time", color: "text-red-400", icon: AlertCircle };
+    }
+    
+    // Priority 5: Very inactive (14-30 days)
+    if (daysSinceLastRun <= 30) {
+      return { label: "Lost Streak", color: "text-red-500", icon: HeartCrack };
+    }
+    
+    // Priority 6: Dormant (30+ days)
+    return { label: "Dormant", color: "text-gray-500", icon: Moon };
   };
 
   const getBMIStatus = (height: number, weight: number) => {
@@ -444,6 +516,7 @@ const Settings: React.FC = () => {
   };
 
   const status = getUserStatus();
+  const StatusIcon = status.icon;
   const bmiStatus = profileState ? getBMIStatus(profileState.height_cm, profileState.weight_kg) : null;
 
   return (
@@ -522,7 +595,8 @@ const Settings: React.FC = () => {
 
                 {/* Footer Labels - Status Left, BMI Right */}
                 <div className="w-full flex justify-between items-center px-2">
-                  <div className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-gray-900/80 border border-gray-700/50 ${status.color}`}>
+                  <div className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-gray-900/80 border border-gray-700/50 ${status.color}`}>
+                    <StatusIcon className="w-3 h-3" />
                     {status.label}
                   </div>
                   {bmiStatus && (
