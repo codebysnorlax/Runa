@@ -59,7 +59,7 @@ const AddRun: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-3">
                 <div className="animate-slide-up" style={{animationDelay: '0.1s'}}>
                     <label className="block text-sm font-medium text-gray-300 mb-1">Date</label>
-                    <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500" />
+                    <input type="date" value={date} onChange={e => setDate(e.target.value)} max={new Date().toISOString().split('T')[0]} className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white focus:ring-2 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500" />
                 </div>
                 <div className="animate-slide-up" style={{animationDelay: '0.2s'}}>
                     <label className="block text-sm font-medium text-gray-300 mb-1">Distance (meters)</label>

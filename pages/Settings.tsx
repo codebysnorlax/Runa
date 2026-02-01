@@ -89,6 +89,7 @@ const Settings: React.FC = () => {
   const [profileState, setProfileState] = useState<Profile | null>(null);
   const [goalState, setGoalState] = useState<Goal | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Feedback state
   const [feedbackStep, setFeedbackStep] = useState(0);
@@ -555,9 +556,24 @@ const Settings: React.FC = () => {
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-brand-orange via-orange-500 to-pink-500 p-0.5">
                       <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
                         {user?.imageUrl ? (
-                          <img src={user.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                          <>
+                            {!imageLoaded && (
+                              <div className="absolute inset-0 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 animate-pulse">
+                                <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                              </div>
+                            )}
+                            <img 
+                              src={user.imageUrl} 
+                              alt="Profile" 
+                              className="w-full h-full object-cover rounded-full" 
+                              onLoad={() => setImageLoaded(true)}
+                              onError={() => setImageLoaded(false)}
+                            />
+                          </>
                         ) : (
-                          <User className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                          <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
+                            <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                          </div>
                         )}
                       </div>
                     </div>
