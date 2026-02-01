@@ -46,24 +46,24 @@ const defaultInsights: InsightsData = {
 };
 
 
-export const loadJSON = <T,>(key: string, defaultValue: T, username: string): T => {
+export const loadJSON = <T,>(key: string, defaultValue: T, username: string, firstName?: string): T => {
   try {
     const item = window.localStorage.getItem(userKey(key, username));
     if (item) {
       const parsed = JSON.parse(item);
-      // Handle case where profile name is default "User" and we have a username
-      if (key === PROFILE_KEY && parsed.name === 'User') {
-        parsed.name = username;
+      // Handle case where profile name is default "User" and we have a firstName
+      if (key === PROFILE_KEY && parsed.name === 'User' && firstName) {
+        parsed.name = firstName;
       }
       return parsed;
     }
-    // If it's a new user and we're loading the profile, set the name
-    if (key === PROFILE_KEY && (defaultValue as any).name === 'User') {
-      (defaultValue as Profile).name = username;
+    // If it's a new user and we're loading the profile, set the name from firstName
+    if (key === PROFILE_KEY && (defaultValue as any).name === 'User' && firstName) {
+      (defaultValue as Profile).name = firstName;
     }
     return defaultValue;
   } catch (error) {
-    console.error(`Error reading from localStorage key “${userKey(key, username)}”:`, error);
+    console.error(`Error reading from localStorage key "${userKey(key, username)}":`, error);
     return defaultValue;
   }
 };
@@ -73,12 +73,12 @@ export const saveJSON = <T,>(key: string, data: T, username: string): void => {
     const serializedData = JSON.stringify(data);
     window.localStorage.setItem(userKey(key, username), serializedData);
   } catch (error) {
-    console.error(`Error writing to localStorage key “${userKey(key, username)}”:`, error);
+    console.error(`Error writing to localStorage key "${userKey(key, username)}":`, error);
   }
 };
 
-export const initializeDefaults = (username: string): { profile: Profile; runs: Run[]; goals: Goal; insights: InsightsData } => {
-  const profile = loadJSON<Profile>(PROFILE_KEY, { ...defaultProfile }, username);
+export const initializeDefaults = (username: string, firstName?: string): { profile: Profile; runs: Run[]; goals: Goal; insights: InsightsData } => {
+  const profile = loadJSON<Profile>(PROFILE_KEY, { ...defaultProfile }, username, firstName);
   const runs = loadJSON<Run[]>(RUNS_KEY, defaultRuns, username);
   const goals = loadJSON<Goal>(GOALS_KEY, { ...defaultGoals }, username);
   const insights = loadJSON<InsightsData>(INSIGHTS_KEY, { ...defaultInsights }, username);
@@ -151,7 +151,7 @@ export const importUserData = (jsonData: string, username: string): boolean => {
     saveRuns(backupData.runs, username);
     saveGoals(backupData.goals, username);
     saveInsights(backupData.insights, username);
-    
+
     console.log('Data saved successfully for user:', username);
     console.log('Checking localStorage:', {
       profile: localStorage.getItem(`profile_${username}`),

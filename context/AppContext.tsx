@@ -42,16 +42,17 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({
     if (isLoaded && user) {
       const username = user.id;
       setCurrentUser(user.firstName || user.username || "User");
-      refreshUserData(username);
+      const firstName = user.firstName || user.username;
+      refreshUserData(username, firstName);
     } else if (isLoaded) {
       setLoading(false);
     }
   }, [user, isLoaded]);
 
-  const refreshUserData = (username: string) => {
+  const refreshUserData = (username: string, firstName?: string) => {
     setLoading(true);
     const { profile, runs, goals, insights } =
-      storage.initializeDefaults(username);
+      storage.initializeDefaults(username, firstName);
     setProfile(profile);
     setRuns(runs);
     setGoals(goals);
