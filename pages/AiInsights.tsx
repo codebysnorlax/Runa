@@ -259,37 +259,41 @@ const AiInsights: React.FC = () => {
           onClose={() => setToast(null)}
         />
       )}
-      <div className="flex justify-between items-center gap-3 px-4 lg:px-0">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">
-            AI Insights
-          </h1>
-          <span className="px-2 py-0.5 text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30">BETA</span>
-          <p className="text-xs text-red-500 ml-2">Usage: {usageCount}/2 today</p>
+      <div className="px-4 lg:px-0">
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-white truncate">
+              AI Insights
+            </h1>
+            <span className="px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30 whitespace-nowrap">BETA</span>
+          </div>
+          <button
+            onClick={handleGenerate}
+            disabled={isGenerating || usageCount >= 2}
+            className="flex items-center justify-center bg-brand-orange text-white font-semibold py-2 px-3 sm:px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+            title={usageCount >= 2 ? "Daily limit reached" : ""}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="animate-spin w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                <span className="hidden sm:inline">Generating...</span>
+                <span className="sm:hidden">Gen...</span>
+              </>
+            ) : usageCount >= 2 ? (
+              <>
+                <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                <span className="hidden sm:inline">Resets in {resetTime}</span>
+                <span className="sm:hidden">{resetTime}</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                Generate
+              </>
+            )}
+          </button>
         </div>
-        <button
-          onClick={handleGenerate}
-          disabled={isGenerating || usageCount >= 2}
-          className="flex items-center justify-center bg-brand-orange text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed text-sm"
-          title={usageCount >= 2 ? "Daily limit reached" : ""}
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="animate-spin w-4 h-4 mr-1.5" />
-              Generating...
-            </>
-          ) : usageCount >= 2 ? (
-            <>
-              <Lock className="w-4 h-4 mr-1.5" />
-              Resets in {resetTime}
-            </>
-          ) : (
-            <>
-              <Zap className="w-4 h-4 mr-1.5" />
-              Generate
-            </>
-          )}
-        </button>
+        <p className="text-xs text-gray-400 mt-1">Daily usage: <span className="text-red-500 font-medium">{usageCount}/2</span> • Resets in {resetTime}</p>
       </div>
 
       {isGenerating ? (
