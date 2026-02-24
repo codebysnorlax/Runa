@@ -12,7 +12,7 @@ import {
   Target,
   Lock,
 } from "lucide-react";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 const AiInsightsSkeleton: React.FC = () => (
   <div className="space-y-6">
@@ -105,10 +105,7 @@ const AiInsights: React.FC = () => {
   } = useAppContext();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
+  const { addToast } = useToast();
   const [usageCount, setUsageCount] = useState(0);
   const [resetTime, setResetTime] = useState("");
 
@@ -147,11 +144,10 @@ const AiInsights: React.FC = () => {
 
   const handleGenerate = async () => {
     if (!profile || !goals || runs.length === 0) {
-      setToast({
-        message:
-          "Complete your profile, set goals, and add at least one run to generate insights.",
-        type: "error",
-      });
+      addToast(
+        "Complete your profile, set goals, and add at least one run to generate insights.",
+        "error"
+      );
       return;
     }
 
@@ -165,15 +161,12 @@ const AiInsights: React.FC = () => {
       );
       if (newInsightsData) {
         updateInsights(newInsightsData);
-        setToast({
-          message: "Insights generated successfully!",
-          type: "success",
-        });
+        addToast("Insights generated successfully!", "success");
 
         // Increment count on successful generation
         const today = new Date().toDateString();
         const savedDate = localStorage.getItem("insightsDate");
-        
+
         if (savedDate === today) {
           const currentCount = parseInt(
             localStorage.getItem("insightsCount") || "0"
@@ -211,8 +204,7 @@ const AiInsights: React.FC = () => {
         setError("AI service quota exceeded. Please try again later.");
       } else {
         setError(
-          `AI service error: ${
-            err.message || "Unknown error occurred. Please try again."
+          `AI service error: ${err.message || "Unknown error occurred. Please try again."
           }`
         );
       }
@@ -252,13 +244,7 @@ const AiInsights: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 pb-24 lg:pb-6 lg:px-4">
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+
       <div className="px-4 lg:px-0">
         <div className="flex justify-between items-center gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
@@ -364,11 +350,10 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`flex-shrink-0 w-40 p-3 bg-gray-800/50 rounded-lg border-2 transition-all snap-start first:ml-4 ${
-                          isToday
+                        className={`flex-shrink-0 w-40 p-3 bg-gray-800/50 rounded-lg border-2 transition-all snap-start first:ml-4 ${isToday
                             ? "border-red-500"
                             : "border-gray-700 hover:border-brand-orange/50"
-                        }`}
+                          }`}
                         style={{ aspectRatio: '2/3' }}
                       >
                         <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">
@@ -391,11 +376,10 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`p-4 bg-gray-800/50 rounded-lg border-2 transition-all ${
-                          isToday
+                        className={`p-4 bg-gray-800/50 rounded-lg border-2 transition-all ${isToday
                             ? "border-red-500"
                             : "border-gray-700 hover:border-brand-orange/50"
-                        }`}
+                          }`}
                       >
                         <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">
                           {day}

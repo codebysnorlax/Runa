@@ -1,9 +1,9 @@
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, useRef } from "react";
 import { useAppContext } from "../context/AppContext";
 import Card from "../components/Card";
 import ProgressRing from "../components/ProgressRing";
 import DashboardSkeleton from "../components/DashboardSkeleton";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 import StreakHeatmap from "../components/StreakHeatmap";
 import AnimatedNumber from "../components/AnimatedNumber";
@@ -28,18 +28,21 @@ import { calculateStreak, getHeatmapData } from "../utils/streakUtils";
 const Dashboard: React.FC = () => {
   const { profile, runs, goals, insights, loading, currentUser } =
     useAppContext();
-  const [showBackupReminder, setShowBackupReminder] = useState(false);
+  const { addToast } = useToast();
+  const backupReminderShown = useRef(false);
 
   useEffect(() => {
+    if (backupReminderShown.current) return;
     const lastBackupReminder = localStorage.getItem("lastBackupReminder");
     const today = new Date().toDateString();
     const hour = new Date().getHours();
 
     if (lastBackupReminder !== today && hour >= 6 && hour < 12) {
-      setShowBackupReminder(true);
+      addToast("💾 Backup your data in Settings", "success");
       localStorage.setItem("lastBackupReminder", today);
+      backupReminderShown.current = true;
     }
-  }, []);
+  }, [addToast]);
 
   const personalRecords = useMemo<PersonalRecords | null>(() => {
     if (runs.length === 0) return null;
@@ -109,13 +112,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 pb-24 lg:pb-6 px-4 sm:px-0">
-      {showBackupReminder && (
-        <Toast
-          message="💾 Backup your data in Settings"
-          type="success"
-          onClose={() => setShowBackupReminder(false)}
-        />
-      )}
+
 
       {/* Header */}
       <div className="animate-fade-in">
@@ -227,8 +224,8 @@ const Dashboard: React.FC = () => {
             {todayRun && yesterdayRun && yesterdayRun.distance_m > 0 && (
               <div
                 className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${todayRun.distance_m > yesterdayRun.distance_m
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                  ? "bg-green-500/20 text-green-400"
+                  : "bg-red-500/20 text-red-400"
                   }`}
               >
                 {todayRun.distance_m > yesterdayRun.distance_m ? (
@@ -301,10 +298,10 @@ const Dashboard: React.FC = () => {
             {latestInsight && (
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${latestInsight.type === "positive"
-                    ? "bg-green-500/20 text-green-400"
-                    : latestInsight.type === "negative"
-                      ? "bg-red-500/20 text-red-400"
-                      : "bg-blue-500/20 text-blue-400"
+                  ? "bg-green-500/20 text-green-400"
+                  : latestInsight.type === "negative"
+                    ? "bg-red-500/20 text-red-400"
+                    : "bg-blue-500/20 text-blue-400"
                   }`}
               >
                 {latestInsight.type}

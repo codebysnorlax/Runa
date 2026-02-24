@@ -5,7 +5,7 @@ import { useUser } from "@clerk/clerk-react";
 import { Goal, Profile, DistanceGoal } from "../types";
 import Card from "../components/Card";
 import Skeleton from "../components/Skeleton";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 import AudioHelp from "../components/AudioHelp";
 import { AudioProvider } from "../context/AudioContext";
 import {
@@ -137,10 +137,7 @@ const Settings: React.FC = () => {
     }
   ];
 
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
-  } | null>(null);
+  const { addToast } = useToast();
 
   useEffect(() => {
     if (profile) {
@@ -242,7 +239,7 @@ const Settings: React.FC = () => {
         weight_kg: Number(profileState.weight_kg) || 0,
       };
       updateProfile(finalProfile);
-      setToast({ message: "Profile updated successfully!", type: "success" });
+      addToast("Profile updated successfully!", "success");
     }
   };
 
@@ -255,35 +252,32 @@ const Settings: React.FC = () => {
         weekly_runs: Number(goalState.weekly_runs) || 0,
       };
       updateGoals(finalGoals);
-      setToast({ message: "Goals updated successfully!", type: "success" });
+      addToast("Goals updated successfully!", "success");
     }
   };
 
   const handleDownloadBackup = () => {
     if (user?.id) {
       storage.downloadBackup(user.id);
-      setToast({ message: "Backup downloaded successfully!", type: "success" });
+      addToast("Backup downloaded successfully!", "success");
     }
   };
 
   const handleRecreateDataFile = () => {
     if (user?.id) {
       storage.recreateBackupFile(user.id);
-      setToast({
-        message: "data.json file created successfully!",
-        type: "success",
-      });
+      addToast("data.json file created successfully!", "success");
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
-      setToast({ message: "No file selected", type: "error" });
+      addToast("No file selected", "error");
       return;
     }
     if (!user?.id) {
-      setToast({ message: "User not authenticated", type: "error" });
+      addToast("User not authenticated", "error");
       return;
     }
 
@@ -293,28 +287,19 @@ const Settings: React.FC = () => {
         const content = event.target?.result as string;
         const success = storage.importUserData(content, user.id);
         if (success) {
-          setToast({ message: "Data restored successfully! Reloading...", type: "success" });
+          addToast("Data restored successfully! Reloading...", "success");
           setTimeout(() => {
             window.location.reload();
           }, 1000);
         } else {
-          setToast({
-            message: "Failed to restore data. Invalid file format.",
-            type: "error",
-          });
+          addToast("Failed to restore data. Invalid file format.", "error");
         }
       } catch (error) {
-        setToast({
-          message: "Error reading file. Please try again.",
-          type: "error",
-        });
+        addToast("Error reading file. Please try again.", "error");
       }
     };
     reader.onerror = () => {
-      setToast({
-        message: "Failed to read file.",
-        type: "error",
-      });
+      addToast("Failed to read file.", "error");
     };
     reader.readAsText(file);
 
@@ -345,14 +330,14 @@ const Settings: React.FC = () => {
       });
 
       if (!hasValidResponse) {
-        setToast({ message: "Please answer at least one question before submitting", type: "error" });
+        addToast("Please answer at least one question before submitting", "error");
         return;
       }
 
       // Check cooldown before attempting to send
       const { canSendFeedback } = await import('../services/telegramService');
       if (!canSendFeedback()) {
-        setToast({ message: "Please wait before sending another feedback", type: "error" });
+        addToast("Please wait before sending another feedback", "error");
         return;
       }
 
@@ -372,12 +357,12 @@ const Settings: React.FC = () => {
             );
           }
           setFeedbackCompleted(true);
-          setToast({ message: result.message, type: "success" });
+          addToast(result.message, "success");
         } else {
-          setToast({ message: result.message, type: "error" });
+          addToast(result.message, "error");
         }
       } catch (error) {
-        setToast({ message: "Failed to send feedback. Please try again.", type: "error" });
+        addToast("Failed to send feedback. Please try again.", "error");
       } finally {
         setFeedbackSubmitting(false);
       }
@@ -424,7 +409,7 @@ const Settings: React.FC = () => {
     const sortedRuns = [...runs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // Calculate streak
     let streak = 0;
     let checkDate = new Date(today);
@@ -433,12 +418,12 @@ const Settings: React.FC = () => {
       d.setHours(0, 0, 0, 0);
       return d.getTime();
     }));
-    
+
     while (runDates.has(checkDate.getTime())) {
       streak++;
       checkDate.setDate(checkDate.getDate() - 1);
     }
-    
+
     // If no run today, check if yesterday started a streak
     if (streak === 0) {
       checkDate = new Date(today);
@@ -448,23 +433,23 @@ const Settings: React.FC = () => {
         checkDate.setDate(checkDate.getDate() - 1);
       }
     }
-    
+
     const lastRunDate = new Date(sortedRuns[0].date);
     lastRunDate.setHours(0, 0, 0, 0);
     const daysSinceLastRun = Math.floor((today.getTime() - lastRunDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // Get last 7 days activity
     const sevenDaysAgo = new Date(today);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const recentRuns = runs.filter(r => new Date(r.date) >= sevenDaysAgo);
     const runsThisWeek = recentRuns.length;
-    
+
     // Get last 30 days for consistency check
     const thirtyDaysAgo = new Date(today);
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const monthRuns = runs.filter(r => new Date(r.date) >= thirtyDaysAgo);
     const avgRunsPerWeek = (monthRuns.length / 30) * 7;
-    
+
     // Priority 1: Active streaks (ran today)
     if (daysSinceLastRun === 0) {
       if (streak >= 30) return { label: "Legend", color: "text-purple-400", icon: Flame };
@@ -474,35 +459,35 @@ const Settings: React.FC = () => {
       if (runsThisWeek >= 4) return { label: "Crushing It", color: "text-cyan-400", icon: Target };
       return { label: "Active Today", color: "text-green-300", icon: CheckCircle };
     }
-    
+
     // Priority 2: Recent activity (1-2 days ago)
     if (daysSinceLastRun === 1) {
       if (streak >= 7) return { label: "Streak Alive", color: "text-orange-400", icon: Flame };
       if (runsThisWeek >= 3) return { label: "Consistent", color: "text-green-400", icon: Heart };
       return { label: "Ran Yesterday", color: "text-lime-400", icon: Activity };
     }
-    
+
     if (daysSinceLastRun === 2) {
       if (avgRunsPerWeek >= 4) return { label: "Time to Run", color: "text-yellow-400", icon: Clock };
       return { label: "2 Days Ago", color: "text-yellow-300", icon: Clock };
     }
-    
+
     // Priority 3: Warning zone (3-7 days)
     if (daysSinceLastRun <= 7) {
       if (avgRunsPerWeek >= 3) return { label: "Getting Lazy", color: "text-orange-400", icon: AlertTriangle };
       return { label: "Need Motivation", color: "text-orange-300", icon: AlertTriangle };
     }
-    
+
     // Priority 4: Inactive (7-14 days)
     if (daysSinceLastRun <= 14) {
       return { label: "Comeback Time", color: "text-red-400", icon: AlertCircle };
     }
-    
+
     // Priority 5: Very inactive (14-30 days)
     if (daysSinceLastRun <= 30) {
       return { label: "Lost Streak", color: "text-red-500", icon: HeartCrack };
     }
-    
+
     // Priority 6: Dormant (30+ days)
     return { label: "Dormant", color: "text-gray-500", icon: Moon };
   };
@@ -523,13 +508,7 @@ const Settings: React.FC = () => {
   return (
     <AudioProvider>
       <div className={`max-w-4xl mx-auto px-4 sm:px-6 ${activeTab === 'feedback' ? '' : 'pb-24'}`}>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
+
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">
           Settings
         </h1>
@@ -562,10 +541,10 @@ const Settings: React.FC = () => {
                                 <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                               </div>
                             )}
-                            <img 
-                              src={user.imageUrl} 
-                              alt="Profile" 
-                              className="w-full h-full object-cover rounded-full" 
+                            <img
+                              src={user.imageUrl}
+                              alt="Profile"
+                              className="w-full h-full object-cover rounded-full"
                               onLoad={() => setImageLoaded(true)}
                               onError={() => setImageLoaded(false)}
                             />
