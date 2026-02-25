@@ -373,33 +373,87 @@ const drawMonthlyRings = (ctx: CanvasRenderingContext2D, data: any[], area: any)
   if (!data.length) return;
   const maxDist = Math.max(...data.map(m => m.distance));
   const maxRuns = Math.max(...data.map(m => m.runs));
-  const cols = Math.min(data.length, 3);
+
+  // Use 2 columns for better proportions, max 4 items
+  const cols = Math.min(data.length, 2);
   const rows = Math.ceil(data.length / cols);
   const cw = area.width / cols;
   const ch = area.height / rows;
-  const r = Math.min(cw, ch) / 2.8;
+  const r = Math.min(cw, ch) / 3.2; // smaller radius to leave room for text
 
   data.forEach((m, i) => {
-    const cx = area.x + (i % cols) * cw + cw / 2;
-    const cy = area.y + Math.floor(i / cols) * ch + ch / 2;
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+
+    // Center partial last row
+    const itemsInRow = row < rows - 1 ? cols : data.length - row * cols;
+    const rowOffset = (area.width - itemsInRow * cw) / 2;
+
+    const cx = area.x + rowOffset + col * cw + cw / 2;
+    const cy = area.y + row * ch + ch / 2;
     const dp = (m.distance / maxDist) * 2 * Math.PI;
     const rp = (m.runs / maxRuns) * 2 * Math.PI;
 
-    ctx.strokeStyle = '#374151'; ctx.lineWidth = 18; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.stroke();
+    // Outer ring (distance — orange)
+    ctx.strokeStyle = '#374151';
+    ctx.lineWidth = 14;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+    ctx.stroke();
+
     ctx.strokeStyle = '#FF7A00';
-    ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + dp); ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + dp);
+    ctx.stroke();
 
-    ctx.strokeStyle = '#374151'; ctx.lineWidth = 14;
-    ctx.beginPath(); ctx.arc(cx, cy, r - 28, 0, 2 * Math.PI); ctx.stroke();
+    // Inner ring (runs — purple)
+    ctx.strokeStyle = '#374151';
+    ctx.lineWidth = 11;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 22, 0, 2 * Math.PI);
+    ctx.stroke();
+
     ctx.strokeStyle = '#A78BFA';
-    ctx.beginPath(); ctx.arc(cx, cy, r - 28, -Math.PI / 2, -Math.PI / 2 + rp); ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 22, -Math.PI / 2, -Math.PI / 2 + rp);
+    ctx.stroke();
 
-    ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 24px system-ui'; ctx.textAlign = 'center';
-    ctx.fillText(new Date(m.name + '-01').toLocaleDateString('en', { month: 'short' }), cx, cy + 2);
-    ctx.fillStyle = '#9CA3AF'; ctx.font = '20px system-ui';
-    ctx.fillText(`${m.distance.toFixed(1)}km`, cx, cy + 30);
-    ctx.font = '18px system-ui'; ctx.fillText(`${m.runs} runs`, cx, cy + 52);
-    ctx.font = '16px system-ui'; ctx.fillText(`${m.time.toFixed(1)}h`, cx, cy + 72);
+    // Month name
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 20px system-ui';
+    ctx.textAlign = 'center';
+    const monthLabel = new Date(m.name + '-01').toLocaleDateString('en', { month: 'short' });
+    ctx.fillText(monthLabel, cx, cy - 8);
+
+    // Year
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '14px system-ui';
+    const yearLabel = new Date(m.name + '-01').getFullYear().toString();
+    ctx.fillText(yearLabel, cx, cy + 8);
+
+    // Stats below ring — stacked vertically, no overlap
+    const statsY = cy + r + 28;
+
+    // Distance line
+    ctx.fillStyle = '#FF7A00';
+    ctx.beginPath(); ctx.arc(cx - 45, statsY - 3, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#E5E7EB';
+    ctx.font = 'bold 15px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${m.distance.toFixed(1)}km`, cx - 37, statsY);
+
+    // Runs line
+    ctx.fillStyle = '#A78BFA';
+    ctx.beginPath(); ctx.arc(cx - 45, statsY + 17, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#E5E7EB';
+    ctx.fillText(`${m.runs} runs`, cx - 37, statsY + 20);
+
+    // Hours
+    ctx.fillStyle = '#6B7280';
+    ctx.font = '13px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${m.time.toFixed(1)}h total`, cx, statsY + 40);
   });
 };
+
