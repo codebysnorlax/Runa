@@ -40,65 +40,69 @@ const StreakHeatmap: React.FC<HeatmapProps> = ({ data }) => {
   const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="overflow-x-auto">
-      <div className="inline-block min-w-full">
-        <div className="flex gap-2">
-          {/* Day Labels */}
-          <div className="flex flex-col gap-1 text-[10px] text-gray-500 pt-4 leading-[12px]">
-            {dayLabels.map((day, i) => (
-              <div key={i} className="h-3 flex items-center">
-                {i % 2 === 1 ? day : ''}
+    <div className="w-full">
+      <div className="flex gap-1.5">
+        {/* Day Labels */}
+        <div className="flex flex-col gap-[3px] text-[10px] text-gray-500 pt-4 leading-[12px] flex-shrink-0">
+          {dayLabels.map((day, i) => (
+            <div key={i} className="h-[14px] flex items-center">
+              {i % 2 === 1 ? day : ''}
+            </div>
+          ))}
+        </div>
+
+        {/* Grid container — fills remaining width */}
+        <div className="flex-1 min-w-0">
+          {/* Month Labels */}
+          <div
+            className="grid gap-[3px] mb-1 text-[10px] text-gray-500 h-3"
+            style={{ gridTemplateColumns: `repeat(${weeks.length}, 1fr)` }}
+          >
+            {weeks.map((week, weekIndex) => {
+              const firstDay = week.find(d => d.date);
+              if (firstDay && new Date(firstDay.date).getDate() <= 7) {
+                const month = new Date(firstDay.date).getMonth();
+                return (
+                  <div key={weekIndex} className="overflow-visible truncate">
+                    {monthLabels[month]}
+                  </div>
+                );
+              }
+              return <div key={weekIndex} />;
+            })}
+          </div>
+
+          {/* Heatmap Grid — uses CSS grid to fill width */}
+          <div
+            className="grid gap-[3px]"
+            style={{ gridTemplateColumns: `repeat(${weeks.length}, 1fr)` }}
+          >
+            {weeks.map((week, weekIndex) => (
+              <div key={weekIndex} className="flex flex-col gap-[3px]">
+                {week.map((day, dayIndex) => (
+                  <div
+                    key={dayIndex}
+                    className={`aspect-square rounded-sm ${day.count === -1 ? 'bg-transparent' : getColor(day.count)}`}
+                    title={day.date ? `${day.date}: ${day.count} run${day.count !== 1 ? 's' : ''}` : ''}
+                  />
+                ))}
               </div>
             ))}
           </div>
-
-          <div className="flex-1">
-            {/* Month Labels */}
-            <div className="flex gap-1 mb-1 text-[10px] text-gray-500 h-3">
-              {weeks.map((week, weekIndex) => {
-                const firstDay = week.find(d => d.date);
-                if (firstDay && new Date(firstDay.date).getDate() <= 7) {
-                  const month = new Date(firstDay.date).getMonth();
-                  return (
-                    <div key={weekIndex} className="w-3 overflow-visible">
-                      {monthLabels[month]}
-                    </div>
-                  );
-                }
-                return <div key={weekIndex} className="w-3" />;
-              })}
-            </div>
-
-            {/* Grid */}
-            <div className="flex gap-1">
-              {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
-                  {week.map((day, dayIndex) => (
-                    <div
-                      key={dayIndex}
-                      // Increased size to w-3.5 h-3.5 (14px) for better fill
-                      className={`w-3.5 h-3.5 rounded-sm ${day.count === -1 ? 'bg-transparent' : getColor(day.count)}`}
-                      title={day.date ? `${day.date}: ${day.count} run${day.count !== 1 ? 's' : ''}` : ''}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
+      </div>
 
-        {/* Legend */}
-        <div className="flex items-center justify-end gap-2 mt-2 text-[10px] text-gray-500">
-          <span>Less</span>
-          <div className="flex gap-1">
-            <div className="w-3 h-3 rounded-sm bg-gray-700" />
-            <div className="w-3 h-3 rounded-sm bg-green-900" />
-            <div className="w-3 h-3 rounded-sm bg-green-700" />
-            <div className="w-3 h-3 rounded-sm bg-green-500" />
-            <div className="w-3 h-3 rounded-sm bg-green-400" />
-          </div>
-          <span>More</span>
+      {/* Legend */}
+      <div className="flex items-center justify-end gap-2 mt-2 text-[10px] text-gray-500">
+        <span>Less</span>
+        <div className="flex gap-1">
+          <div className="w-3 h-3 rounded-sm bg-gray-700" />
+          <div className="w-3 h-3 rounded-sm bg-green-900" />
+          <div className="w-3 h-3 rounded-sm bg-green-700" />
+          <div className="w-3 h-3 rounded-sm bg-green-500" />
+          <div className="w-3 h-3 rounded-sm bg-green-400" />
         </div>
+        <span>More</span>
       </div>
     </div>
   );

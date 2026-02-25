@@ -10,9 +10,11 @@
   0% {
     background-position: 0% center;
   }
+
   50% {
     background-position: 100% center;
   }
+
   100% {
     background-position: 0% center;
   }
@@ -174,4 +176,22 @@
 
 .animate-text-shine {
   animation: text-shine 5s linear infinite;
+}
+
+@keyframes wave-progress {
+  0% {
+    background-position: 0 center;
+  }
+
+  100% {
+    background-position: -40px center;
+  }
+}
+
+.animate-wave-progress {
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 5 Q 10 0 20 5 T 40 5' fill='none' stroke='%23ffffff' stroke-width='3' stroke-opacity='0.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 40px 10px;
+  background-position: 0 center;
+  background-repeat: repeat-x;
+  animation: wave-progress 1s linear infinite;
 }

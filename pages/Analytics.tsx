@@ -59,15 +59,21 @@ const formatPace = (paceMinutes: number) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-dark-card border border-dark-border p-2 rounded-md shadow-lg">
-        <p className="label text-white">{`${label}`}</p>
-        {payload.map((pld: any, index: number) => (
-          <p key={index} style={{ color: pld.color }}>
-            {pld.name.includes("Pace")
-              ? `${pld.name}: ${formatPace(pld.value)} min/km`
-              : `${pld.name}: ${pld.value.toFixed(2)}`}
-          </p>
-        ))}
+      <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-700/50 px-3.5 py-2.5 rounded-xl shadow-2xl">
+        <p className="text-[11px] text-gray-400 font-medium mb-1.5 border-b border-gray-700/40 pb-1.5">{label}</p>
+        <div className="space-y-1">
+          {payload.map((pld: any, index: number) => (
+            <div key={index} className="flex items-center gap-2 text-[12px]">
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: pld.color }} />
+              <span className="text-gray-400">{pld.name}:</span>
+              <span className="text-white font-semibold ml-auto">
+                {pld.name.includes("Pace")
+                  ? `${formatPace(pld.value)} min/km`
+                  : typeof pld.value === 'number' ? pld.value.toFixed(2) : pld.value}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -257,49 +263,183 @@ const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
   );
 };
 
-const FilterModal = memo(({ onClose, onApply, onClear }: {
+const FilterModal = memo(({ onClose, onApply, onClear, maxDistKm, initialTime, initialDistRange }: {
   onClose: () => void;
-  onApply: (time: number | null, distance: number | null) => void;
+  onApply: (time: number | null, distRange: [number, number] | null) => void;
   onClear: () => void;
+  maxDistKm: number;
+  initialTime: number | null;
+  initialDistRange: [number, number] | null;
 }) => {
-  const [time, setTime] = useState<number | null>(null);
-  const [distance, setDistance] = useState("");
+  const maxRange = maxDistKm;
+  const [time, setTime] = useState<number | null>(initialTime);
+  const [distMin, setDistMin] = useState(initialDistRange ? initialDistRange[0] / 1000 : 0);
+  const [distMax, setDistMax] = useState(initialDistRange ? initialDistRange[1] / 1000 : maxRange);
+  const [distEnabled, setDistEnabled] = useState(!!initialDistRange);
+  const [applying, setApplying] = useState(false);
+
+  const handleMinChange = (v: number) => {
+    setDistMin(Math.min(v, distMax - 0.1));
+    setDistEnabled(true);
+  };
+  const handleMaxChange = (v: number) => {
+    setDistMax(Math.max(v, distMin + 0.1));
+    setDistEnabled(true);
+  };
+
+  const leftPct = (distMin / maxRange) * 100;
+  const rightPct = ((maxRange - distMax) / maxRange) * 100;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-dark-card border border-dark-border rounded-lg p-6 w-80" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-white font-semibold">Filter Charts</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={20} /></button>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="text-gray-400 text-sm block mb-2">Time Period</label>
-            <div className="flex gap-2 flex-wrap">
-              {[7, 15, 30].map((v) => (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div
+        className="relative w-full max-w-sm rounded-2xl bg-gray-900 border border-gray-700/50 shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Top accent gradient */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-orange via-orange-400 to-purple-500" />
+
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-base font-bold text-white">Filter Charts</h3>
+              <p className="text-[11px] text-gray-500 mt-0.5">Refine your analytics view</p>
+            </div>
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Time Period */}
+          <div className="mb-6">
+            <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block mb-2.5">
+              Time Period
+            </label>
+            <div className="flex gap-2">
+              {[
+                { val: 7, label: "7D" },
+                { val: 15, label: "15D" },
+                { val: 30, label: "30D" },
+                { val: 60, label: "60D" },
+                { val: 90, label: "90D" },
+              ].map((v) => (
                 <button
-                  key={v}
-                  onClick={() => setTime(time === v ? null : v)}
-                  className={`px-3 py-1 rounded text-sm ${time === v ? "bg-brand-orange text-white" : "bg-gray-700 text-gray-300"}`}
+                  key={v.val}
+                  onClick={() => setTime(time === v.val ? null : v.val)}
+                  className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${time === v.val
+                    ? "bg-brand-orange text-white shadow-md shadow-brand-orange/20"
+                    : "bg-gray-800/80 text-gray-400 hover:bg-gray-700/80 hover:text-gray-200"
+                    }`}
                 >
-                  {v} days
+                  {v.label}
                 </button>
               ))}
             </div>
           </div>
-          <div>
-            <label className="text-gray-400 text-sm block mb-2">Min Distance (meters)</label>
-            <input
-              type="text"
-              value={distance}
-              onChange={(e) => setDistance(e.target.value.replace(/\D/g, ""))}
-              placeholder="e.g. 1600"
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm"
-            />
+
+          {/* Distance Range Slider */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2.5">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                Distance Range
+              </label>
+              <button
+                onClick={() => { setDistEnabled(!distEnabled); if (distEnabled) { setDistMin(0); setDistMax(maxRange); } }}
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors ${distEnabled ? "bg-brand-orange/15 text-brand-orange" : "bg-gray-800 text-gray-500"
+                  }`}
+              >
+                {distEnabled ? "ON" : "OFF"}
+              </button>
+            </div>
+
+            {/* Range display */}
+            <div className="flex justify-between items-center mb-3">
+              <div className="bg-gray-800/80 rounded-lg px-3 py-1.5 border border-gray-700/50">
+                <span className="text-sm font-bold text-white">{distMin.toFixed(1)}</span>
+                <span className="text-[10px] text-gray-500 ml-0.5">km</span>
+              </div>
+              <div className="text-gray-600 text-xs">—</div>
+              <div className="bg-gray-800/80 rounded-lg px-3 py-1.5 border border-gray-700/50">
+                <span className="text-sm font-bold text-white">{distMax.toFixed(1)}</span>
+                <span className="text-[10px] text-gray-500 ml-0.5">km</span>
+              </div>
+            </div>
+
+            {/* Dual range slider */}
+            <style>{`
+              .range-thumb { -webkit-appearance: none; appearance: none; pointer-events: none; position: absolute; width: 100%; height: 32px; background: transparent; }
+              .range-thumb::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: white; border: 2px solid; cursor: pointer; pointer-events: all; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+              .range-thumb::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: white; border: 2px solid; cursor: pointer; pointer-events: all; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+              .range-thumb::-moz-range-track { background: transparent; border: none; }
+              .range-min::-webkit-slider-thumb { border-color: #FF7A00; }
+              .range-max::-webkit-slider-thumb { border-color: #8B5CF6; }
+              .range-min::-moz-range-thumb { border-color: #FF7A00; }
+              .range-max::-moz-range-thumb { border-color: #8B5CF6; }
+            `}</style>
+            <div className="relative h-8 flex items-center">
+              {/* Track */}
+              <div className="absolute left-0 right-0 h-1.5 bg-gray-700/60 rounded-full" />
+              {/* Active range */}
+              <div
+                className="absolute h-1.5 bg-gradient-to-r from-brand-orange to-orange-400 rounded-full"
+                style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
+              />
+              {/* Min slider */}
+              <input
+                type="range"
+                min="0"
+                max={maxRange}
+                step="0.1"
+                value={distMin}
+                onChange={(e) => handleMinChange(parseFloat(e.target.value))}
+                className="range-thumb range-min"
+                style={{ zIndex: 3 }}
+              />
+              {/* Max slider */}
+              <input
+                type="range"
+                min="0"
+                max={maxRange}
+                step="0.1"
+                value={distMax}
+                onChange={(e) => handleMaxChange(parseFloat(e.target.value))}
+                className="range-thumb range-max"
+                style={{ zIndex: 4 }}
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-[9px] text-gray-600">0 km</span>
+              <span className="text-[9px] text-gray-600">{maxRange} km</span>
+            </div>
           </div>
-          <div className="flex gap-2 pt-2">
-            <button onClick={() => { onClear(); onClose(); }} className="flex-1 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white text-sm">Clear</button>
-            <button onClick={() => onApply(time, distance ? parseInt(distance) : null)} className="flex-1 px-3 py-2 bg-brand-orange hover:bg-orange-600 rounded text-white text-sm">Apply</button>
+
+          {/* Actions */}
+          <div className="flex gap-2.5">
+            <button
+              onClick={() => { onClear(); onClose(); }}
+              className="flex-1 py-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700/80 text-gray-300 text-xs font-semibold transition-colors"
+            >
+              Clear All
+            </button>
+            <button
+              disabled={applying}
+              onClick={() => {
+                setApplying(true);
+                setTimeout(() => onApply(time, distEnabled ? [distMin * 1000, distMax * 1000] : null), 600);
+              }}
+              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${applying ? 'bg-brand-orange/60 cursor-not-allowed' : 'bg-gradient-to-r from-brand-orange to-orange-600 hover:shadow-lg hover:shadow-brand-orange/20'} text-white`}
+            >
+              {applying ? (
+                <>
+                  <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                  </svg>
+                  Applying...
+                </>
+              ) : 'Apply Filters'}
+            </button>
           </div>
         </div>
       </div>
@@ -311,17 +451,22 @@ const Analytics: React.FC = () => {
   const { runs, goals, loading } = useAppContext();
   const [showFilter, setShowFilter] = useState(false);
   const [appliedTime, setAppliedTime] = useState<number | null>(null);
-  const [appliedDistance, setAppliedDistance] = useState<number | null>(null);
+  const [appliedDistRange, setAppliedDistRange] = useState<[number, number] | null>(null);
+  const [isFiltering, setIsFiltering] = useState(false);
 
-  const handleApply = useCallback((time: number | null, dist: number | null) => {
-    setAppliedTime(time);
-    setAppliedDistance(dist);
+  const handleApply = useCallback((time: number | null, distRange: [number, number] | null) => {
+    setIsFiltering(true);
     setShowFilter(false);
+    setTimeout(() => {
+      setAppliedTime(time);
+      setAppliedDistRange(distRange);
+      setIsFiltering(false);
+    }, 600);
   }, []);
 
   const handleClear = useCallback(() => {
     setAppliedTime(null);
-    setAppliedDistance(null);
+    setAppliedDistRange(null);
   }, []);
 
   const chartData = useMemo(() => {
@@ -349,8 +494,8 @@ const Analytics: React.FC = () => {
       const cutoff = Date.now() - appliedTime * 86400000;
       filtered = filtered.filter((run) => new Date(run.date).getTime() >= cutoff);
     }
-    if (appliedDistance) {
-      filtered = filtered.filter((run) => run.distance_m >= appliedDistance);
+    if (appliedDistRange) {
+      filtered = filtered.filter((run) => run.distance_m >= appliedDistRange[0] && run.distance_m <= appliedDistRange[1]);
     }
     return filtered
       .map((run) => ({ ...run, dateObj: new Date(run.date) }))
@@ -362,7 +507,7 @@ const Analytics: React.FC = () => {
         distance: run.distance_m / 1000,
         time: run.total_time_sec / 60,
       }));
-  }, [runs, appliedTime, appliedDistance]);
+  }, [runs, appliedTime, appliedDistRange]);
 
   const weeklyDistanceData = useMemo(() => {
     const weeks: {
@@ -527,11 +672,11 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 pb-24 lg:pb-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+    <div className="space-y-4 pb-24 lg:pb-6">
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
-          <span className="px-2 py-0.5 text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30">BETA</span>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Analytics</h1>
+          <span className="px-1.5 py-0 text-[11px] font-bold italic bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30" style={{ fontFamily: "'Caveat', cursive" }}>Beta</span>
         </div>
         <button
           onClick={() => setShowFilter(true)}
@@ -539,18 +684,18 @@ const Analytics: React.FC = () => {
         >
           <Filter size={16} />
           Filter
-          {(appliedTime || appliedDistance) && <span className="w-2 h-2 bg-brand-orange rounded-full" />}
+          {(appliedTime || appliedDistRange) && <span className="w-2 h-2 bg-brand-orange rounded-full" />}
         </button>
       </div>
 
-      {showFilter && <FilterModal onClose={() => setShowFilter(false)} onApply={handleApply} onClear={handleClear} />}
+      {showFilter && <FilterModal onClose={() => setShowFilter(false)} onApply={handleApply} onClear={handleClear} maxDistKm={Math.ceil(Math.max(...runs.map(r => r.distance_m / 1000), 5) / 5) * 5} initialTime={appliedTime} initialDistRange={appliedDistRange} />}
 
       <Heatmap runs={runs} />
 
       {/* Goal Progress Section */}
       {goalProgressData.length > 0 && (
         <Card>
-          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
+          <h2 className="text-sm sm:text-base font-bold text-white mb-3 uppercase tracking-wide">
             Goal Progress
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -582,20 +727,27 @@ const Analytics: React.FC = () => {
                 </div>
               </div>
             ))}
+            {/* Add goal card - desktop only */}
+            <a href="#/settings?tab=goals" className="hidden sm:flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-700/50 hover:border-brand-orange/50 hover:bg-gray-800/40 transition-all cursor-pointer group min-h-[120px]">
+              <div className="text-center">
+                <p className="text-2xl text-gray-600 group-hover:text-brand-orange transition-colors mb-1">+</p>
+                <p className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors">Add another goal</p>
+              </div>
+            </a>
           </div>
         </Card>
       )}
 
       {/* Advanced Performance Charts */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
         <Card>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
               Performance Trend
             </h2>
             <button
-              onClick={() => exportChartToImage((appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14), 'performance', 'Performance Trend')}
+              onClick={(e) => exportChartToImage((appliedTime || appliedDistRange) ? filteredPerformanceData : filteredPerformanceData.slice(-14), 'performance', 'Performance Trend', e)}
               className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
               title="Download chart"
             >
@@ -603,123 +755,173 @@ const Analytics: React.FC = () => {
             </button>
           </div>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={280}>
             <ComposedChart
-              data={(appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
-              margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+              data={(appliedTime || appliedDistRange) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+              <defs>
+                <linearGradient id="gradDistance" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FF7A00" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#FF7A00" stopOpacity={0.02} />
+                </linearGradient>
+                <filter id="glowOrange">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                <filter id="glowPurple">
+                  <feGaussianBlur stdDeviation="2.5" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} vertical={false} />
               <XAxis
                 dataKey="name"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
               <YAxis
                 yAxisId="left"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#4B5563', strokeDasharray: '4 4' }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9CA3AF', paddingTop: '8px' }} />
               <Area
                 yAxisId="left"
-                type="monotone"
+                type="natural"
                 dataKey="distance"
-                fill="#FF7A00"
-                fillOpacity={0.3}
+                fill="url(#gradDistance)"
                 stroke="#FF7A00"
+                strokeWidth={2.5}
                 name="Distance (km)"
+                dot={false}
+                activeDot={{ r: 5, fill: '#FF7A00', stroke: '#1F2937', strokeWidth: 2 }}
+                filter="url(#glowOrange)"
               />
               <Line
                 yAxisId="right"
-                type="monotone"
+                type="natural"
                 dataKey="pace"
-                stroke="#8884d8"
+                stroke="#A78BFA"
                 strokeWidth={2}
                 name="Pace (min/km)"
+                dot={{ r: 3, fill: '#A78BFA', stroke: '#1F2937', strokeWidth: 1.5 }}
+                activeDot={{ r: 5, fill: '#A78BFA', stroke: '#1F2937', strokeWidth: 2 }}
+                filter="url(#glowPurple)"
               />
             </ComposedChart>
           </ResponsiveContainer>
         </Card>
 
         <Card>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
               Distance & Time per Run
             </h2>
             <button
-              onClick={() => exportChartToImage((appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14), 'distance-time', 'Distance & Time per Run')}
+              onClick={(e) => exportChartToImage((appliedTime || appliedDistRange) ? filteredChartData : filteredChartData.slice(-14), 'distance-time', 'Distance & Time per Run', e)}
               className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
               title="Download chart"
             >
               <Download size={18} className="text-gray-400" />
             </button>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart
-              data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
-              margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart
+              data={(appliedTime || appliedDistRange) ? filteredChartData : filteredChartData.slice(-14)}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+              <defs>
+                <linearGradient id="gradDistGreen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#34D399" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#34D399" stopOpacity={0.02} />
+                </linearGradient>
+                <linearGradient id="gradTimeRose" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FB7185" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#FB7185" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} vertical={false} />
               <XAxis
                 dataKey="name"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
               <YAxis
                 yAxisId="left"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
                 unit=" km"
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
                 unit=" min"
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#4B5563', strokeDasharray: '4 4' }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9CA3AF', paddingTop: '8px' }} />
+              <Area
                 yAxisId="left"
+                type="natural"
                 dataKey="distance"
-                fill="#82ca9d"
+                fill="url(#gradDistGreen)"
+                stroke="#34D399"
+                strokeWidth={2.5}
                 name="Distance (km)"
-                animationDuration={800}
+                dot={false}
+                activeDot={{ r: 5, fill: '#34D399', stroke: '#1F2937', strokeWidth: 2 }}
               />
-              <Bar
+              <Area
                 yAxisId="right"
+                type="natural"
                 dataKey="time"
-                fill="#ff6b6b"
+                fill="url(#gradTimeRose)"
+                stroke="#FB7185"
+                strokeWidth={2}
                 name="Time (min)"
-                animationDuration={800}
+                dot={false}
+                activeDot={{ r: 5, fill: '#FB7185', stroke: '#1F2937', strokeWidth: 2 }}
               />
-            </ComposedChart>
+            </AreaChart>
           </ResponsiveContainer>
         </Card>
       </div>
 
       {/* Weekly Analysis with Goals */}
       <Card>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-base sm:text-lg font-semibold text-white">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
             Weekly Performance vs Goals
           </h2>
           <button
-            onClick={() => exportChartToImage(weeklyDistanceData, 'weekly', 'Weekly Performance')}
+            onClick={(e) => exportChartToImage(weeklyDistanceData, 'weekly', 'Weekly Performance', e)}
             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
             title="Download chart"
           >
@@ -727,48 +929,74 @@ const Analytics: React.FC = () => {
           </button>
         </div>
 
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
           <ComposedChart
             data={weeklyDistanceData}
-            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+            margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+            <defs>
+              <linearGradient id="gradBarOrange" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#FF7A00" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#FF7A00" stopOpacity={0.5} />
+              </linearGradient>
+              <linearGradient id="gradBarPurple" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A78BFA" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#A78BFA" stopOpacity={0.5} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} vertical={false} />
             <XAxis
               dataKey="name"
-              stroke="#888"
+              stroke="transparent"
               fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: "#6B7280" }}
+              tickLine={false}
+              axisLine={false}
             />
             <YAxis
               yAxisId="left"
-              stroke="#888"
+              stroke="transparent"
               fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: "#6B7280" }}
+              tickLine={false}
+              axisLine={false}
               unit=" km"
             />
             <YAxis
               yAxisId="right"
               orientation="right"
-              stroke="#888"
+              stroke="transparent"
               fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: "#6B7280" }}
+              tickLine={false}
+              axisLine={false}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9CA3AF', paddingTop: '8px' }} />
             <Bar
               yAxisId="left"
               dataKey="distance"
-              fill="#FF7A00"
+              fill="url(#gradBarOrange)"
               name="Distance (km)"
+              radius={[4, 4, 0, 0]}
+              animationDuration={800}
             />
-            <Bar yAxisId="right" dataKey="runs" fill="#8884d8" name="Runs" />
+            <Bar
+              yAxisId="right"
+              dataKey="runs"
+              fill="url(#gradBarPurple)"
+              name="Runs"
+              radius={[4, 4, 0, 0]}
+              animationDuration={800}
+            />
             {goals?.weekly_distance_km && (
               <ReferenceLine
                 yAxisId="left"
                 y={goals.weekly_distance_km}
-                stroke="#ef4444"
-                strokeDasharray="5 5"
-                label="Goal"
+                stroke="#EF4444"
+                strokeDasharray="6 4"
+                strokeWidth={1.5}
+                label={{ value: 'Goal', position: 'right', fill: '#EF4444', fontSize: 11, fontWeight: 600 }}
               />
             )}
           </ComposedChart>
@@ -778,11 +1006,11 @@ const Analytics: React.FC = () => {
       {/* Monthly Overview */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-base sm:text-lg font-semibold text-white">
+          <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
             Monthly Progress Rings
           </h2>
           <button
-            onClick={() => exportChartToImage(monthlyData, 'monthly', 'Monthly Progress')}
+            onClick={(e) => exportChartToImage(monthlyData, 'monthly', 'Monthly Progress', e)}
             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
             title="Download chart"
           >
@@ -805,7 +1033,7 @@ const Analytics: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start ${isCurrentMonth ? 'border-2 border-brand-orange' : 'border border-dashed border-gray-700/50'
                   }`}
                 style={{ minWidth: '140px' }}
               >
@@ -912,7 +1140,7 @@ const Analytics: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors ${isCurrentMonth ? 'border-2 border-brand-orange' : 'border border-dashed border-gray-700/50'
                   }`}
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">
