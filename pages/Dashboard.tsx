@@ -405,6 +405,7 @@ const Dashboard: React.FC = () => {
               { label: "Distance", sub: "Longest", val: `${(personalRecords.longestDistance / 1000).toFixed(2)}`, unit: "km", icon: Route, bg: "bg-blue-500/10", border: "border-blue-500/15", color: "text-blue-400" },
               { label: "Duration", sub: "Longest", val: formatDuration(personalRecords.longestDuration), unit: "", icon: Clock, bg: "bg-purple-500/10", border: "border-purple-500/15", color: "text-purple-400" },
               { label: "Speed", sub: "Top", val: `${personalRecords.fastestAvgSpeed.toFixed(1)}`, unit: "km/h", icon: Zap, bg: "bg-yellow-500/10", border: "border-yellow-500/15", color: "text-yellow-400" },
+              { label: "Streak", sub: "Highest", val: `${streakData.longestStreak}`, unit: "days", icon: Flame, bg: "bg-orange-500/10", border: "border-orange-500/15", color: "text-orange-400" },
             ].map((r) => {
               const Icon = r.icon;
               return (

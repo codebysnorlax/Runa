@@ -222,28 +222,29 @@ const AiInsights: React.FC = () => {
   };
 
   const getInsightIcon = (type: "positive" | "negative" | "neutral") => {
+    const iconClass = "w-5 h-5 flex-shrink-0";
     switch (type) {
       case "positive":
-        return <ShieldCheck className="w-6 h-6 text-green-400 flex-shrink-0" />;
+        return <ShieldCheck className={`${iconClass} text-emerald-400`} />;
       case "negative":
-        return <ThumbsDown className="w-6 h-6 text-red-400 flex-shrink-0" />;
+        return <ThumbsDown className={`${iconClass} text-rose-400`} />;
       case "neutral":
-        return <HeartPulse className="w-6 h-6 text-blue-400 flex-shrink-0" />;
+        return <HeartPulse className={`${iconClass} text-sky-400`} />;
       default:
-        return <Zap className="w-6 h-6 text-yellow-400 flex-shrink-0" />;
+        return <Zap className={`${iconClass} text-amber-400`} />;
     }
   };
 
-  const insightBgColor = (type: "positive" | "negative" | "neutral") => {
+  const insightTheme = (type: "positive" | "negative" | "neutral") => {
     switch (type) {
       case "positive":
-        return "border-green-500/50";
+        return { border: "border-emerald-500/30", bg: "bg-emerald-500/8", badge: "bg-emerald-500/15", accent: "from-emerald-500/20 via-transparent" };
       case "negative":
-        return "border-red-500/50";
+        return { border: "border-rose-500/30", bg: "bg-rose-500/8", badge: "bg-rose-500/15", accent: "from-rose-500/20 via-transparent" };
       case "neutral":
-        return "border-blue-500/50";
+        return { border: "border-sky-500/30", bg: "bg-sky-500/8", badge: "bg-sky-500/15", accent: "from-sky-500/20 via-transparent" };
       default:
-        return "border-dark-border";
+        return { border: "border-gray-700/50", bg: "bg-gray-800/40", badge: "bg-gray-700/30", accent: "from-gray-500/20 via-transparent" };
     }
   };
 
@@ -255,40 +256,50 @@ const AiInsights: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-4 pb-24 lg:pb-6 lg:px-4">
 
       <div className="px-4 lg:px-0">
-        <div className="flex justify-between items-center gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex justify-between items-center gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 rounded-lg bg-brand-orange/15">
+              <Brain className="w-5 h-5 text-brand-orange" />
+            </div>
             <h1 className="text-lg sm:text-2xl font-bold text-white truncate">
               AI Insights
             </h1>
-            <span className="px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30 whitespace-nowrap">BETA</span>
+            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-purple-500/15 text-purple-400 rounded-full border border-purple-500/25">BETA</span>
           </div>
           <button
             onClick={handleGenerate}
             disabled={isGenerating || usageCount >= 2}
-            className="flex items-center justify-center bg-brand-orange text-white font-semibold py-2 px-3 sm:px-4 rounded-lg hover:bg-orange-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
+            className="group flex items-center justify-center bg-gradient-to-r from-brand-orange to-orange-600 text-white font-semibold py-2 px-4 sm:px-5 rounded-xl hover:shadow-lg hover:shadow-brand-orange/20 transition-all disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed disabled:shadow-none text-xs sm:text-sm whitespace-nowrap flex-shrink-0"
             title={usageCount >= 2 ? "Daily limit reached" : ""}
           >
             {isGenerating ? (
               <>
-                <Loader2 className="animate-spin w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                <Loader2 className="animate-spin w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
                 <span className="hidden sm:inline">Generating...</span>
                 <span className="sm:hidden">Gen...</span>
               </>
             ) : usageCount >= 2 ? (
               <>
-                <Lock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5" />
                 <span className="hidden sm:inline">Resets in {resetTime}</span>
                 <span className="sm:hidden">{resetTime}</span>
               </>
             ) : (
               <>
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
+                <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 group-hover:rotate-12 transition-transform" />
                 Generate
               </>
             )}
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-1">Daily usage: <span className="text-red-500 font-medium">{usageCount}/2</span> • Resets in {resetTime}</p>
+        <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-1">
+            {[0, 1].map((i) => (
+              <div key={i} className={`w-1.5 h-1.5 rounded-full ${i < usageCount ? 'bg-brand-orange' : 'bg-gray-700'}`} />
+            ))}
+          </div>
+          <p className="text-[11px] text-gray-500">{usageCount}/2 used today · Resets in {resetTime}</p>
+        </div>
       </div>
 
       {isGenerating ? (
@@ -296,61 +307,74 @@ const AiInsights: React.FC = () => {
       ) : (
         <>
           {insights && insights.improvementScore > 0 && (
-            <Card className="bg-gradient-to-br from-orange-500/10 to-purple-500/10 border border-orange-500/20 p-4 mx-4 lg:mx-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-semibold text-white">
+            <div className="mx-4 lg:mx-0 rounded-2xl bg-gray-800/40 border border-dashed border-gray-700/50 p-5">
+              <div className="flex items-center gap-6">
+                <div className="flex-shrink-0">
+                  <p className="text-5xl font-black text-white leading-none tracking-tight"
+                    style={{ background: 'linear-gradient(135deg, #FF7A00, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+                  >
+                    {insights.improvementScore}
+                  </p>
+                  <p className="text-[10px] text-gray-500 font-medium mt-1 tracking-wide text-center">OUT OF 100</p>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-sm font-bold text-white uppercase tracking-wide">
                     Improvement Score
                   </h2>
-                  <p className="text-xs text-gray-500">
-                    Based on recent activity
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Based on your recent activity
                   </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Target className="w-8 h-8 text-brand-orange" />
-                  <div>
-                    <p className="text-3xl font-bold text-white leading-none">
-                      {insights.improvementScore}
-                    </p>
-                    <p className="text-xs text-gray-500">out of 100</p>
+                  <div className="mt-3 h-2 bg-gray-700/50 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-brand-orange via-orange-400 to-purple-500"
+                      style={{ width: `${insights.improvementScore}%`, transition: 'width 1s ease-out' }}
+                    />
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 lg:px-0">
-            {insights?.insights?.map((insight) => (
-              <Card
-                key={insight.id}
-                className={`border-l-4 ${insightBgColor(
-                  insight.type
-                )} hover:scale-[1.02] transition-transform`}
-              >
-                <div className="flex items-start gap-3">
-                  {getInsightIcon(insight.type)}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-white mb-2">
-                      {insight.title}
-                    </h3>
-                    <p className="text-sm text-gray-300 leading-relaxed">
-                      {insight.content}
-                    </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 px-4 lg:px-0">
+            {insights?.insights?.map((insight) => {
+              const theme = insightTheme(insight.type);
+              return (
+                <div
+                  key={insight.id}
+                  className={`relative overflow-hidden rounded-xl ${theme.bg} border ${theme.border} p-4 hover:scale-[1.01] transition-all duration-200 group`}
+                >
+                  {/* Subtle left accent gradient */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${theme.accent}`} />
+                  <div className="flex items-start gap-3 pl-2">
+                    <div className={`p-2 rounded-lg ${theme.badge} flex-shrink-0 mt-0.5`}>
+                      {getInsightIcon(insight.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-bold text-white mb-1.5">
+                        {insight.title}
+                      </h3>
+                      <p className="text-[13px] text-gray-400 leading-relaxed">
+                        {insight.content}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            ))}
+              );
+            })}
           </div>
 
           {insights &&
             insights.weeklyPlan &&
             Object.values(insights.weeklyPlan).some((p) => p) && (
-              <div>
-                <h2 className="text-xl font-bold text-white mb-4 px-4 lg:px-0">
-                  Weekly Training Plan
-                </h2>
-                {/* Mobile: Horizontal scroll - full width */}
-                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide">
+              <div className="px-4 lg:px-0">
+                <div className="flex items-center gap-2 mb-3">
+                  <BarChart3 className="w-4 h-4 text-gray-500" />
+                  <h2 className="text-sm font-bold text-white uppercase tracking-wide">
+                    Weekly Training Plan
+                  </h2>
+                </div>
+                {/* Mobile: Horizontal scroll */}
+                <div className="flex gap-2.5 overflow-x-auto pb-2 snap-x snap-mandatory lg:hidden scrollbar-hide -mx-4 px-4">
                   {Object.entries(insights.weeklyPlan).map(([day, plan]) => {
                     const today = new Date()
                       .toLocaleDateString("en-US", { weekday: "long" })
@@ -359,24 +383,31 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`flex-shrink-0 w-40 p-3 bg-gray-800/50 rounded-lg border-2 transition-all snap-start first:ml-4 ${isToday
-                          ? "border-red-500"
-                          : "border-gray-700 hover:border-brand-orange/50"
+                        className={`flex flex-col flex-shrink-0 w-40 rounded-xl overflow-hidden snap-start transition-all bg-gray-800/30 ${isToday
+                          ? "ring-1 ring-brand-orange/50 shadow-lg shadow-brand-orange/10"
+                          : "ring-1 ring-gray-700/40"
                           }`}
-                        style={{ aspectRatio: '2/3' }}
                       >
-                        <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">
-                          {day}
-                        </p>
-                        <p className="text-xs text-gray-300 leading-relaxed">
-                          {plan || "Rest day"}
-                        </p>
+                        <div className={`px-3 py-2 text-center ${isToday
+                          ? "bg-brand-orange/15"
+                          : "bg-gray-700/40"
+                          }`}>
+                          <p className={`text-xs font-bold uppercase tracking-wider ${isToday ? "text-brand-orange" : "text-gray-300"
+                            }`}>
+                            {day.slice(0, 3)}
+                          </p>
+                        </div>
+                        <div className="p-3 flex-1">
+                          <p className="text-[11px] text-gray-300 leading-relaxed">
+                            {plan || "Rest day 🧘"}
+                          </p>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
                 {/* Desktop: Grid */}
-                <div className="hidden lg:grid grid-cols-7 gap-3">
+                <div className="hidden lg:grid grid-cols-7 gap-2.5">
                   {Object.entries(insights.weeklyPlan).map(([day, plan]) => {
                     const today = new Date()
                       .toLocaleDateString("en-US", { weekday: "long" })
@@ -385,17 +416,25 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`p-4 bg-gray-800/50 rounded-lg border-2 transition-all ${isToday
-                          ? "border-red-500"
-                          : "border-gray-700 hover:border-brand-orange/50"
+                        className={`flex flex-col rounded-xl overflow-hidden transition-all ${isToday
+                          ? "ring-1 ring-brand-orange/50 shadow-md shadow-brand-orange/10"
+                          : "ring-1 ring-gray-700/40 hover:ring-gray-600/60"
                           }`}
                       >
-                        <p className="font-semibold capitalize text-brand-orange mb-2 text-sm">
-                          {day}
-                        </p>
-                        <p className="text-xs text-gray-300 leading-relaxed">
-                          {plan || "Rest day"}
-                        </p>
+                        <div className={`px-3 py-2 text-center flex-shrink-0 ${isToday
+                          ? "bg-brand-orange/15"
+                          : "bg-gray-700/40"
+                          }`}>
+                          <p className={`text-xs font-bold uppercase tracking-wider ${isToday ? "text-brand-orange" : "text-gray-300"
+                            }`}>
+                            {day.slice(0, 3)}
+                          </p>
+                        </div>
+                        <div className="p-3 flex-1 bg-gray-800/30">
+                          <p className="text-[11px] text-gray-300 leading-relaxed">
+                            {plan || "Rest day 🧘"}
+                          </p>
+                        </div>
                       </div>
                     );
                   })}
