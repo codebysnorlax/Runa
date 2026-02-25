@@ -84,7 +84,10 @@ const Settings: React.FC = () => {
     runs,
   } = useAppContext();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<ActiveTab>("profile");
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    return (params.get('tab') as ActiveTab) || 'profile';
+  });
 
   const [profileState, setProfileState] = useState<Profile | null>(null);
   const [goalState, setGoalState] = useState<Goal | null>(null);
@@ -97,6 +100,21 @@ const Settings: React.FC = () => {
   const [feedbackCompleted, setFeedbackCompleted] = useState(false);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [cooldownTimer, setCooldownTimer] = useState(0);
+  const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
+  const [hasInitializedCalendar, setHasInitializedCalendar] = useState(false);
+
+  useEffect(() => {
+    if (runs && runs.length > 0 && !hasInitializedCalendar) {
+      const sortedRuns = [...runs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const lastRunDate = new Date(sortedRuns[0].date);
+      const today = new Date();
+
+      const monthDiff = (lastRunDate.getFullYear() - today.getFullYear()) * 12 + (lastRunDate.getMonth() - today.getMonth());
+      setCalendarMonthOffset(monthDiff);
+      setHasInitializedCalendar(true);
+    }
+  }, [runs, hasInitializedCalendar]);
+
 
   const FEEDBACK_QUESTIONS: FeedbackQuestion[] = [
     {
@@ -527,8 +545,18 @@ const Settings: React.FC = () => {
         <div>
           {activeTab === "profile" && (
             <form onSubmit={handleProfileSubmit} className="animate-fade-in">
+              {/* Header with Save */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Profile</h3>
+                <button
+                  type="submit"
+                  className="bg-brand-orange hover:bg-orange-600 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors"
+                >
+                  Save Profile
+                </button>
+              </div>
               {/* Profile Header with Avatar on Left, Stats on Right */}
-              <div className="mb-6 p-4 sm:p-5 bg-gray-800/50 border border-gray-700/50 rounded-2xl flex flex-col items-center">
+              <div className="mb-6 p-4 sm:p-5 border border-dashed border-gray-700/50 rounded-2xl flex flex-col items-center">
                 <div className="flex items-center gap-4 sm:gap-6 w-full mb-3">
                   {/* Avatar - Left Side */}
                   <div className="relative flex-shrink-0">
@@ -589,241 +617,416 @@ const Settings: React.FC = () => {
                 </div>
 
                 {/* Footer Labels - Status Left, BMI Right */}
-                <div className="w-full flex justify-between items-center px-2">
-                  <div className={`flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-gray-900/80 border border-gray-700/50 ${status.color}`}>
+                <div className="w-full flex justify-between items-center px-1 mt-1">
+                  <div className={`flex items-center gap-1.5 text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-lg border border-dashed border-gray-700/50 ${status.color}`}>
                     <StatusIcon className="w-3 h-3" />
                     {status.label}
                   </div>
                   {bmiStatus && (
-                    <div className={`text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-gray-900/80 border border-gray-700/50 ${bmiStatus.color}`}>
+                    <div className={`text-[10px] sm:text-xs font-semibold px-3 py-1 rounded-lg border border-dashed border-gray-700/50 ${bmiStatus.color}`}>
                       {bmiStatus.label}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Input Fields */}
-              {/* Input Fields */}
-              <div className="space-y-4 mb-6">
-                {/* Name Input - Full Width */}
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                    <User className="w-4 h-4 text-brand-orange" />
-                    Name
-                  </label>
-                  <input
-                    name="name"
-                    type="text"
-                    value={profileState.name}
-                    onChange={handleProfileChange}
-                    className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                    placeholder="Enter your name"
-                  />
+              {/* Profile Inputs & Calendar Grid */}
+              <div className="flex flex-col lg:flex-row gap-6 mb-6">
+                {/* Input Fields */}
+                <div className="flex-1 space-y-4">
+                  {/* Name */}
+                  <div className="rounded-xl p-4 border border-dashed border-gray-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-brand-orange/15 flex items-center justify-center">
+                        <User className="w-3.5 h-3.5 text-brand-orange" />
+                      </div>
+                      <label className="text-[11px] text-gray-400 font-medium">Name</label>
+                    </div>
+                    <input
+                      name="name"
+                      type="text"
+                      value={profileState.name}
+                      onChange={handleProfileChange}
+                      className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-sm font-semibold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange placeholder-gray-600"
+                      placeholder="Enter your name"
+                    />
+                  </div>
+
+                  {/* Age, Height, Weight */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="rounded-xl p-4 border border-dashed border-gray-700/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-purple-500/15 flex items-center justify-center">
+                          <Target className="w-3.5 h-3.5 text-purple-400" />
+                        </div>
+                        <label className="text-[11px] text-gray-400 font-medium">Age</label>
+                      </div>
+                      <input
+                        name="age"
+                        type="number"
+                        value={profileState.age}
+                        onChange={handleProfileChange}
+                        className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                        placeholder="—"
+                      />
+                    </div>
+                    <div className="rounded-xl p-4 border border-dashed border-gray-700/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                          <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+                        </div>
+                        <label className="text-[11px] text-gray-400 font-medium">Height <span className="text-gray-600">cm</span></label>
+                      </div>
+                      <input
+                        name="height_cm"
+                        type="number"
+                        value={profileState.height_cm}
+                        onChange={handleProfileChange}
+                        className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                        placeholder="—"
+                      />
+                    </div>
+                    <div className="rounded-xl p-4 border border-dashed border-gray-700/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-green-500/15 flex items-center justify-center">
+                          <Activity className="w-3.5 h-3.5 text-green-400" />
+                        </div>
+                        <label className="text-[11px] text-gray-400 font-medium">Weight <span className="text-gray-600">kg</span></label>
+                      </div>
+                      <input
+                        name="weight_kg"
+                        type="number"
+                        value={profileState.weight_kg}
+                        onChange={handleProfileChange}
+                        className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                        placeholder="—"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="rounded-xl p-4 border border-dashed border-gray-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-gray-500/15 flex items-center justify-center">
+                        <Mail className="w-3.5 h-3.5 text-gray-400" />
+                      </div>
+                      <label className="text-[11px] text-gray-400 font-medium">Email</label>
+                    </div>
+                    <input
+                      type="text"
+                      value={user?.primaryEmailAddress?.emailAddress || ""}
+                      readOnly
+                      className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-gray-400 text-sm font-semibold cursor-not-allowed opacity-80"
+                    />
+                  </div>
                 </div>
 
-                {/* Age, Height, Weight - Single Row */}
-                <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                  <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2 truncate">
-                      <Target className="w-4 h-4 text-brand-orange" />
-                      Age
-                    </label>
-                    <input
-                      name="age"
-                      type="number"
-                      value={profileState.age}
-                      onChange={handleProfileChange}
-                      className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                      placeholder="Age"
-                    />
-                  </div>
-                  <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2 truncate">
-                      <Code className="w-4 h-4 text-brand-orange" />
-                      Height
-                    </label>
-                    <input
-                      name="height_cm"
-                      type="number"
-                      value={profileState.height_cm}
-                      onChange={handleProfileChange}
-                      className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                      placeholder="cm"
-                    />
-                  </div>
-                  <div className="group">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2 truncate">
-                      <Database className="w-4 h-4 text-brand-orange" />
-                      Weight
-                    </label>
-                    <input
-                      name="weight_kg"
-                      type="number"
-                      value={profileState.weight_kg}
-                      onChange={handleProfileChange}
-                      className="w-full bg-gray-800/50 border border-gray-600 rounded-xl p-3.5 text-white placeholder-gray-500 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange transition-all duration-300"
-                      placeholder="kg"
-                    />
-                  </div>
+                {/* Activity Calendar Block */}
+                <div className="w-full lg:w-[320px] flex-shrink-0">
+                  {(() => {
+                    const realToday = new Date();
+                    const viewDate = new Date(realToday.getFullYear(), realToday.getMonth() + calendarMonthOffset, 1);
+                    const year = viewDate.getFullYear();
+                    const month = viewDate.getMonth();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 is Sunday
+                    const startOffset = firstDayOfMonth; // 0 for Sunday
+                    const prevMonthDays = new Date(year, month, 0).getDate();
+
+                    // Active days mapping and streaks
+                    let currentStreak = 0;
+                    let bestStreak = 0;
+
+                    const sortedRunDates = Array.from(new Set<number>(
+                      runs.map((r: any) => {
+                        const d = new Date(r.date);
+                        d.setHours(0, 0, 0, 0);
+                        return d.getTime();
+                      })
+                    )).sort((a, b) => b - a);
+
+                    const activeDaysThisMonth = new Set(
+                      runs
+                        .map((r: any) => new Date(r.date))
+                        .filter((d: Date) => d.getMonth() === month && d.getFullYear() === year)
+                        .map((d: Date) => d.getDate())
+                    );
+
+                    if (sortedRunDates.length > 0) {
+                      let checkDate = new Date(realToday);
+                      checkDate.setHours(0, 0, 0, 0);
+
+                      // current streak
+                      while (sortedRunDates.includes(checkDate.getTime())) {
+                        currentStreak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                      }
+                      if (currentStreak === 0) {
+                        checkDate = new Date(realToday);
+                        checkDate.setHours(0, 0, 0, 0);
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        while (sortedRunDates.includes(checkDate.getTime())) {
+                          currentStreak++;
+                          checkDate.setDate(checkDate.getDate() - 1);
+                        }
+                      }
+
+                      // best streak
+                      const ascendingDates = [...sortedRunDates].sort((a, b) => a - b);
+                      let tempStreak = 1;
+                      bestStreak = 1;
+                      for (let i = 1; i < ascendingDates.length; i++) {
+                        const prev = new Date(ascendingDates[i - 1]);
+                        const curr = new Date(ascendingDates[i]);
+                        const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
+                        if (diffDays === 1) {
+                          tempStreak++;
+                          bestStreak = Math.max(bestStreak, tempStreak);
+                        } else {
+                          tempStreak = 1;
+                        }
+                      }
+                    }
+
+                    const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+                    return (
+                      <div className="h-full flex flex-col p-4 sm:p-4 border border-dashed border-gray-700/50 rounded-2xl bg-gray-900/40">
+                        <div className="flex justify-between items-center mb-3">
+                          <div>
+                            <div className="text-gray-400 text-xs mb-0.5 leading-none font-medium">{year}</div>
+                            <div className="text-white text-lg font-bold tracking-wide leading-tight">
+                              {viewDate.toLocaleString('default', { month: 'long' })}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 border border-gray-700/50 rounded-full p-0.5 bg-black/20">
+                            <button
+                              type="button"
+                              onClick={() => setCalendarMonthOffset(p => Math.max(-3, p - 1))}
+                              disabled={calendarMonthOffset <= -3}
+                              className={`p-1.5 rounded-full transition-colors ${calendarMonthOffset <= -3 ? 'text-gray-700 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setCalendarMonthOffset(p => Math.min(3, p + 1))}
+                              disabled={calendarMonthOffset >= 3}
+                              className={`p-1.5 rounded-full transition-colors ${calendarMonthOffset >= 3 ? 'text-gray-700 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Weekday headers */}
+                        <div className="grid grid-cols-7 gap-y-2 gap-x-1 mb-2">
+                          {weekDays.map((day, idx) => (
+                            <div key={idx} className="text-center text-[10px] uppercase tracking-wider font-semibold text-gray-500">{day}</div>
+                          ))}
+                        </div>
+
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-y-2 gap-x-1 mb-3 justify-items-center flex-1 content-start">
+                          {Array.from({ length: startOffset }).map((_, i) => (
+                            <div key={`prev-${i}`} className="w-7 h-7 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 text-[12px] font-medium">
+                              {prevMonthDays - startOffset + i + 1}
+                            </div>
+                          ))}
+                          {Array.from({ length: daysInMonth }).map((_, i) => {
+                            const dayNum = i + 1;
+                            const isToday = dayNum === realToday.getDate() && month === realToday.getMonth() && year === realToday.getFullYear();
+                            const isActive = activeDaysThisMonth.has(dayNum);
+
+                            const borderClass = isToday
+                              ? 'border-red-500/70 hover:border-red-400'
+                              : (isActive ? 'border-orange-500/30 hover:border-orange-400' : 'border-gray-700/40 hover:border-gray-500');
+                            const textClass = isToday
+                              ? 'text-red-400'
+                              : (isActive ? 'text-orange-400' : 'text-gray-300');
+                            const bgClass = isToday
+                              ? 'bg-red-500/10'
+                              : (isActive ? 'bg-orange-500/5' : '');
+
+                            return (
+                              <div
+                                key={`day-${dayNum}`}
+                                className={`relative w-7 h-7 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[12px] transition-all font-medium border border-dashed ${borderClass} ${textClass} ${bgClass}`}
+                              >
+                                {dayNum}
+                                {isActive && (
+                                  <Flame className="absolute -bottom-1 -right-0.5 w-[14px] h-[14px] text-brand-orange drop-shadow-[0_0_4px_rgba(255,107,0,0.8)] fill-brand-orange" />
+                                )}
+                              </div>
+                            );
+                          })}
+                          {Array.from({ length: (7 - ((startOffset + daysInMonth) % 7)) % 7 }).map((_, i) => (
+                            <div key={`next-${i}`} className="w-7 h-7 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 text-[12px] font-medium">
+                              {i + 1}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Stats Footer */}
+                        <div className="mt-auto flex items-center justify-between px-1 pt-3 border-t border-gray-800/60 w-full">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#f59e0b] shadow-[0_0_6px_rgba(245,158,11,0.5)]"></div>
+                            <span className="text-gray-400 text-xs font-medium">Current Streak</span>
+                            <span className="text-white text-sm font-bold ml-0.5">{currentStreak}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-right">
+                            <span className="text-white text-sm font-bold mr-0.5">{bestStreak}</span>
+                            <span className="text-gray-400 text-xs font-medium">Best</span>
+                            <Flame className="w-3 h-3 text-[#22c55e] drop-shadow-[0_0_6px_rgba(34,197,94,0.5)] fill-[#22c55e]" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
-              {/* Save Button */}
-              <button
-                type="submit"
-                className="w-full relative group overflow-hidden bg-gradient-to-r from-brand-orange to-orange-600 text-white font-bold py-4 px-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  Save Profile
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              </button>
             </form>
           )}
           {activeTab === "goals" && (
             <form
               onSubmit={handleGoalSubmit}
-              className="space-y-6 animate-fade-in"
+              className="space-y-5 animate-fade-in"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Weekly Distance Target (km)
-                  </label>
-                  <input
-                    name="weekly_distance_km"
-                    type="number"
-                    step="0.1"
-                    value={goalState.weekly_distance_km || 0}
-                    onChange={handleGoalChange}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Weekly Running Days
-                  </label>
-                  <input
-                    name="weekly_runs"
-                    type="number"
-                    min="0"
-                    max="7"
-                    value={goalState.weekly_runs || 0}
-                    onChange={handleGoalChange}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange"
-                  />
+              {/* Header with Save */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Weekly Targets</h3>
+                <button
+                  type="submit"
+                  className="bg-brand-orange hover:bg-orange-600 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors"
+                >
+                  Save Goals
+                </button>
+              </div>
+              {/* Weekly Targets */}
+              <div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-transparent rounded-xl p-4 border border-dashed border-gray-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-brand-orange/15 flex items-center justify-center">
+                        <Activity className="w-3.5 h-3.5 text-brand-orange" />
+                      </div>
+                      <label className="text-[11px] text-gray-400 font-medium">Distance (km)</label>
+                    </div>
+                    <input
+                      name="weekly_distance_km"
+                      type="number"
+                      step="0.1"
+                      value={goalState.weekly_distance_km || 0}
+                      onChange={handleGoalChange}
+                      className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                    />
+                  </div>
+                  <div className="bg-transparent rounded-xl p-4 border border-dashed border-gray-700/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                        <Clock className="w-3.5 h-3.5 text-blue-400" />
+                      </div>
+                      <label className="text-[11px] text-gray-400 font-medium">Running Days</label>
+                    </div>
+                    <input
+                      name="weekly_runs"
+                      type="number"
+                      min="0"
+                      max="7"
+                      value={goalState.weekly_runs || 0}
+                      onChange={handleGoalChange}
+                      className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* Distance Goals */}
               <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
-                  <h3 className="text-base sm:text-lg font-medium text-white">
-                    Distance Goals
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={(e) => addDistanceGoal(e)}
-                    className="flex items-center justify-center bg-gradient-to-r from-green-600 to-green-500 text-white px-4 py-3 rounded-lg hover:from-green-700 hover:to-green-600 active:scale-95 transition-all duration-200 shadow-lg"
-                  >
-                    <Plus className="w-4 h-4 mr-2" /> Add New Goal
-                  </button>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Distance Goals</h3>
+                  <p className="text-[10px] text-gray-600">{(goalState.distance_goals || []).length} goal{(goalState.distance_goals || []).length !== 1 ? 's' : ''}</p>
                 </div>
 
-                {(goalState.distance_goals || []).length === 0 ? (
-                  <div className="text-center py-6 bg-gray-800 rounded-lg border border-gray-700">
-                    <Target className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                    <p className="text-gray-400 text-sm">No goals set</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {(goalState.distance_goals || []).map((goal) => (
-                      <div
-                        key={goal.id}
-                        className="bg-gray-800 p-3 rounded-lg border border-gray-700"
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {(goalState.distance_goals || []).map((goal) => (
+                    <div
+                      key={goal.id}
+                      className="bg-transparent rounded-xl border border-dashed border-gray-700/50 overflow-hidden group relative"
+                    >
+                      {/* Colored top bar */}
+                      <div className="h-1 bg-gradient-to-r from-brand-orange to-orange-400" />
+
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={(e) => removeDistanceGoal(goal.id, e)}
+                        className="absolute top-2.5 right-2 opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/20 text-gray-600 hover:text-red-400 transition-all z-10"
                       >
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Name
-                            </label>
-                            <input
-                              type="text"
-                              value={goal.name}
-                              onChange={(e) =>
-                                updateDistanceGoal(
-                                  goal.id,
-                                  "name",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
-                              placeholder="5K Run"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Distance (km)
-                            </label>
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+
+                      <div className="p-3.5 space-y-3">
+                        {/* Goal Name */}
+                        <input
+                          type="text"
+                          value={goal.name}
+                          onChange={(e) => updateDistanceGoal(goal.id, "name", e.target.value)}
+                          className="w-full bg-transparent border-none text-sm font-bold text-white p-0 focus:ring-0 placeholder-gray-600 truncate"
+                          placeholder="Goal name"
+                        />
+
+                        {/* Distance */}
+                        <div>
+                          <label className="text-[9px] text-gray-500 uppercase tracking-wider block mb-1">Distance</label>
+                          <div className="flex items-baseline gap-1">
                             <input
                               type="number"
                               step="0.1"
                               min="0.1"
                               value={goal.distance_km}
-                              onChange={(e) =>
-                                updateDistanceGoal(
-                                  goal.id,
-                                  "distance_km",
-                                  Number(e.target.value)
-                                )
-                              }
-                              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                              onChange={(e) => updateDistanceGoal(goal.id, "distance_km", Number(e.target.value))}
+                              className="w-full bg-transparent border border-gray-700/40 rounded-lg px-2.5 py-1.5 text-white text-sm font-semibold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                             />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-400 mb-1">
-                              Time (MM:SS)
-                            </label>
-                            <input
-                              type="text"
-                              value={goal.target_time}
-                              onChange={(e) =>
-                                updateDistanceGoal(
-                                  goal.id,
-                                  "target_time",
-                                  e.target.value
-                                )
-                              }
-                              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
-                              placeholder="25:00"
-                            />
-                          </div>
-                          <div className="flex items-end">
-                            <button
-                              type="button"
-                              onClick={(e) => removeDistanceGoal(goal.id, e)}
-                              className="w-full bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-colors flex items-center justify-center"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <span className="text-[10px] text-gray-500 flex-shrink-0">km</span>
                           </div>
                         </div>
+
+                        {/* Target Time */}
+                        <div>
+                          <label className="text-[9px] text-gray-500 uppercase tracking-wider block mb-1">Target</label>
+                          <input
+                            type="text"
+                            value={goal.target_time}
+                            onChange={(e) => updateDistanceGoal(goal.id, "target_time", e.target.value)}
+                            className="w-full bg-transparent border border-gray-700/40 rounded-lg px-2.5 py-1.5 text-white text-sm font-semibold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
+                            placeholder="MM:SS"
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-                <p className="text-xs text-gray-400 mt-2">
-                  💡 Set realistic goals like 5K in 25:00, 10K in 50:00
+                    </div>
+                  ))}
+
+                  {/* Add Goal Card */}
+                  <button
+                    type="button"
+                    onClick={(e) => addDistanceGoal(e)}
+                    className="flex flex-col items-center justify-center min-h-[160px] rounded-xl border border-dashed border-gray-700/50 hover:border-brand-orange/40 hover:bg-gray-800/30 transition-all group/add cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gray-800 group-hover/add:bg-brand-orange/15 flex items-center justify-center transition-colors mb-2">
+                      <Plus className="w-5 h-5 text-gray-500 group-hover/add:text-brand-orange transition-colors" />
+                    </div>
+                    <span className="text-xs text-gray-500 group-hover/add:text-gray-300 transition-colors">Add Goal</span>
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-gray-600 mt-3 flex items-center gap-1">
+                  💡 e.g. 5K in 25:00, 10K in 50:00
                 </p>
               </div>
 
-              <button
-                type="submit"
-                onTouchStart={() => { }}
-                className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 active:scale-95 transition-all duration-200 touch-manipulation"
-              >
-                Save Goals
-              </button>
             </form>
           )}
           {activeTab === "backup" && (
@@ -877,7 +1080,7 @@ const Settings: React.FC = () => {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-gray-800 p-6 rounded-lg">
+                  <div className="bg-transparent border border-dashed border-gray-700/50 p-6 rounded-2xl">
                     <h4 className="text-white font-medium mb-4">How it works:</h4>
                     <div className="space-y-4">
                       <div className="flex items-start space-x-3">
@@ -1063,7 +1266,7 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Software Information */}
-              <div className="bg-gray-800 p-4 rounded-lg space-y-4">
+              <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl space-y-4">
                 <div className="flex items-center space-x-3">
                   <Code className="w-5 h-5 sm:w-6 sm:h-6 text-brand-orange" />
                   <h2 className="text-lg sm:text-xl font-semibold text-white">
@@ -1098,7 +1301,7 @@ const Settings: React.FC = () => {
               </div>
 
               {/* How to Use */}
-              <div className="bg-gray-800 p-4 rounded-lg space-y-4">
+              <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl space-y-4">
                 <div className="flex items-center space-x-3">
                   <Target className="w-5 h-5 sm:w-6 sm:h-6 text-brand-orange" />
                   <h2 className="text-lg sm:text-xl font-semibold text-white">
@@ -1139,7 +1342,7 @@ const Settings: React.FC = () => {
               </div>
 
               {/* Privacy & Security */}
-              <div className="bg-gray-800 p-4 rounded-lg">
+              <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl">
                 <div className="flex items-center space-x-3 mb-4">
                   <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-brand-orange" />
                   <h2 className="text-lg sm:text-xl font-semibold text-white">

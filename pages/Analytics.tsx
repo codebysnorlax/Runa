@@ -291,7 +291,7 @@ const FilterModal = memo(({ onClose, onApply, onClear, maxDistKm, initialTime, i
   const rightPct = ((maxRange - distMax) / maxRange) * 100;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
         className="relative w-full max-w-sm rounded-2xl bg-gray-900 border border-gray-700/50 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -727,6 +727,13 @@ const Analytics: React.FC = () => {
                 </div>
               </div>
             ))}
+            {/* Add goal card - desktop only */}
+            <a href="#/settings?tab=goals" className="hidden sm:flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-700/50 hover:border-brand-orange/50 hover:bg-gray-800/40 transition-all cursor-pointer group min-h-[120px]">
+              <div className="text-center">
+                <p className="text-2xl text-gray-600 group-hover:text-brand-orange transition-colors mb-1">+</p>
+                <p className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors">Add another goal</p>
+              </div>
+            </a>
           </div>
         </Card>
       )}
@@ -1026,7 +1033,7 @@ const Analytics: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                className={`flex-shrink-0 flex flex-col items-center p-3 bg-gray-800 rounded-lg transition-colors snap-start ${isCurrentMonth ? 'border-2 border-brand-orange' : 'border border-dashed border-gray-700/50'
                   }`}
                 style={{ minWidth: '140px' }}
               >
@@ -1133,7 +1140,7 @@ const Analytics: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors border-2 ${isCurrentMonth ? 'border-red-500' : 'border-transparent'
+                className={`flex flex-col items-center p-3 sm:p-4 bg-gray-800 rounded-lg transition-colors ${isCurrentMonth ? 'border-2 border-brand-orange' : 'border border-dashed border-gray-700/50'
                   }`}
               >
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-3">

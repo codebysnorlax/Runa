@@ -14,8 +14,8 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
   const { currentlyPlaying, setCurrentlyPlaying } = useAudio();
 
   const audioId = `audio-${audioType}`;
-  const audioFile = audioType === 'male' 
-    ? `${import.meta.env.BASE_URL}audio/MaleJsonHelp.wav` 
+  const audioFile = audioType === 'male'
+    ? `${import.meta.env.BASE_URL}audio/MaleJsonHelp.wav`
     : `${import.meta.env.BASE_URL}audio/femaleJsonHelp.wav`;
 
   useEffect(() => {
@@ -73,14 +73,14 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
   const progressPercent = duration ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="bg-gray-700 p-4 rounded-lg border border-gray-600">
+    <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl">
       <div className="flex items-center space-x-3 mb-3">
         <Volume2 className="w-5 h-5 text-brand-orange" />
         <h4 className="text-white font-medium">
           Audio Help ({audioType === 'male' ? 'Male' : 'Female'} Voice)
         </h4>
       </div>
-      
+
       <div className="flex items-center space-x-3">
         <button
           onClick={togglePlay}
@@ -92,10 +92,10 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
             <Play className="w-5 h-5 text-white ml-0.5" />
           )}
         </button>
-        
+
         <div className="flex-1">
           <div className="bg-gray-600 h-2 rounded-full overflow-hidden">
-            <div 
+            <div
               className="bg-brand-orange h-full transition-all duration-100"
               style={{ width: `${progressPercent}%` }}
             />
