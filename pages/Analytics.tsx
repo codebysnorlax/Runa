@@ -59,15 +59,21 @@ const formatPace = (paceMinutes: number) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-dark-card border border-dark-border p-2 rounded-md shadow-lg">
-        <p className="label text-white">{`${label}`}</p>
-        {payload.map((pld: any, index: number) => (
-          <p key={index} style={{ color: pld.color }}>
-            {pld.name.includes("Pace")
-              ? `${pld.name}: ${formatPace(pld.value)} min/km`
-              : `${pld.name}: ${pld.value.toFixed(2)}`}
-          </p>
-        ))}
+      <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-700/50 px-3.5 py-2.5 rounded-xl shadow-2xl">
+        <p className="text-[11px] text-gray-400 font-medium mb-1.5 border-b border-gray-700/40 pb-1.5">{label}</p>
+        <div className="space-y-1">
+          {payload.map((pld: any, index: number) => (
+            <div key={index} className="flex items-center gap-2 text-[12px]">
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: pld.color }} />
+              <span className="text-gray-400">{pld.name}:</span>
+              <span className="text-white font-semibold ml-auto">
+                {pld.name.includes("Pace")
+                  ? `${formatPace(pld.value)} min/km`
+                  : typeof pld.value === 'number' ? pld.value.toFixed(2) : pld.value}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -527,11 +533,11 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 pb-24 lg:pb-6">
+    <div className="space-y-4 pb-24 lg:pb-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Analytics</h1>
-          <span className="px-2 py-0.5 text-xs font-semibold bg-brand-orange/20 text-brand-orange rounded-full border border-brand-orange/30">BETA</span>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Analytics</h1>
+          <span className="px-1.5 py-0.5 text-[9px] font-bold bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30">BETA</span>
         </div>
         <button
           onClick={() => setShowFilter(true)}
@@ -550,7 +556,7 @@ const Analytics: React.FC = () => {
       {/* Goal Progress Section */}
       {goalProgressData.length > 0 && (
         <Card>
-          <h2 className="text-base sm:text-lg font-semibold text-white mb-4">
+          <h2 className="text-sm sm:text-base font-bold text-white mb-3 uppercase tracking-wide">
             Goal Progress
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -588,14 +594,14 @@ const Analytics: React.FC = () => {
 
       {/* Advanced Performance Charts */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
         <Card>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
               Performance Trend
             </h2>
             <button
-              onClick={() => exportChartToImage((appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14), 'performance', 'Performance Trend')}
+              onClick={(e) => exportChartToImage((appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14), 'performance', 'Performance Trend', e)}
               className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
               title="Download chart"
             >
@@ -603,123 +609,173 @@ const Analytics: React.FC = () => {
             </button>
           </div>
 
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={280}>
             <ComposedChart
               data={(appliedTime || appliedDistance) ? filteredPerformanceData : filteredPerformanceData.slice(-14)}
-              margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+              <defs>
+                <linearGradient id="gradDistance" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FF7A00" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#FF7A00" stopOpacity={0.02} />
+                </linearGradient>
+                <filter id="glowOrange">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                <filter id="glowPurple">
+                  <feGaussianBlur stdDeviation="2.5" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} vertical={false} />
               <XAxis
                 dataKey="name"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
               <YAxis
                 yAxisId="left"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#4B5563', strokeDasharray: '4 4' }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9CA3AF', paddingTop: '8px' }} />
               <Area
                 yAxisId="left"
-                type="monotone"
+                type="natural"
                 dataKey="distance"
-                fill="#FF7A00"
-                fillOpacity={0.3}
+                fill="url(#gradDistance)"
                 stroke="#FF7A00"
+                strokeWidth={2.5}
                 name="Distance (km)"
+                dot={false}
+                activeDot={{ r: 5, fill: '#FF7A00', stroke: '#1F2937', strokeWidth: 2 }}
+                filter="url(#glowOrange)"
               />
               <Line
                 yAxisId="right"
-                type="monotone"
+                type="natural"
                 dataKey="pace"
-                stroke="#8884d8"
+                stroke="#A78BFA"
                 strokeWidth={2}
                 name="Pace (min/km)"
+                dot={{ r: 3, fill: '#A78BFA', stroke: '#1F2937', strokeWidth: 1.5 }}
+                activeDot={{ r: 5, fill: '#A78BFA', stroke: '#1F2937', strokeWidth: 2 }}
+                filter="url(#glowPurple)"
               />
             </ComposedChart>
           </ResponsiveContainer>
         </Card>
 
         <Card>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-base sm:text-lg font-semibold text-white">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
               Distance & Time per Run
             </h2>
             <button
-              onClick={() => exportChartToImage((appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14), 'distance-time', 'Distance & Time per Run')}
+              onClick={(e) => exportChartToImage((appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14), 'distance-time', 'Distance & Time per Run', e)}
               className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
               title="Download chart"
             >
               <Download size={18} className="text-gray-400" />
             </button>
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart
               data={(appliedTime || appliedDistance) ? filteredChartData : filteredChartData.slice(-14)}
-              margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+              <defs>
+                <linearGradient id="gradDistGreen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#34D399" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#34D399" stopOpacity={0.02} />
+                </linearGradient>
+                <linearGradient id="gradTimeRose" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#FB7185" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#FB7185" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} vertical={false} />
               <XAxis
                 dataKey="name"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
               />
               <YAxis
                 yAxisId="left"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
                 unit=" km"
               />
               <YAxis
                 yAxisId="right"
                 orientation="right"
-                stroke="#888"
+                stroke="transparent"
                 fontSize={10}
-                tick={{ fill: "#9CA3AF" }}
+                tick={{ fill: "#6B7280" }}
+                tickLine={false}
+                axisLine={false}
                 unit=" min"
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#4B5563', strokeDasharray: '4 4' }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9CA3AF', paddingTop: '8px' }} />
+              <Area
                 yAxisId="left"
+                type="natural"
                 dataKey="distance"
-                fill="#82ca9d"
+                fill="url(#gradDistGreen)"
+                stroke="#34D399"
+                strokeWidth={2.5}
                 name="Distance (km)"
-                animationDuration={800}
+                dot={false}
+                activeDot={{ r: 5, fill: '#34D399', stroke: '#1F2937', strokeWidth: 2 }}
               />
-              <Bar
+              <Area
                 yAxisId="right"
+                type="natural"
                 dataKey="time"
-                fill="#ff6b6b"
+                fill="url(#gradTimeRose)"
+                stroke="#FB7185"
+                strokeWidth={2}
                 name="Time (min)"
-                animationDuration={800}
+                dot={false}
+                activeDot={{ r: 5, fill: '#FB7185', stroke: '#1F2937', strokeWidth: 2 }}
               />
-            </ComposedChart>
+            </AreaChart>
           </ResponsiveContainer>
         </Card>
       </div>
 
       {/* Weekly Analysis with Goals */}
       <Card>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-base sm:text-lg font-semibold text-white">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
             Weekly Performance vs Goals
           </h2>
           <button
-            onClick={() => exportChartToImage(weeklyDistanceData, 'weekly', 'Weekly Performance')}
+            onClick={(e) => exportChartToImage(weeklyDistanceData, 'weekly', 'Weekly Performance', e)}
             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
             title="Download chart"
           >
@@ -727,48 +783,74 @@ const Analytics: React.FC = () => {
           </button>
         </div>
 
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
           <ComposedChart
             data={weeklyDistanceData}
-            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+            margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
+            <defs>
+              <linearGradient id="gradBarOrange" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#FF7A00" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#FF7A00" stopOpacity={0.5} />
+              </linearGradient>
+              <linearGradient id="gradBarPurple" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A78BFA" stopOpacity={0.9} />
+                <stop offset="100%" stopColor="#A78BFA" stopOpacity={0.5} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" strokeOpacity={0.3} vertical={false} />
             <XAxis
               dataKey="name"
-              stroke="#888"
+              stroke="transparent"
               fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: "#6B7280" }}
+              tickLine={false}
+              axisLine={false}
             />
             <YAxis
               yAxisId="left"
-              stroke="#888"
+              stroke="transparent"
               fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: "#6B7280" }}
+              tickLine={false}
+              axisLine={false}
               unit=" km"
             />
             <YAxis
               yAxisId="right"
               orientation="right"
-              stroke="#888"
+              stroke="transparent"
               fontSize={10}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: "#6B7280" }}
+              tickLine={false}
+              axisLine={false}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9CA3AF', paddingTop: '8px' }} />
             <Bar
               yAxisId="left"
               dataKey="distance"
-              fill="#FF7A00"
+              fill="url(#gradBarOrange)"
               name="Distance (km)"
+              radius={[4, 4, 0, 0]}
+              animationDuration={800}
             />
-            <Bar yAxisId="right" dataKey="runs" fill="#8884d8" name="Runs" />
+            <Bar
+              yAxisId="right"
+              dataKey="runs"
+              fill="url(#gradBarPurple)"
+              name="Runs"
+              radius={[4, 4, 0, 0]}
+              animationDuration={800}
+            />
             {goals?.weekly_distance_km && (
               <ReferenceLine
                 yAxisId="left"
                 y={goals.weekly_distance_km}
-                stroke="#ef4444"
-                strokeDasharray="5 5"
-                label="Goal"
+                stroke="#EF4444"
+                strokeDasharray="6 4"
+                strokeWidth={1.5}
+                label={{ value: 'Goal', position: 'right', fill: '#EF4444', fontSize: 11, fontWeight: 600 }}
               />
             )}
           </ComposedChart>
@@ -778,11 +860,11 @@ const Analytics: React.FC = () => {
       {/* Monthly Overview */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-base sm:text-lg font-semibold text-white">
+          <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wide">
             Monthly Progress Rings
           </h2>
           <button
-            onClick={() => exportChartToImage(monthlyData, 'monthly', 'Monthly Progress')}
+            onClick={(e) => exportChartToImage(monthlyData, 'monthly', 'Monthly Progress', e)}
             className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
             title="Download chart"
           >
