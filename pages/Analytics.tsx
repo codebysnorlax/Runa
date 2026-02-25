@@ -534,7 +534,7 @@ const Analytics: React.FC = () => {
 
   return (
     <div className="space-y-4 pb-24 lg:pb-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <h1 className="text-xl sm:text-2xl font-bold text-white">Analytics</h1>
           <span className="px-1.5 py-0.5 text-[9px] font-bold bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30">BETA</span>
