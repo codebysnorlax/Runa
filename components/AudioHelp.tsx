@@ -96,7 +96,7 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
         <div className="flex-1">
           <div className="bg-gray-600 h-2 rounded-full overflow-hidden">
             <div
-              className="bg-brand-orange h-full transition-all duration-100"
+              className={`bg-brand-orange h-full transition-all duration-100 ${isPlaying ? 'animate-wave-progress' : ''}`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>

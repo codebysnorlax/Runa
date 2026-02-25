@@ -202,7 +202,7 @@ const ToastCard: React.FC<ToastCardProps> = ({ item, onClose, isExiting }) => {
 const TOAST_DURATION = 5000;
 const COLLAPSED_GAP = 8; // px offset per stacked toast (collapsed)
 const COLLAPSED_SCALE_STEP = 0.04; // scale reduction per stack level
-const EXPANDED_GAP = 62; // px offset per toast (expanded/hovered)
+const EXPANDED_GAP = 54; // px offset per toast (expanded/hovered)
 
 export const ToastContainer: React.FC = () => {
   const { toasts, removeToast } = useToast();

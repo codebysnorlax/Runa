@@ -264,7 +264,7 @@ const AiInsights: React.FC = () => {
             <h1 className="text-lg sm:text-2xl font-bold text-white truncate">
               AI Insights
             </h1>
-            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-purple-500/15 text-purple-400 rounded-full border border-purple-500/25">BETA</span>
+            <span className="px-2 py-0 text-[12px] font-bold italic tracking-wider bg-purple-500/15 text-purple-400 rounded-full border border-purple-500/25" style={{ fontFamily: "'Caveat', cursive" }}>Beta</span>
           </div>
           <button
             onClick={handleGenerate}

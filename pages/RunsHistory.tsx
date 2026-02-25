@@ -201,7 +201,7 @@ const RunsHistory: React.FC = () => {
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 sm:py-3 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-brand-orange text-sm sm:text-base"
+            className="w-full pl-8 pr-3 py-2 sm:py-3 bg-transparent border border-dashed border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-brand-orange focus:border-brand-orange text-sm sm:text-base"
           />
         </div>
         <div className="relative">
@@ -209,7 +209,7 @@ const RunsHistory: React.FC = () => {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as FilterType)}
-            className="pl-8 pr-6 py-2 sm:py-3 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-brand-orange appearance-none text-sm sm:text-base"
+            className="pl-8 pr-6 py-2 sm:py-3 bg-transparent border border-dashed border-gray-700/50 rounded-xl text-white focus:outline-none focus:ring-1 focus:ring-brand-orange focus:border-brand-orange appearance-none text-sm sm:text-base [&>option]:bg-gray-900"
           >
             <option value="all">All</option>
             <option value="thisWeek">Week</option>
@@ -221,9 +221,9 @@ const RunsHistory: React.FC = () => {
 
       {/* Desktop & Tablet Table View */}
       <div className="hidden md:block">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-800">
+        <div className="overflow-x-auto bg-transparent border border-dashed border-gray-700/50 rounded-2xl">
+          <table className="min-w-full divide-y divide-dashed divide-gray-700/50">
+            <thead className="bg-gray-900/40">
               <tr>
                 <SortableHeader sortKeyId="date">Date</SortableHeader>
                 <SortableHeader sortKeyId="distance_m">
@@ -252,7 +252,7 @@ const RunsHistory: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-gray-700/30">
               {paginatedRuns.map((run, index) => {
                 const prevRun = paginatedRuns[index + 1];
                 return (
@@ -329,9 +329,9 @@ const RunsHistory: React.FC = () => {
 
       {/* Mobile Table View */}
       <div className="md:hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-800">
+        <div className="overflow-x-auto bg-transparent border border-dashed border-gray-700/50 rounded-2xl">
+          <table className="min-w-full text-sm divide-y divide-dashed divide-gray-700/50">
+            <thead className="bg-gray-900/40">
               <tr>
                 <th className="px-2 sm:px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase">
                   Date
@@ -350,7 +350,7 @@ const RunsHistory: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-gray-700/30">
               {paginatedRuns.map((run, index) => {
                 const prevRun = paginatedRuns[index + 1];
                 return (
@@ -433,7 +433,7 @@ const RunsHistory: React.FC = () => {
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="p-3 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-3 rounded-xl bg-transparent border border-dashed border-gray-700/50 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white hover:border-gray-500 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -445,7 +445,7 @@ const RunsHistory: React.FC = () => {
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
-              className="p-3 rounded-lg bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="p-3 rounded-xl bg-transparent border border-dashed border-gray-700/50 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed hover:text-white hover:border-gray-500 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               <ChevronRight className="w-5 h-5" />
             </button>

@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-white">
             {getGreeting()}, {currentUser || "Runner"}!
           </h1>
-          <span className="px-1.5 py-0.5 text-[9px] font-bold bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30">BETA</span>
+          <span className="px-1.5 py-0 text-[11px] font-bold italic bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30" style={{ fontFamily: "'Caveat', cursive" }}>Beta</span>
         </div>
         <p className="text-xs text-gray-500 mt-0.5">Here's your fitness overview</p>
       </div>
@@ -278,7 +278,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 mb-4">
 
         {/* Weekly Goal — progress bar */}
-        <div className="bg-gray-800/60 border border-gray-700/30 rounded-lg px-3.5 py-3">
+        <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
               <Target className="w-3 h-3 text-orange-400" />
@@ -306,7 +306,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Today's Run */}
-        <div className="bg-gray-800/60 border border-gray-700/30 rounded-lg px-3.5 py-3">
+        <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
               <Footprints className="w-3 h-3 text-blue-400" />
@@ -345,7 +345,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Latest Insight */}
-        <div className="bg-gray-800/60 border border-gray-700/30 rounded-lg px-3.5 py-3 sm:col-span-2 md:col-span-1">
+        <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3 sm:col-span-2 md:col-span-1">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
               <Brain className="w-3 h-3 text-purple-400" />
@@ -383,7 +383,7 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-4">
 
         {/* Heatmap */}
-        <div className="bg-gray-800/60 border border-gray-700/30 rounded-lg px-3.5 py-3">
+        <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <CalendarDays className="w-3 h-3 text-green-400" />
@@ -395,7 +395,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Personal Records */}
-        <div className="bg-gray-800/60 border border-gray-700/30 rounded-lg px-3.5 py-3">
+        <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
           <div className="flex items-center gap-1.5 mb-3">
             <Trophy className="w-3 h-3 text-yellow-400" />
             <h2 className="text-xs font-bold text-white uppercase tracking-wider">Personal Records</h2>
@@ -428,7 +428,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* ── Recent Runs ── */}
-      <div className="bg-gray-800/60 border border-gray-700/30 rounded-lg px-3.5 py-3">
+      <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-1.5">
             <Activity className="w-3 h-3 text-green-400" />
