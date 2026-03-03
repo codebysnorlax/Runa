@@ -651,7 +651,7 @@ const Settings: React.FC = () => {
                       <input
                         name="age"
                         type="number"
-                        value={profileState.age}
+                        value={profileState.age || ""}
                         onChange={handleProfileChange}
                         className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                         placeholder="—"
@@ -667,7 +667,7 @@ const Settings: React.FC = () => {
                       <input
                         name="height_cm"
                         type="number"
-                        value={profileState.height_cm}
+                        value={profileState.height_cm || ""}
                         onChange={handleProfileChange}
                         className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                         placeholder="—"
@@ -683,7 +683,7 @@ const Settings: React.FC = () => {
                       <input
                         name="weight_kg"
                         type="number"
-                        value={profileState.weight_kg}
+                        value={profileState.weight_kg || ""}
                         onChange={handleProfileChange}
                         className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                         placeholder="—"
@@ -935,7 +935,7 @@ const Settings: React.FC = () => {
                       name="weekly_distance_km"
                       type="number"
                       step="0.1"
-                      value={goalState.weekly_distance_km || 0}
+                      value={goalState.weekly_distance_km || ""}
                       onChange={handleGoalChange}
                       className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                     />
@@ -952,7 +952,7 @@ const Settings: React.FC = () => {
                       type="number"
                       min="0"
                       max="7"
-                      value={goalState.weekly_runs || 0}
+                      value={goalState.weekly_runs || ""}
                       onChange={handleGoalChange}
                       className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                     />
@@ -1003,7 +1003,7 @@ const Settings: React.FC = () => {
                               type="number"
                               step="0.1"
                               min="0.1"
-                              value={goal.distance_km}
+                              value={goal.distance_km || ""}
                               onChange={(e) => updateDistanceGoal(goal.id, "distance_km", Number(e.target.value))}
                               className="w-full bg-transparent border border-gray-700/40 rounded-lg px-2.5 py-1.5 text-white text-sm font-semibold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                             />
