@@ -15,6 +15,7 @@ const AddRun: React.FC = () => {
     const [seconds, setSeconds] = useState('');
     const [maxSpeed, setMaxSpeed] = useState('');
     const [notes, setNotes] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
 
 
@@ -146,9 +147,21 @@ const AddRun: React.FC = () => {
                 <div className="pt-2 animate-slide-up" style={{ animationDelay: '0.7s' }}>
                     <button
                         type="submit"
-                        className="w-full bg-brand-orange hover:bg-orange-500 text-white text-sm font-bold py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange focus:ring-offset-gray-900"
+                        disabled={submitting}
+                        className={`w-full text-white text-sm font-bold py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange focus:ring-offset-gray-900 flex items-center justify-center gap-2 ${submitting
+                                ? 'bg-brand-orange/60 cursor-not-allowed'
+                                : 'bg-brand-orange hover:bg-orange-500'
+                            }`}
                     >
-                        Save Run
+                        {submitting ? (
+                            <>
+                                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                                </svg>
+                                Saving...
+                            </>
+                        ) : 'Save Run'}
                     </button>
                 </div>
             </form>

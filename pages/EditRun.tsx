@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import Card from '../components/Card';
 import { useToast } from '../context/ToastContext';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -77,42 +76,102 @@ const EditRun: React.FC = () => {
     }
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold text-white mb-6">Edit Run</h1>
-            <Card>
-                <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-24 lg:pb-6">
+
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 animate-fade-in">Edit Run</h1>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Row 1: Date & Distance */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Date</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={e => setDate(e.target.value)}
+                            max={new Date().toISOString().split('T')[0]}
+                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500"
+                        />
+                    </div>
+
+                    <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Distance (meters)</label>
+                        <input
+                            type="number"
+                            value={distanceM}
+                            onChange={e => setDistanceM(e.target.value)}
+                            placeholder="e.g., 5000"
+                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
+                        />
+                    </div>
+                </div>
+
+                {/* Row 2: Duration */}
+                <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-1">Date</label>
-                        <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (minutes)</label>
+                        <input
+                            type="number"
+                            value={minutes}
+                            onChange={e => setMinutes(e.target.value)}
+                            placeholder="e.g., 25"
+                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
+                        />
                     </div>
+                    <div>
+                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (seconds)</label>
+                        <input
+                            type="number"
+                            value={seconds}
+                            onChange={e => setSeconds(e.target.value)}
+                            placeholder="e.g., 30"
+                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
+                        />
+                    </div>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Time (minutes)</label>
-                            <input type="number" value={minutes} onChange={e => setMinutes(e.target.value)} placeholder="e.g., 25" className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Time (seconds)</label>
-                            <input type="number" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="e.g., 30" className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
+                {/* Row 3: Speeds */}
+                <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+                    <div>
+                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Avg Speed (km/h)</label>
+                        <div className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-bold flex items-center h-[38px]">
+                            <span className={avgSpeedKmh !== '0.00' ? 'text-brand-orange' : 'text-gray-500'}>
+                                {avgSpeedKmh}
+                            </span>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Avg Speed (km/h)</label>
-                            <div className="w-full bg-gray-800 border border-gray-600 rounded-md p-2 text-gray-300">{avgSpeedKmh}</div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Max Speed (km/h)</label>
-                            <input type="number" value={maxSpeed} onChange={e => setMaxSpeed(e.target.value)} placeholder="Optional" className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                        </div>
+                    <div>
+                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Max Speed (km/h)</label>
+                        <input
+                            type="number"
+                            value={maxSpeed}
+                            onChange={e => setMaxSpeed(e.target.value)}
+                            placeholder="Optional"
+                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
+                        />
                     </div>
+                </div>
 
-                    <button type="submit" className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
+                {/* Notes */}
+                <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
+                    <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Notes</label>
+                    <textarea
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="How did the run feel?"
+                        rows={2}
+                        className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-[13px] focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600 resize-none"
+                    />
+                </div>
+
+                <div className="pt-2 animate-slide-up" style={{ animationDelay: '0.7s' }}>
+                    <button
+                        type="submit"
+                        className="w-full bg-brand-orange hover:bg-orange-500 text-white text-sm font-bold py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange focus:ring-offset-gray-900"
+                    >
                         Update Run
                     </button>
-                </form>
-            </Card>
+                </div>
+            </form>
 
             <div className="mt-4 flex items-center justify-center text-gray-500 text-[11px] font-medium animate-fade-in" style={{ animationDelay: '0.8s' }}>
                 <span>Your running data is stored locally for maximum privacy.</span>
