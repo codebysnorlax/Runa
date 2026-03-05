@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { LayoutDashboard, CirclePlus, History, TrendingUp, Sparkles, Settings } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
 
@@ -36,18 +37,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <h1 className="text-2xl font-bold mb-1 julee-regular gradient-text">Runa</h1>
             <p className="text-sm text-gray-400 mb-8">User: <span className="font-bold text-gray-300">{user?.firstName || user?.username || 'User'}</span></p>
           </div>
-          <nav className="flex flex-col space-y-2 flex-grow">
+          <nav className="flex flex-col space-y-2 flex-grow relative">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200 ${isActive ? 'bg-brand-orange text-white' : 'hover:bg-gray-700'
+                  `relative flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
                   }`
                 }
               >
-                <item.icon className="w-5 h-5" />
-                <span>{item.label}</span>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.div
+                        layoutId="desktop-active-tab"
+                        className="absolute inset-0 bg-brand-orange rounded-lg"
+                        initial={false}
+                        transition={{
+                          type: "spring",
+                          stiffness: 500,
+                          damping: 35
+                        }}
+                      />
+                    )}
+                    <item.icon className="w-5 h-5 relative z-10" />
+                    <span className="relative z-10">{item.label}</span>
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
