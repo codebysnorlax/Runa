@@ -74,7 +74,7 @@ const Login = () => {
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:flex lg:items-center">
           <div className="w-full py-8 md:py-12 lg:py-12">
             {/* Mobile/Tablet Layout */}
-            <div className="lg:hidden flex flex-col gap-8 md:gap-10 max-w-5xl mx-auto">
+            <div className="lg:hidden flex flex-col gap-6 md:gap-8 max-w-5xl mx-auto">
               <div className="text-center">
                 <h2 className="custom-heading text-4xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight">
                   AI-Powered Fitness Tracker
@@ -83,6 +83,20 @@ const Login = () => {
                   For those who truly want to track their runs, analyze
                   performance, and get intelligent insights.
                 </p>
+              </div>
+
+              {/* Buttons — top on mobile */}
+              <div className="flex flex-row gap-3 w-full">
+                <SignInButton mode="modal">
+                  <button className="flex-1 bg-brand-orange hover:bg-orange-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-all hover:scale-105 text-sm">
+                    Get Started
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-all hover:scale-105 text-sm">
+                    Sign Up
+                  </button>
+                </SignUpButton>
               </div>
 
               {showFAQ ? (
@@ -121,21 +135,6 @@ const Login = () => {
                   </div>
                 </div>
               )}
-
-              <div className="max-w-xl mx-auto w-full">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <SignInButton mode="modal">
-                    <button className="w-full bg-brand-orange hover:bg-orange-600 text-white font-semibold px-10 py-4 rounded-xl transition-all hover:scale-105 text-lg">
-                      Sign In
-                    </button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <button className="w-full bg-gray-800 hover:bg-gray-700 border-2 border-gray-700 text-white font-semibold px-10 py-4 rounded-xl transition-all hover:scale-105 text-lg">
-                      Sign Up
-                    </button>
-                  </SignUpButton>
-                </div>
-              </div>
             </div>
 
             {/* Desktop Layout */}
@@ -151,7 +150,7 @@ const Login = () => {
                 <div className="max-w-lg flex gap-3">
                   <SignInButton mode="modal">
                     <button className="flex-1 bg-brand-orange hover:bg-orange-600 text-white font-medium px-8 py-3 rounded-lg transition-colors">
-                      Sign In
+                      Get Started
                     </button>
                   </SignInButton>
                   <SignUpButton mode="modal">

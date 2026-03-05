@@ -546,6 +546,12 @@ const Analytics: React.FC = () => {
     const months: {
       [key: string]: { distance: number; runs: number; time: number };
     } = {};
+
+    // Always show the current month, even with 0 runs
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    months[currentMonthKey] = { distance: 0, runs: 0, time: 0 };
+
     runs.forEach((run) => {
       const date = new Date(run.date);
       const monthKey = `${date.getFullYear()}-${String(
