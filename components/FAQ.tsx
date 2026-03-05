@@ -32,7 +32,7 @@ const FAQItem: React.FC<{ item: FAQItem; isOpen: boolean; onToggle: () => void }
   }, [isOpen, item.answer]);
 
   return (
-    <div className="border border-gray-700/50 rounded-lg overflow-hidden bg-gray-800/30 hover:bg-gray-800/50 hover:border-brand-orange/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand-orange/10">
+    <div className="border border-dashed border-gray-700/50 rounded-lg overflow-hidden bg-transparent backdrop-blur-sm">
       <button
         onClick={onToggle}
         className="w-full px-4 py-3.5 flex items-center justify-between text-left group"
