@@ -164,6 +164,21 @@
   background: #ea580c;
 }
 
+/* Global input focus: orange dashed border, no default outline — all browsers incl. Firefox */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  outline-style: none !important;
+  -moz-outline-style: none !important;
+  border-color: #FF7A00 !important;
+  border-style: dashed !important;
+  box-shadow: 0 0 0 1px rgba(255, 122, 0, 0.25) !important;
+}
+
 @keyframes text-shine {
   0% {
     background-position: 200% center;

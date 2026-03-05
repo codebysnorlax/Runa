@@ -546,6 +546,12 @@ const Analytics: React.FC = () => {
     const months: {
       [key: string]: { distance: number; runs: number; time: number };
     } = {};
+
+    // Always show the current month, even with 0 runs
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    months[currentMonthKey] = { distance: 0, runs: 0, time: 0 };
+
     runs.forEach((run) => {
       const date = new Date(run.date);
       const monthKey = `${date.getFullYear()}-${String(
@@ -678,9 +684,13 @@ const Analytics: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-white">Analytics</h1>
           <span className="px-1.5 py-0 text-[11px] font-bold italic bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30" style={{ fontFamily: "'Caveat', cursive" }}>Beta</span>
         </div>
+      </div>
+
+      {/* Sticky Filter Container */}
+      <div className="sticky top-[110px] lg:top-[64px] z-40 flex justify-end w-full h-0 pointer-events-none" style={{ overflow: 'visible' }}>
         <button
           onClick={() => setShowFilter(true)}
-          className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white text-sm w-fit"
+          className="relative flex items-center justify-center gap-2 p-2 sm:px-3 sm:py-2 bg-gray-800/30 hover:bg-gray-700/50 backdrop-blur-xl rounded-xl sm:rounded-lg text-white text-sm border border-gray-600/30 shadow-lg pointer-events-auto -mt-[44px] transition-all"
         >
           <Filter size={16} />
           Filter

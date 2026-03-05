@@ -33,11 +33,13 @@ const AddRun: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (submitting) return; // prevent double-submit
         if (!date || !distanceM || totalTimeSec <= 0) {
             addToast('Please fill all required fields.', 'error');
             return;
         }
 
+        setSubmitting(true);
         addRun({
             date: new Date(date).toISOString(),
             distance_m: parseFloat(distanceM),
