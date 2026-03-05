@@ -672,19 +672,23 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <div className="space-y-4 pb-24 lg:pb-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 pb-24 lg:pb-6 relative">
+      <div className="flex justify-between items-center h-10 mb-2">
         <div className="flex items-center gap-2">
           <h1 className="text-xl sm:text-2xl font-bold text-white">Analytics</h1>
           <span className="px-1.5 py-0 text-[11px] font-bold italic bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30" style={{ fontFamily: "'Caveat', cursive" }}>Beta</span>
         </div>
+      </div>
+
+      {/* Sticky Filter Container */}
+      <div className="sticky top-[110px] lg:top-[64px] z-40 flex justify-end w-full h-0 pointer-events-none" style={{ overflow: 'visible' }}>
         <button
           onClick={() => setShowFilter(true)}
-          className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-white text-sm w-fit"
+          className="relative flex items-center justify-center gap-2 p-2 sm:px-3 sm:py-2 bg-gray-800/30 hover:bg-gray-700/50 backdrop-blur-xl rounded-xl sm:rounded-lg text-white text-sm border border-gray-600/30 shadow-lg pointer-events-auto -mt-[44px] transition-all"
         >
-          <Filter size={16} />
-          Filter
-          {(appliedTime || appliedDistRange) && <span className="w-2 h-2 bg-brand-orange rounded-full" />}
+          <Filter size={18} className="sm:w-4 sm:h-4 w-5 h-5" />
+          <span className="hidden sm:inline">Filter</span>
+          {(appliedTime || appliedDistRange) && <span className="absolute sm:relative -top-1 -right-1 sm:top-auto sm:right-auto w-2.5 h-2.5 sm:w-2 sm:h-2 bg-brand-orange rounded-full border border-gray-800/50 sm:border-0" />}
         </button>
       </div>
 
