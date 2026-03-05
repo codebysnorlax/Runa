@@ -101,6 +101,19 @@ const Settings: React.FC = () => {
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [cooldownTimer, setCooldownTimer] = useState(0);
   const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
+  const [hasInitializedCalendar, setHasInitializedCalendar] = useState(false);
+
+  useEffect(() => {
+    if (runs && runs.length > 0 && !hasInitializedCalendar) {
+      const sortedRuns = [...runs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const lastRunDate = new Date(sortedRuns[0].date);
+      const today = new Date();
+
+      const monthDiff = (lastRunDate.getFullYear() - today.getFullYear()) * 12 + (lastRunDate.getMonth() - today.getMonth());
+      setCalendarMonthOffset(monthDiff);
+      setHasInitializedCalendar(true);
+    }
+  }, [runs, hasInitializedCalendar]);
 
 
   const FEEDBACK_QUESTIONS: FeedbackQuestion[] = [
@@ -651,7 +664,7 @@ const Settings: React.FC = () => {
                       <input
                         name="age"
                         type="number"
-                        value={profileState.age || ""}
+                        value={profileState.age}
                         onChange={handleProfileChange}
                         className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                         placeholder="—"
@@ -667,7 +680,7 @@ const Settings: React.FC = () => {
                       <input
                         name="height_cm"
                         type="number"
-                        value={profileState.height_cm || ""}
+                        value={profileState.height_cm}
                         onChange={handleProfileChange}
                         className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                         placeholder="—"
@@ -683,7 +696,7 @@ const Settings: React.FC = () => {
                       <input
                         name="weight_kg"
                         type="number"
-                        value={profileState.weight_kg || ""}
+                        value={profileState.weight_kg}
                         onChange={handleProfileChange}
                         className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                         placeholder="—"
@@ -712,14 +725,6 @@ const Settings: React.FC = () => {
                 <div className="w-full lg:w-[320px] flex-shrink-0">
                   {(() => {
                     const realToday = new Date();
-                    let minOffset = 0;
-                    const maxOffset = 1;
-                    if (runs && runs.length > 0) {
-                      const earliestRunTime = Math.min(...runs.map((r: any) => new Date(r.date).getTime()));
-                      const earliestRun = new Date(earliestRunTime);
-                      const diff = (earliestRun.getFullYear() - realToday.getFullYear()) * 12 + (earliestRun.getMonth() - realToday.getMonth());
-                      minOffset = Math.min(0, diff);
-                    }
                     const viewDate = new Date(realToday.getFullYear(), realToday.getMonth() + calendarMonthOffset, 1);
                     const year = viewDate.getFullYear();
                     const month = viewDate.getMonth();
@@ -731,7 +736,6 @@ const Settings: React.FC = () => {
                     // Active days mapping and streaks
                     let currentStreak = 0;
                     let bestStreak = 0;
-                    let daysSinceLastRun: number | null = null;
 
                     const sortedRunDates = Array.from(new Set<number>(
                       runs.map((r: any) => {
@@ -782,13 +786,6 @@ const Settings: React.FC = () => {
                           tempStreak = 1;
                         }
                       }
-
-                      // gap since last run
-                      const lastRunDateObj = new Date(sortedRunDates[0]);
-                      const realTodayZero = new Date(realToday);
-                      realTodayZero.setHours(0, 0, 0, 0);
-                      daysSinceLastRun = Math.floor((realTodayZero.getTime() - lastRunDateObj.getTime()) / (1000 * 60 * 60 * 24));
-                      if (daysSinceLastRun < 0) daysSinceLastRun = 0;
                     }
 
                     const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -805,18 +802,18 @@ const Settings: React.FC = () => {
                           <div className="flex items-center gap-1.5 border border-gray-700/50 rounded-full p-0.5 bg-black/20">
                             <button
                               type="button"
-                              onClick={() => setCalendarMonthOffset(p => Math.max(minOffset, p - 1))}
-                              disabled={calendarMonthOffset <= minOffset}
-                              className={`p-1.5 rounded-full transition-colors ${calendarMonthOffset <= minOffset ? 'text-gray-700 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                              onClick={() => setCalendarMonthOffset(p => Math.max(-3, p - 1))}
+                              disabled={calendarMonthOffset <= -3}
+                              className={`p-1.5 rounded-full transition-colors ${calendarMonthOffset <= -3 ? 'text-gray-700 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                             </button>
 
                             <button
                               type="button"
-                              onClick={() => setCalendarMonthOffset(p => Math.min(maxOffset, p + 1))}
-                              disabled={calendarMonthOffset >= maxOffset}
-                              className={`p-1.5 rounded-full transition-colors ${calendarMonthOffset >= maxOffset ? 'text-gray-700 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
+                              onClick={() => setCalendarMonthOffset(p => Math.min(3, p + 1))}
+                              disabled={calendarMonthOffset >= 3}
+                              className={`p-1.5 rounded-full transition-colors ${calendarMonthOffset >= 3 ? 'text-gray-700 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-800'}`}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                             </button>
@@ -872,31 +869,17 @@ const Settings: React.FC = () => {
                         </div>
 
                         {/* Stats Footer */}
-                        <div className="mt-auto flex flex-col gap-2 px-1 pt-3 border-t border-gray-800/60 w-full">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-[#f59e0b] shadow-[0_0_6px_rgba(245,158,11,0.5)]"></div>
-                              <span className="text-gray-400 text-xs font-medium">Current Streak</span>
-                              <span className="text-white text-sm font-bold ml-0.5">{currentStreak}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-right">
-                              <span className="text-white text-sm font-bold mr-0.5">{bestStreak}</span>
-                              <span className="text-gray-400 text-xs font-medium">Best</span>
-                              <Flame className="w-3 h-3 text-[#22c55e] drop-shadow-[0_0_6px_rgba(34,197,94,0.5)] fill-[#22c55e]" />
-                            </div>
+                        <div className="mt-auto flex items-center justify-between px-1 pt-3 border-t border-gray-800/60 w-full">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-[#f59e0b] shadow-[0_0_6px_rgba(245,158,11,0.5)]"></div>
+                            <span className="text-gray-400 text-xs font-medium">Current Streak</span>
+                            <span className="text-white text-sm font-bold ml-0.5">{currentStreak}</span>
                           </div>
-
-                          {daysSinceLastRun !== null && (
-                            <div className="flex items-center justify-between bg-gray-800/40 rounded-lg p-2 border border-gray-700/30">
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-3 h-3 text-blue-400" />
-                                <span className="text-gray-400 text-[11px] font-medium">Gap</span>
-                              </div>
-                              <span className={`text-xs font-bold ${daysSinceLastRun === 0 ? 'text-green-400' : daysSinceLastRun <= 2 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                {daysSinceLastRun === 0 ? 'Ran Today' : `${daysSinceLastRun} day${daysSinceLastRun > 1 ? 's' : ''}`}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 text-right">
+                            <span className="text-white text-sm font-bold mr-0.5">{bestStreak}</span>
+                            <span className="text-gray-400 text-xs font-medium">Best</span>
+                            <Flame className="w-3 h-3 text-[#22c55e] drop-shadow-[0_0_6px_rgba(34,197,94,0.5)] fill-[#22c55e]" />
+                          </div>
                         </div>
                       </div>
                     );
@@ -935,7 +918,7 @@ const Settings: React.FC = () => {
                       name="weekly_distance_km"
                       type="number"
                       step="0.1"
-                      value={goalState.weekly_distance_km || ""}
+                      value={goalState.weekly_distance_km || 0}
                       onChange={handleGoalChange}
                       className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                     />
@@ -952,7 +935,7 @@ const Settings: React.FC = () => {
                       type="number"
                       min="0"
                       max="7"
-                      value={goalState.weekly_runs || ""}
+                      value={goalState.weekly_runs || 0}
                       onChange={handleGoalChange}
                       className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-lg font-bold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                     />
@@ -1003,7 +986,7 @@ const Settings: React.FC = () => {
                               type="number"
                               step="0.1"
                               min="0.1"
-                              value={goal.distance_km || ""}
+                              value={goal.distance_km}
                               onChange={(e) => updateDistanceGoal(goal.id, "distance_km", Number(e.target.value))}
                               className="w-full bg-transparent border border-gray-700/40 rounded-lg px-2.5 py-1.5 text-white text-sm font-semibold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange"
                             />

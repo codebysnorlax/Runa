@@ -65,7 +65,7 @@ const EmptyDashboard: React.FC<{
   return (
     <div className="max-w-7xl mx-auto pb-24 lg:pb-6 px-4 sm:px-0 space-y-5">
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden border-2 border-dashed border-gray-700/60 rounded-2xl p-8 sm:p-12 text-center animate-fade-in">
+      <div className="relative border-2 border-dashed border-gray-700/60 rounded-2xl p-8 sm:p-12 text-center animate-fade-in">
         <div className="absolute top-0 right-0 w-72 h-72 bg-brand-orange/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 animate-pulse" />
         <div className="absolute bottom-0 left-0 w-56 h-56 bg-purple-500/8 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" style={{ animation: "pulse 3s ease-in-out infinite" }} />
 
