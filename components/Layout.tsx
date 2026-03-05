@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </style>
       <div className="min-h-screen text-gray-200 flex flex-col lg:flex-row">
         {/* Mobile/Tablet Header */}
-        <header className="lg:hidden sticky top-0 z-40 bg-dark-card border-b border-dark-border px-4 py-3 flex items-center justify-between">
+        <header className="lg:hidden sticky top-0 z-40 bg-transparent backdrop-blur-xl px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold julee-regular gradient-text">Runa</h1>
           <UserButton afterSignOutUrl="/#/login" />
         </header>
@@ -42,8 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200 ${
-                    isActive ? 'bg-brand-orange text-white' : 'hover:bg-gray-700'
+                  `flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200 ${isActive ? 'bg-brand-orange text-white' : 'hover:bg-gray-700'
                   }`
                 }
               >
@@ -60,21 +59,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </aside>
 
         {/* Bottom Navbar for Mobile & Tablet */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-dark-card border-t border-dark-border flex justify-around p-1.5 z-50">
-           {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `flex flex-col items-center justify-center p-1 rounded-md w-12 sm:w-14 md:w-16 transition-colors duration-200 ${
-                    isActive ? 'text-brand-orange' : 'text-gray-400 hover:text-white'
-                  }`
-                }
-              >
-                <item.icon className="w-5 h-5 sm:w-5 sm:h-5 mb-0.5" />
-                <span className="text-[10px] sm:text-xs">{item.label}</span>
-              </NavLink>
-            ))}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-transparent backdrop-blur-xl flex justify-around p-1.5 z-50">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center p-1 rounded-md w-12 sm:w-14 md:w-16 transition-colors duration-200 ${isActive ? 'text-brand-orange' : 'text-gray-400 hover:text-white'
+                }`
+              }
+            >
+              <item.icon className="w-5 h-5 sm:w-5 sm:h-5 mb-0.5" />
+              <span className="text-[10px] sm:text-xs">{item.label}</span>
+            </NavLink>
+          ))}
         </nav>
 
         <main className="flex-1 p-4 sm:p-5 md:p-6 lg:p-8 pb-20 lg:pb-8">
