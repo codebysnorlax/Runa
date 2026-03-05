@@ -78,27 +78,12 @@ const EditRun: React.FC = () => {
 
     return (
         <div className="max-w-2xl mx-auto">
-
             <h1 className="text-3xl font-bold text-white mb-6">Edit Run</h1>
             <Card>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-1">Date</label>
                         <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
-                    </div>
-                </div>
-
-                {/* Row 2: Duration */}
-                <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (minutes)</label>
-                        <input
-                            type="number"
-                            value={minutes}
-                            onChange={e => setMinutes(e.target.value)}
-                            placeholder="e.g., 25"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -111,7 +96,6 @@ const EditRun: React.FC = () => {
                             <input type="number" value={seconds} onChange={e => setSeconds(e.target.value)} placeholder="e.g., 30" className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-brand-orange focus:border-brand-orange" />
                         </div>
                     </div>
-                </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -124,22 +108,11 @@ const EditRun: React.FC = () => {
                         </div>
                     </div>
 
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Max Speed (km/h)</label>
-                        <input
-                            type="number"
-                            value={maxSpeed}
-                            onChange={e => setMaxSpeed(e.target.value)}
-                            placeholder="Optional"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
-
                     <button type="submit" className="w-full bg-brand-orange text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors duration-200">
                         Update Run
                     </button>
-                </div>
-            </form>
+                </form>
+            </Card>
 
             <div className="mt-4 flex items-center justify-center text-gray-500 text-[11px] font-medium animate-fade-in" style={{ animationDelay: '0.8s' }}>
                 <span>Your running data is stored locally for maximum privacy.</span>
