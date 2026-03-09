@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useAppContext } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
@@ -17,17 +17,9 @@ import {
   Plus,
   Trash2,
   Info,
-  Github,
   Mail,
-  BookOpen,
-  Instagram,
-  Twitter,
-  Linkedin,
-  Code,
-  Shield,
   MessageSquare,
   HelpCircle,
-  Coffee,
   Flame,
   Zap,
   TrendingUp,
@@ -44,6 +36,8 @@ import * as storage from "../services/storageService";
 import FeedbackStep, { FeedbackQuestion, UserResponse } from "../components/FeedbackStep";
 import FeedbackSummary from "../components/FeedbackSummary";
 import FAQ from "../components/FAQ";
+import InfoPage from "./Info";
+import { calculateStreak } from "../utils/streakUtils";
 
 const SettingsSkeleton: React.FC = () => (
   <div className="max-w-4xl mx-auto">
@@ -190,7 +184,7 @@ const Settings: React.FC = () => {
     e?.stopPropagation();
     if (goalState) {
       const newGoal: DistanceGoal = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         distance_km: 1,
         target_time: "06:00",
         name: "New Goal",
@@ -386,28 +380,7 @@ const Settings: React.FC = () => {
     setFeedbackCompleted(false);
   };
 
-  if (loading || !profileState || !goalState) {
-    return <SettingsSkeleton />;
-  }
-
-  const TabButton: React.FC<{
-    tab: ActiveTab;
-    label: string;
-    icon: React.ElementType;
-  }> = ({ tab, label, icon: Icon }) => (
-    <button
-      onClick={() => setActiveTab(tab)}
-      className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
-        ? "border-brand-orange text-white"
-        : "border-transparent text-gray-400 hover:text-white hover:border-gray-500"
-        }`}
-    >
-      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-      <span className="text-xs sm:text-sm">{label}</span>
-    </button>
-  );
-
-  /* User Status Logic */
+  /* User Status Logic — must stay before early return to respect Rules of Hooks */
   const getUserStatus = (): { label: string; color: string; icon: React.ElementType } => {
     if (!runs || runs.length === 0) return { label: "New Runner", color: "text-blue-400", icon: User };
 
@@ -506,9 +479,31 @@ const Settings: React.FC = () => {
     return { label: "Obese", color: "text-red-400" };
   };
 
-  const status = getUserStatus();
+  const status = useMemo(() => getUserStatus(), [runs]);
+
+  if (loading || !profileState || !goalState) {
+    return <SettingsSkeleton />;
+  }
+
   const StatusIcon = status.icon;
   const bmiStatus = profileState ? getBMIStatus(profileState.height_cm, profileState.weight_kg) : null;
+
+  const TabButton: React.FC<{
+    tab: ActiveTab;
+    label: string;
+    icon: React.ElementType;
+  }> = ({ tab, label, icon: Icon }) => (
+    <button
+      onClick={() => setActiveTab(tab)}
+      className={`flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 transition-colors whitespace-nowrap ${activeTab === tab
+        ? "border-brand-orange text-white"
+        : "border-transparent text-gray-400 hover:text-white hover:border-gray-500"
+        }`}
+    >
+      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+      <span className="text-xs sm:text-sm">{label}</span>
+    </button>
+  );
 
   return (
     <AudioProvider>
@@ -728,18 +723,11 @@ const Settings: React.FC = () => {
                     const startOffset = firstDayOfMonth; // 0 for Sunday
                     const prevMonthDays = new Date(year, month, 0).getDate();
 
-                    // Active days mapping and streaks
-                    let currentStreak = 0;
-                    let bestStreak = 0;
+                    // Use shared streak utility instead of duplicating logic
+                    const streakData = calculateStreak(runs);
+                    const currentStreak = streakData.currentStreak;
+                    const bestStreak = streakData.longestStreak;
                     let daysSinceLastRun: number | null = null;
-
-                    const sortedRunDates = Array.from(new Set<number>(
-                      runs.map((r: any) => {
-                        const d = new Date(r.date);
-                        d.setHours(0, 0, 0, 0);
-                        return d.getTime();
-                      })
-                    )).sort((a, b) => b - a);
 
                     const activeDaysThisMonth = new Set(
                       runs
@@ -748,43 +736,10 @@ const Settings: React.FC = () => {
                         .map((d: Date) => d.getDate())
                     );
 
-                    if (sortedRunDates.length > 0) {
-                      let checkDate = new Date(realToday);
-                      checkDate.setHours(0, 0, 0, 0);
-
-                      // current streak
-                      while (sortedRunDates.includes(checkDate.getTime())) {
-                        currentStreak++;
-                        checkDate.setDate(checkDate.getDate() - 1);
-                      }
-                      if (currentStreak === 0) {
-                        checkDate = new Date(realToday);
-                        checkDate.setHours(0, 0, 0, 0);
-                        checkDate.setDate(checkDate.getDate() - 1);
-                        while (sortedRunDates.includes(checkDate.getTime())) {
-                          currentStreak++;
-                          checkDate.setDate(checkDate.getDate() - 1);
-                        }
-                      }
-
-                      // best streak
-                      const ascendingDates = [...sortedRunDates].sort((a, b) => a - b);
-                      let tempStreak = 1;
-                      bestStreak = 1;
-                      for (let i = 1; i < ascendingDates.length; i++) {
-                        const prev = new Date(ascendingDates[i - 1]);
-                        const curr = new Date(ascendingDates[i]);
-                        const diffDays = Math.round((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24));
-                        if (diffDays === 1) {
-                          tempStreak++;
-                          bestStreak = Math.max(bestStreak, tempStreak);
-                        } else {
-                          tempStreak = 1;
-                        }
-                      }
-
-                      // gap since last run
-                      const lastRunDateObj = new Date(sortedRunDates[0]);
+                    if (runs.length > 0) {
+                      const sortedRuns = [...runs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                      const lastRunDateObj = new Date(sortedRuns[0].date);
+                      lastRunDateObj.setHours(0, 0, 0, 0);
                       const realTodayZero = new Date(realToday);
                       realTodayZero.setHours(0, 0, 0, 0);
                       daysSinceLastRun = Math.floor((realTodayZero.getTime() - lastRunDateObj.getTime()) / (1000 * 60 * 60 * 24));
@@ -1164,222 +1119,7 @@ const Settings: React.FC = () => {
             </div>
           )}
           {activeTab === "faq" && <FAQ />}
-          {activeTab === "info" && (
-            <div className="space-y-6 animate-fade-in">
-              {/* Developer Information */}
-              <div className="space-y-4">
-                <div className="flex flex-row justify-between items-center lg:grid lg:grid-cols-3 lg:gap-6 mb-4">
-                  <div className="lg:col-span-2 flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-pink-200 via-purple-200 to-indigo-200 flex-shrink-0">
-                      <img
-                        src="https://github.com/codebysnorlax.png"
-                        alt="Ravi Ranjan Sharma"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-500 via-white via-gray-500 to-gray-500 animate-text-shine bg-[length:200%_auto]">
-                      Developer
-                    </h2>
-                  </div>
-                  <div className="flex justify-end lg:block lg:text-left">
-                    <a
-                      href="http://buymeacoffee.com/codebysnorlax"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative inline-flex group overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange"
-                    >
-                      <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#FFD700_0%,#FFA500_50%,#FFD700_100%)]" />
-                      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-brand-orange px-2 sm:px-3 py-0.5 text-lg sm:text-xl lg:text-2xl font-cookie font-medium text-white backdrop-blur-3xl transition-all group-hover:bg-orange-600 space-x-1 sm:space-x-2">
-                        <Coffee className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="mt-0.5 sm:mt-1">Buy me a coffee</span>
-                      </span>
-                    </a>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                  <div className="lg:col-span-2">
-                    <h3 className="text-base sm:text-lg font-medium text-white mb-2">
-                      Ravi Ranjan Sharma
-                    </h3>
-                    <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                      A tech enthusiast passionate about building innovative
-                      projects and crafting problem-solving software using
-                      cutting-edge technologies.
-                    </p>
-                    <div className="space-y-2">
-                      <h4 className="text-white font-medium text-sm sm:text-base">
-                        Specializations:
-                      </h4>
-                      <ul className="text-gray-300 text-sm space-y-1">
-                        <li>• Full-stack Web Development | learning</li>
-                        <li>• MERN Applications</li>
-                        <li>• AI Integration & Modern UI/UX</li>
-                        <li>• Problem-solving Software Solutions</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 lg:mt-0">
-                    <h4 className="text-white font-medium mb-3 text-sm sm:text-base">
-                      Connect
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3">
-                      <a
-                        href="https://github.com/codebysnorlax"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                      >
-                        <Github className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm">GitHub</span>
-                      </a>
-                      <a
-                        href="mailto:codebysnorlax@gmail.com"
-                        className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                      >
-                        <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm">Email</span>
-                      </a>
-                      <a
-                        href="https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                      >
-                        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm">Blogs</span>
-                      </a>
-                      <a
-                        href="https://instagram.com/nr_snorlax"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                      >
-                        <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm">Instagram</span>
-                      </a>
-                      <a
-                        href="https://twitter.com/codebysnorlax"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                      >
-                        <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm">Twitter</span>
-                      </a>
-                      <a
-                        href="https://linkedin.com/in/codebysnorlax"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                      >
-                        <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm">LinkedIn</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Software Information */}
-              <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Code className="w-5 h-5 sm:w-6 sm:h-6 text-brand-orange" />
-                  <h2 className="text-lg sm:text-xl font-semibold text-white">
-                    AI Fitness Tracker
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-medium text-white mb-2">
-                      Purpose
-                    </h3>
-                    <p className="text-gray-300 text-sm leading-relaxed">
-                      AI-powered fitness tracker designed to monitor your running
-                      progress, set personalized goals, and provide intelligent
-                      insights into your performance.
-                    </p>
-                  </div>
-                  <div className="mt-4 md:mt-0">
-                    <h3 className="text-base sm:text-lg font-medium text-white mb-2">
-                      Key Features
-                    </h3>
-                    <ul className="text-gray-300 text-sm space-y-1">
-                      <li>• Track running sessions with detailed metrics</li>
-                      <li>• Set and monitor fitness goals</li>
-                      <li>• View analytics and performance trends</li>
-                      <li>• AI-powered insights and recommendations</li>
-                      <li>• Data backup and restore functionality</li>
-                      <li>• Local storage for privacy</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* How to Use */}
-              <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-brand-orange" />
-                  <h2 className="text-lg sm:text-xl font-semibold text-white">
-                    How to Use
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-medium text-white mb-2">
-                      Getting Started
-                    </h3>
-                    <ol className="text-gray-300 text-sm space-y-2 list-decimal list-inside">
-                      <li>Sign up or sign in with your email</li>
-                      <li>
-                        Set up your profile in Settings (age, height, weight)
-                      </li>
-                      <li>
-                        Define your fitness goals (weekly distance, running days)
-                      </li>
-                      <li>Start adding your running sessions</li>
-                    </ol>
-                  </div>
-                  <div className="mt-4 md:mt-0">
-                    <h3 className="text-base sm:text-lg font-medium text-white mb-2">
-                      Daily Usage
-                    </h3>
-                    <ol className="text-gray-300 text-sm space-y-2 list-decimal list-inside">
-                      <li>
-                        Add runs via "Add Run" with distance, time, and notes
-                      </li>
-                      <li>View your progress on the Dashboard</li>
-                      <li>Check Analytics for performance trends</li>
-                      <li>Get AI insights for improvement suggestions</li>
-                      <li>Backup your data regularly in Settings</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-
-              {/* Privacy & Security */}
-              <div className="bg-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 rounded-2xl">
-                <div className="flex items-center space-x-3 mb-4">
-                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-brand-orange" />
-                  <h2 className="text-lg sm:text-xl font-semibold text-white">
-                    Privacy & Security
-                  </h2>
-                </div>
-                <div className="text-gray-300 text-sm space-y-2">
-                  <p>
-                    • Secure authentication powered by Clerk
-                  </p>
-                  <p>
-                    • All your fitness data is stored locally in your browser
-                  </p>
-                  <p>• Your personal information never leaves your device</p>
-                  <p>• Use the backup feature to save your data as JSON files</p>
-                  <p>• Open source approach for transparency and trust</p>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === "info" && <InfoPage />}
         </div>
       </div>
     </AudioProvider>

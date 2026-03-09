@@ -126,17 +126,21 @@ export const exportUserData = (username: string) => {
   return JSON.stringify(backupData, null, 2);
 };
 
-export const downloadBackup = (username: string) => {
-  const data = exportUserData(username);
+const triggerDownload = (data: string, filename: string): void => {
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `runa-backup-${username}-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+};
+
+export const downloadBackup = (username: string) => {
+  const data = exportUserData(username);
+  triggerDownload(data, `runa-backup-${username}-${new Date().toISOString().split('T')[0]}.json`);
 };
 
 export const importUserData = (jsonData: string, username: string): boolean => {
@@ -169,13 +173,5 @@ export const importUserData = (jsonData: string, username: string): boolean => {
 
 export const recreateBackupFile = (username: string) => {
   const data = exportUserData(username);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `data.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  triggerDownload(data, 'data.json');
 };

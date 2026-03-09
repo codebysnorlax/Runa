@@ -2,10 +2,15 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Run, Goal, Profile, InsightsData } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+const getAI = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+};
 
 export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile: Profile): Promise<InsightsData | null> => {
-  if (!process.env.GEMINI_API_KEY) {
+  const ai = getAI();
+  if (!ai) {
     return null;
   }
 
@@ -85,7 +90,7 @@ export const generateInsightsAndPlan = async (runs: Run[], goals: Goal, profile:
     // Add unique IDs to insights
     const insightsWithIds = result.insights.map((insight: any) => ({
       ...insight,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
     }));
 
     const finalResult = { ...result, insights: insightsWithIds };

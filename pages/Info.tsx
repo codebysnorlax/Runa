@@ -11,7 +11,17 @@ import {
   Code,
   Target,
   Shield,
+  LucideIcon,
 } from "lucide-react";
+
+const SOCIAL_LINKS: { name: string; url: string; icon: LucideIcon; isExternal: boolean }[] = [
+  { name: "GitHub", url: "https://github.com/codebysnorlax", icon: Github, isExternal: true },
+  { name: "Email", url: "mailto:codebysnorlax@gmail.com", icon: Mail, isExternal: false },
+  { name: "Blogs", url: "https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link", icon: BookOpen, isExternal: true },
+  { name: "Instagram", url: "https://instagram.com/nr_snorlax", icon: Instagram, isExternal: true },
+  { name: "Twitter", url: "https://twitter.com/codebysnorlax", icon: Twitter, isExternal: true },
+  { name: "LinkedIn", url: "https://linkedin.com/in/ravi-ranjan-9b338b333", icon: Linkedin, isExternal: true },
+];
 
 const Info: React.FC = () => {
   return (
@@ -58,58 +68,17 @@ const Info: React.FC = () => {
             <div className="mt-4 lg:mt-0">
               <h4 className="text-white font-medium mb-3 text-sm sm:text-base">Connect</h4>
               <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
-                <a
-                  href="https://github.com/codebysnorlax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Github className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">GitHub</span>
-                </a>
-                <a
-                  href="mailto:codebysnorlax@gmail.com"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Email</span>
-                </a>
-                <a
-                  href="https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Blogs</span>
-                </a>
-                <a
-                  href="https://instagram.com/nr_snorlax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Instagram</span>
-                </a>
-                <a
-                  href="https://twitter.com/codebysnorlax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Twitter</span>
-                </a>
-                <a
-                  href="https://linkedin.com/in/ravi-ranjan-9b338b333"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">LinkedIn</span>
-                </a>
+                {SOCIAL_LINKS.map(({ name, url, icon: Icon, isExternal }) => (
+                  <a
+                    key={name}
+                    href={url}
+                    {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-xs sm:text-sm">{name}</span>
+                  </a>
+                ))}
               </div>
             </div>
           </div>

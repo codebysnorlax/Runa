@@ -7,6 +7,7 @@ import { useToast } from "../context/ToastContext";
 
 import StreakHeatmap from "../components/StreakHeatmap";
 import AnimatedNumber from "../components/AnimatedNumber";
+import useDashboardStats from "../hooks/useDashboardStats";
 import {
   TrendingUp,
   TrendingDown,
@@ -30,7 +31,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Run, PersonalRecords } from "../types";
+import { Run } from "../types";
 import { calculateStreak, getHeatmapData } from "../utils/streakUtils";
 
 /* ═══════════════════════════════════════════════════════
@@ -173,50 +174,17 @@ const Dashboard: React.FC = () => {
   }
 
   // ── Normal dashboard with data ──
-  const personalRecords = runs.reduce(
-    (acc, run) => ({
-      longestDistance: Math.max(acc.longestDistance, run.distance_m),
-      longestDuration: Math.max(acc.longestDuration, run.total_time_sec),
-      fastestAvgSpeed: Math.max(acc.fastestAvgSpeed, run.avg_speed_kmh),
-    }),
-    { longestDistance: 0, longestDuration: 0, fastestAvgSpeed: 0 }
-  );
-
-  const streakData = calculateStreak(runs);
-  const heatmapData = getHeatmapData(runs, 3);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-
-  const todayRun = runs.find(
-    (run) => new Date(run.date).setHours(0, 0, 0, 0) === today.getTime()
-  );
-  const yesterdayRun = runs.find(
-    (run) => new Date(run.date).setHours(0, 0, 0, 0) === yesterday.getTime()
-  );
-
-  // Calculate current week (Monday to Sunday)
-  const currentWeekStart = new Date(today);
-  const dayOfWeek = currentWeekStart.getDay();
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  currentWeekStart.setDate(currentWeekStart.getDate() + diff);
-  currentWeekStart.setHours(0, 0, 0, 0);
-
-  const currentWeekRuns = runs.filter((run) => {
-    const runDate = new Date(run.date);
-    runDate.setHours(0, 0, 0, 0);
-    return runDate >= currentWeekStart && runDate <= today;
-  });
-
-  const currentWeekDistance = currentWeekRuns.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
-
-  const goalProgress =
-    goals && goals.weekly_distance_km > 0
-      ? (currentWeekDistance / goals.weekly_distance_km) * 100
-      : 0;
-  const latestInsight = insights?.insights?.[0];
+  const {
+    personalRecords,
+    streakData,
+    heatmapData,
+    todayRun,
+    yesterdayRun,
+    currentWeekDistance,
+    goalProgress,
+    totalDistance,
+    latestInsight,
+  } = useDashboardStats(runs, goals, insights);
 
   const formatDuration = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
@@ -230,9 +198,6 @@ const Dashboard: React.FC = () => {
     if (hour < 17) return "Good Afternoon";
     return "Good Evening";
   };
-
-  const totalDistance =
-    runs.reduce((sum, run) => sum + run.distance_m, 0) / 1000;
 
   return (
     <div className="max-w-7xl mx-auto pb-24 lg:pb-6 px-4 sm:px-0">
