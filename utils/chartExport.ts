@@ -31,11 +31,11 @@ export const exportChartToImage = async (
 
   try {
     const favicon = await loadImage('/favicon/favicon-32x32.png');
-    ctx.drawImage(favicon, 920, 1020, 28, 28);
+    ctx.drawImage(favicon, 830, 1020, 28, 28);
     ctx.fillStyle = '#555';
     ctx.font = '22px system-ui';
     ctx.textAlign = 'right';
-    ctx.fillText('Runa', 1005, 1042);
+    ctx.fillText('runafit.online', 1005, 1042);
   } catch { /* skip */ }
 
   canvas.toBlob((blob) => {
