@@ -72,7 +72,7 @@ const Info: React.FC = () => {
               <div className="space-y-2">
                 <h4 className="text-white font-medium text-sm sm:text-base">Specializations:</h4>
                 <ul className="text-gray-300 text-sm space-y-1">
-                  <li>• Full-stack Web Development</li>
+                  <li>• Full-stack Software Development</li>
                   <li>• Adapt to the newest programming language</li>
                   <li>• AI Integration & Modern UI/UX</li>
                   <li>• Problem-solving Software Solutions</li>
