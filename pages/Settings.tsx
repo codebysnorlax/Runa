@@ -31,6 +31,8 @@ import {
   AlertCircle,
   HeartCrack,
   Moon,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import * as storage from "../services/storageService";
 import FeedbackStep, {
@@ -92,6 +94,7 @@ const Settings: React.FC = () => {
   const [goalState, setGoalState] = useState<Goal | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
 
   // Feedback state
   const [feedbackStep, setFeedbackStep] = useState(0);
@@ -733,7 +736,7 @@ const Settings: React.FC = () => {
                       type="text"
                       value={profileState.name}
                       onChange={handleProfileChange}
-                      className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-white text-sm font-semibold focus:ring-1 focus:ring-brand-orange focus:border-brand-orange placeholder-gray-600"
+                      className="w-full bg-transparent border-0 border-b border-gray-700/50 rounded-none px-1 py-1 text-white text-lg sm:text-xl font-bold focus:ring-0 focus:border-brand-orange placeholder-gray-600"
                       placeholder="Enter your name"
                     />
                   </div>
@@ -806,19 +809,34 @@ const Settings: React.FC = () => {
                         Email in used
                       </label>
                     </div>
-                    <input
-                      type="text"
-                      value={
-                        user?.primaryEmailAddress?.emailAddress
-                          ? user.primaryEmailAddress.emailAddress.replace(
-                              /(.{5})(.*)(@.*)/,
-                              "$1*****$3",
-                            )
-                          : ""
-                      }
-                      readOnly
-                      className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-gray-400 text-sm font-semibold cursor-not-allowed opacity-80"
-                    />{" "}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={
+                          user?.primaryEmailAddress?.emailAddress
+                            ? (showEmail
+                                ? user.primaryEmailAddress.emailAddress
+                                : (() => {
+                                    const email = user.primaryEmailAddress.emailAddress;
+                                    const parts = email.split("@");
+                                    if (parts.length !== 2) return email;
+                                    const [local, domain] = parts;
+                                    if (local.length <= 3) return `${local.slice(0, 1)}***@${domain}`;
+                                    return `${local.slice(0, 2)}${'•'.repeat(Math.min(local.length - 3, 8))}${local.slice(-1)}@${domain}`;
+                                  })())
+                            : ""
+                        }
+                        readOnly
+                        className="w-full bg-transparent border border-gray-700/50 rounded-lg pl-3 pr-10 py-2.5 text-gray-400 text-sm font-semibold cursor-not-allowed opacity-80"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowEmail(!showEmail)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                      >
+                        {showEmail ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
