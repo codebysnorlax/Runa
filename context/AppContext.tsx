@@ -65,7 +65,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({
 
     const newRun: Run = {
       ...newRunData,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
     };
 
     const updatedRuns = [newRun, ...runs];

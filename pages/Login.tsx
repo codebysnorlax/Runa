@@ -166,7 +166,7 @@ const Login = () => {
                   <FAQ />
                 </div>
               ) : (
-                <>
+                <div>
                   <div className="relative overflow-hidden rounded-lg">
                     {images.map((img, index) => (
                       <img
@@ -195,7 +195,7 @@ const Login = () => {
                       />
                     ))}
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>

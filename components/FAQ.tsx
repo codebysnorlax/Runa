@@ -7,30 +7,6 @@ interface FAQItem {
 }
 
 const FAQItem: React.FC<{ item: FAQItem; isOpen: boolean; onToggle: () => void }> = ({ item, isOpen, onToggle }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsTyping(true);
-      setDisplayedText('');
-      let index = 0;
-      const interval = setInterval(() => {
-        if (index < item.answer.length) {
-          setDisplayedText(item.answer.slice(0, index + 1));
-          index++;
-        } else {
-          setIsTyping(false);
-          clearInterval(interval);
-        }
-      }, 15);
-      return () => clearInterval(interval);
-    } else {
-      setDisplayedText('');
-      setIsTyping(false);
-    }
-  }, [isOpen, item.answer]);
-
   return (
     <div className="border border-dashed border-gray-700/50 rounded-lg overflow-hidden bg-transparent backdrop-blur-sm">
       <button
@@ -44,8 +20,7 @@ const FAQItem: React.FC<{ item: FAQItem; isOpen: boolean; onToggle: () => void }
         <div className="overflow-hidden">
           <div className="px-4 pb-4 pt-1">
             <p className="text-sm text-gray-400 leading-relaxed">
-              {displayedText}
-              {isTyping && <span className="inline-block w-0.5 h-4 bg-brand-orange ml-0.5 animate-pulse"></span>}
+              {item.answer}
             </p>
           </div>
         </div>

@@ -11,7 +11,18 @@ import {
   Code,
   Target,
   Shield,
+  Coffee,
+  LucideIcon,
 } from "lucide-react";
+
+const SOCIAL_LINKS: { name: string; url: string; icon: LucideIcon; isExternal: boolean }[] = [
+  { name: "GitHub", url: "https://github.com/codebysnorlax", icon: Github, isExternal: true },
+  { name: "Email", url: "mailto:codebysnorlax@gmail.com", icon: Mail, isExternal: false },
+  { name: "Blogs", url: "https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link", icon: BookOpen, isExternal: true },
+  { name: "Instagram", url: "https://instagram.com/nr_snorlax", icon: Instagram, isExternal: true },
+  { name: "Twitter", url: "https://twitter.com/codebysnorlax", icon: Twitter, isExternal: true },
+  { name: "LinkedIn", url: "https://linkedin.com/in/ravi-ranjan-9b338b333", icon: Linkedin, isExternal: true },
+];
 
 const Info: React.FC = () => {
   return (
@@ -23,13 +34,27 @@ const Info: React.FC = () => {
       {/* Developer Information */}
       <Card>
         <div className="space-y-4">
-          <div className="flex items-center space-x-3 mb-4">
-            <img
-              src="https://github.com/codebysnorlax.png"
-              alt="Ravi Ranjan Sharma"
-              className="w-8 h-8 sm:w-6 sm:h-6 rounded-full"
-            />
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Developer</h2>
+          <div className="flex items-center justify-between lg:grid lg:grid-cols-3 gap-3 sm:gap-6 mb-4 lg:items-center">
+            <div className="lg:col-span-2 flex items-center space-x-3">
+              <img
+                src="https://github.com/codebysnorlax.png"
+                alt="Ravi Ranjan Sharma"
+                className="w-8 h-8 sm:w-6 sm:h-6 rounded-full"
+              />
+              <h2 className="text-lg sm:text-xl font-semibold text-white">Developer</h2>
+            </div>
+            <div className="flex justify-end lg:justify-start">
+              <a
+                href="http://buymeacoffee.com/codebysnorlax"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-dashed border-brand-orange/40 text-brand-orange bg-brand-orange/10 hover:bg-brand-orange/20 hover:border-brand-orange/60 transition-all"
+              >
+                <Coffee className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Buy me a coffee</span>
+                <span className="sm:hidden">Support</span>
+              </a>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -47,8 +72,8 @@ const Info: React.FC = () => {
               <div className="space-y-2">
                 <h4 className="text-white font-medium text-sm sm:text-base">Specializations:</h4>
                 <ul className="text-gray-300 text-sm space-y-1">
-                  <li>• Full-stack Web Development</li>
-                  <li>• React & TypeScript Applications</li>
+                  <li>• Full-stack Software Development</li>
+                  <li>• Adapt to the newest programming language</li>
                   <li>• AI Integration & Modern UI/UX</li>
                   <li>• Problem-solving Software Solutions</li>
                 </ul>
@@ -58,58 +83,17 @@ const Info: React.FC = () => {
             <div className="mt-4 lg:mt-0">
               <h4 className="text-white font-medium mb-3 text-sm sm:text-base">Connect</h4>
               <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
-                <a
-                  href="https://github.com/codebysnorlax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Github className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">GitHub</span>
-                </a>
-                <a
-                  href="mailto:codebysnorlax@gmail.com"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Email</span>
-                </a>
-                <a
-                  href="https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Blogs</span>
-                </a>
-                <a
-                  href="https://instagram.com/nr_snorlax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Instagram</span>
-                </a>
-                <a
-                  href="https://twitter.com/codebysnorlax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">Twitter</span>
-                </a>
-                <a
-                  href="https://linkedin.com/in/ravi-ranjan-9b338b333"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
-                >
-                  <Linkedin className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm">LinkedIn</span>
-                </a>
+                {SOCIAL_LINKS.map(({ name, url, icon: Icon, isExternal }) => (
+                  <a
+                    key={name}
+                    href={url}
+                    {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    className="flex items-center space-x-2 text-gray-300 hover:text-brand-orange transition-colors"
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-xs sm:text-sm">{name}</span>
+                  </a>
+                ))}
               </div>
             </div>
           </div>

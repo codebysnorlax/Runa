@@ -1,175 +1,38 @@
-
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import RunForm from '../components/RunForm';
 
 const AddRun: React.FC = () => {
     const { addRun } = useAppContext();
     const { addToast } = useToast();
     const navigate = useNavigate();
 
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [distanceM, setDistanceM] = useState('');
-    const [minutes, setMinutes] = useState('');
-    const [seconds, setSeconds] = useState('');
-    const [maxSpeed, setMaxSpeed] = useState('');
-    const [notes, setNotes] = useState('');
-    const [submitting, setSubmitting] = useState(false);
-
-
-
-    const totalTimeSec = useMemo(() => {
-        return (parseInt(minutes, 10) || 0) * 60 + (parseInt(seconds, 10) || 0);
-    }, [minutes, seconds]);
-
-    const avgSpeedKmh = useMemo(() => {
-        const distKm = parseFloat(distanceM) / 1000;
-        const timeHr = totalTimeSec / 3600;
-        if (distKm > 0 && timeHr > 0) {
-            return (distKm / timeHr).toFixed(2);
-        }
-        return '0.00';
-    }, [distanceM, totalTimeSec]);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (submitting) return; // prevent double-submit
-        if (!date || !distanceM || totalTimeSec <= 0) {
+    const handleSubmit = (data: {
+        date: string;
+        distance_m: number;
+        total_time_sec: number;
+        avg_speed_kmh: number;
+        max_speed_kmh: number;
+        notes: string;
+    }) => {
+        if (!data.date || !data.distance_m || data.total_time_sec <= 0) {
             addToast('Please fill all required fields.', 'error');
             return;
         }
 
-        setSubmitting(true);
-        addRun({
-            date: new Date(date).toISOString(),
-            distance_m: parseFloat(distanceM),
-            total_time_sec: totalTimeSec,
-            avg_speed_kmh: parseFloat(avgSpeedKmh),
-            max_speed_kmh: parseFloat(maxSpeed) || 0,
-            notes: notes,
-        });
-
+        addRun(data);
         addToast('Run added successfully!', 'success');
         setTimeout(() => navigate('/history'), 1500);
     };
 
-
-
     return (
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-24 lg:pb-6">
-
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 animate-fade-in">Add New Run</h1>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Row 1: Date & Distance */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Date</label>
-                        <input
-                            type="date"
-                            value={date}
-                            onChange={e => setDate(e.target.value)}
-                            max={new Date().toISOString().split('T')[0]}
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500"
-                        />
-                    </div>
-
-                    <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Distance (meters)</label>
-                        <input
-                            type="number"
-                            value={distanceM}
-                            onChange={e => setDistanceM(e.target.value)}
-                            placeholder="e.g., 5000"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
-                </div>
-
-                {/* Row 2: Duration */}
-                <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (minutes)</label>
-                        <input
-                            type="number"
-                            value={minutes}
-                            onChange={e => setMinutes(e.target.value)}
-                            placeholder="e.g., 25"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (seconds)</label>
-                        <input
-                            type="number"
-                            value={seconds}
-                            onChange={e => setSeconds(e.target.value)}
-                            placeholder="e.g., 30"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
-                </div>
-
-                {/* Row 3: Speeds */}
-                <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Avg Speed (km/h)</label>
-                        <div className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-bold flex items-center h-[38px]">
-                            <span className={avgSpeedKmh !== '0.00' ? 'text-brand-orange' : 'text-gray-500'}>
-                                {avgSpeedKmh}
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Max Speed (km/h)</label>
-                        <input
-                            type="number"
-                            value={maxSpeed}
-                            onChange={e => setMaxSpeed(e.target.value)}
-                            placeholder="Optional"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
-                </div>
-
-                {/* Notes */}
-                <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
-                    <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Notes</label>
-                    <textarea
-                        value={notes}
-                        onChange={e => setNotes(e.target.value)}
-                        placeholder="How did the run feel?"
-                        rows={2}
-                        className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-[13px] focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600 resize-none"
-                    />
-                </div>
-
-                <div className="pt-2 animate-slide-up" style={{ animationDelay: '0.7s' }}>
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className={`w-full text-white text-sm font-bold py-2.5 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange focus:ring-offset-gray-900 flex items-center justify-center gap-2 ${submitting
-                                ? 'bg-brand-orange/60 cursor-not-allowed'
-                                : 'bg-brand-orange hover:bg-orange-500'
-                            }`}
-                    >
-                        {submitting ? (
-                            <>
-                                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                                    <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                                </svg>
-                                Saving...
-                            </>
-                        ) : 'Save Run'}
-                    </button>
-                </div>
-            </form>
-
-            <div className="mt-4 flex items-center justify-center text-gray-500 text-[11px] font-medium animate-fade-in" style={{ animationDelay: '0.8s' }}>
-                <span>Your running data is stored locally for maximum privacy.</span>
-            </div>
-        </div>
+        <RunForm
+            title="Add New Run"
+            submitLabel="Save Run"
+            onSubmit={handleSubmit}
+        />
     );
 };
 
