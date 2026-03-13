@@ -764,7 +764,8 @@ const Settings: React.FC = () => {
                           <TrendingUp className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-blue-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
-                          Height <span className="text-gray-600 ml-0.5">cm</span>
+                          Height{" "}
+                          <span className="text-gray-600 ml-0.5">cm</span>
                         </label>
                       </div>
                       <input
@@ -782,7 +783,8 @@ const Settings: React.FC = () => {
                           <Activity className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-green-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
-                          Weight <span className="text-gray-600 ml-0.5">kg</span>
+                          Weight{" "}
+                          <span className="text-gray-600 ml-0.5">kg</span>
                         </label>
                       </div>
                       <input
@@ -810,13 +812,54 @@ const Settings: React.FC = () => {
                       type="text"
                       value={
                         user?.primaryEmailAddress?.emailAddress
-                          ? user.primaryEmailAddress.emailAddress.replace(
-                              /(.{5})(.*)(@.*)/,
-                              "$1*****$3",
-                            )
+                          ? (() => {
+                              const email =
+                                user.primaryEmailAddress.emailAddress;
+                              const [localPart, domain] = email.split("@");
+
+                              // For very short local parts (1-3 chars), show first char + stars
+                              if (localPart.length <= 3) {
+                                return `${localPart[0]}${"*".repeat(Math.max(3, localPart.length - 1))}@${domain}`;
+                              }
+
+                              // For medium length (4-8 chars), show 30% from start and end
+                              if (localPart.length <= 8) {
+                                const visibleChars = Math.max(
+                                  1,
+                                  Math.floor(localPart.length * 0.3),
+                                );
+                                const start = localPart.substring(
+                                  0,
+                                  visibleChars,
+                                );
+                                const end = localPart.substring(
+                                  localPart.length - visibleChars,
+                                );
+                                const hiddenCount =
+                                  localPart.length - visibleChars * 2;
+                                return `${start}${"*".repeat(Math.max(2, hiddenCount))}${end}@${domain}`;
+                              }
+
+                              // For longer emails (9+ chars), show more context
+                              const startChars = Math.max(
+                                2,
+                                Math.floor(localPart.length * 0.25),
+                              );
+                              const endChars = Math.max(
+                                2,
+                                Math.floor(localPart.length * 0.25),
+                              );
+                              const start = localPart.substring(0, startChars);
+                              const end = localPart.substring(
+                                localPart.length - endChars,
+                              );
+                              const hiddenCount =
+                                localPart.length - (startChars + endChars);
+
+                              return `${start}${"*".repeat(Math.max(4, hiddenCount))}${end}@${domain}`;
+                            })()
                           : ""
                       }
-                      readOnly
                       className="w-full bg-transparent border border-gray-700/50 rounded-lg px-3 py-2.5 text-gray-400 text-sm font-semibold cursor-not-allowed opacity-80"
                     />{" "}
                   </div>
