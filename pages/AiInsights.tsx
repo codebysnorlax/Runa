@@ -238,13 +238,13 @@ const AiInsights: React.FC = () => {
   const insightTheme = (type: "positive" | "negative" | "neutral") => {
     switch (type) {
       case "positive":
-        return { border: "border-emerald-500/30", bg: "bg-emerald-500/8", badge: "bg-emerald-500/15", accent: "from-emerald-500/20 via-transparent" };
+        return { border: "border-dashed border-gray-700/50", bg: "bg-emerald-500/5", badge: "bg-emerald-500/15", accent: "from-emerald-500/20 via-transparent" };
       case "negative":
-        return { border: "border-rose-500/30", bg: "bg-rose-500/8", badge: "bg-rose-500/15", accent: "from-rose-500/20 via-transparent" };
+        return { border: "border-dashed border-gray-700/50", bg: "bg-rose-500/5", badge: "bg-rose-500/15", accent: "from-rose-500/20 via-transparent" };
       case "neutral":
-        return { border: "border-sky-500/30", bg: "bg-sky-500/8", badge: "bg-sky-500/15", accent: "from-sky-500/20 via-transparent" };
+        return { border: "border-dashed border-gray-700/50", bg: "bg-sky-500/5", badge: "bg-sky-500/15", accent: "from-sky-500/20 via-transparent" };
       default:
-        return { border: "border-gray-700/50", bg: "bg-gray-800/40", badge: "bg-gray-700/30", accent: "from-gray-500/20 via-transparent" };
+        return { border: "border-dashed border-gray-700/50", bg: "bg-gray-800/20", badge: "bg-gray-700/30", accent: "from-gray-500/20 via-transparent" };
     }
   };
 
@@ -383,9 +383,9 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`flex flex-col flex-shrink-0 w-40 rounded-xl overflow-hidden snap-start transition-all bg-gray-800/30 ${isToday
-                          ? "ring-1 ring-brand-orange/50 shadow-lg shadow-brand-orange/10"
-                          : "ring-1 ring-gray-700/40"
+                        className={`flex flex-col flex-shrink-0 w-40 rounded-xl overflow-hidden snap-start transition-all bg-gray-800/30 border border-dashed ${isToday
+                          ? "border-brand-orange/50 shadow-lg shadow-brand-orange/10"
+                          : "border-gray-700/50"
                           }`}
                       >
                         <div className={`px-3 py-2 text-center ${isToday
@@ -416,9 +416,9 @@ const AiInsights: React.FC = () => {
                     return (
                       <div
                         key={day}
-                        className={`flex flex-col rounded-xl overflow-hidden transition-all ${isToday
-                          ? "ring-1 ring-brand-orange/50 shadow-md shadow-brand-orange/10"
-                          : "ring-1 ring-gray-700/40 hover:ring-gray-600/60"
+                        className={`flex flex-col rounded-xl overflow-hidden transition-all border border-dashed ${isToday
+                          ? "border-brand-orange/50 shadow-md shadow-brand-orange/10"
+                          : "border-gray-700/50 hover:border-gray-600/60"
                           }`}
                       >
                         <div className={`px-3 py-2 text-center flex-shrink-0 ${isToday
@@ -510,8 +510,8 @@ const AiInsights: React.FC = () => {
                         title: "Complete Profile",
                         description: "Add your age, height, and weight",
                         link: "#/settings",
-                        gradient: "from-blue-500/15 to-cyan-500/5",
-                        border: "border-blue-500/25",
+                        gradient: "from-blue-500/10 to-transparent",
+                        border: "border-dashed border-gray-700/50",
                         iconColor: "text-blue-400",
                       },
                       {
@@ -520,8 +520,8 @@ const AiInsights: React.FC = () => {
                         title: "Set Goals",
                         description: "Define your weekly targets",
                         link: "#/settings",
-                        gradient: "from-purple-500/15 to-pink-500/5",
-                        border: "border-purple-500/25",
+                        gradient: "from-purple-500/10 to-transparent",
+                        border: "border-dashed border-gray-700/50",
                         iconColor: "text-purple-400",
                       },
                       {
@@ -530,8 +530,8 @@ const AiInsights: React.FC = () => {
                         title: "Log a Run",
                         description: "Record at least one run",
                         link: "#/add-run",
-                        gradient: "from-orange-500/15 to-amber-500/5",
-                        border: "border-orange-500/25",
+                        gradient: "from-orange-500/10 to-transparent",
+                        border: "border-dashed border-gray-700/50",
                         iconColor: "text-brand-orange",
                       },
                     ];
@@ -577,17 +577,17 @@ const AiInsights: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 p-4 sm:p-5 opacity-80 hover:opacity-100 transition-opacity">
+                  <div className="rounded-xl bg-gradient-to-br from-green-500/5 to-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 opacity-80 hover:opacity-100 transition-opacity">
                     <TrendingUp className="w-6 h-6 text-green-400 mb-3" />
                     <h4 className="text-sm font-bold text-white mb-1">Performance Insights</h4>
                     <p className="text-[11px] text-gray-400 leading-relaxed">Detailed analysis of your speed, endurance, and improvement trends</p>
                   </div>
-                  <div className="rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 p-4 sm:p-5 opacity-80 hover:opacity-100 transition-opacity">
+                  <div className="rounded-xl bg-gradient-to-br from-blue-500/5 to-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 opacity-80 hover:opacity-100 transition-opacity">
                     <BarChart3 className="w-6 h-6 text-blue-400 mb-3" />
                     <h4 className="text-sm font-bold text-white mb-1">Weekly Training Plan</h4>
                     <p className="text-[11px] text-gray-400 leading-relaxed">AI-generated schedule tailored to your goals and fitness level</p>
                   </div>
-                  <div className="rounded-xl bg-gradient-to-br from-yellow-500/10 to-amber-500/5 border border-yellow-500/20 p-4 sm:p-5 opacity-80 hover:opacity-100 transition-opacity">
+                  <div className="rounded-xl bg-gradient-to-br from-yellow-500/5 to-transparent border border-dashed border-gray-700/50 p-4 sm:p-5 opacity-80 hover:opacity-100 transition-opacity">
                     <Zap className="w-6 h-6 text-yellow-400 mb-3" />
                     <h4 className="text-sm font-bold text-white mb-1">Improvement Score</h4>
                     <p className="text-[11px] text-gray-400 leading-relaxed">AI-rated metric tracking your overall running progression</p>
