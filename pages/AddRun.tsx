@@ -19,7 +19,7 @@ const AddRun: React.FC = () => {
     }) => {
         if (!data.date || !data.distance_m || data.total_time_sec <= 0) {
             addToast('Please fill all required fields.', 'error');
-            return;
+            return false;
         }
 
         addRun(data);
