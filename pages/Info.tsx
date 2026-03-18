@@ -18,10 +18,10 @@ import {
 const SOCIAL_LINKS: { name: string; url: string; icon: LucideIcon; isExternal: boolean }[] = [
   { name: "GitHub", url: "https://github.com/codebysnorlax", icon: Github, isExternal: true },
   { name: "Email", url: "mailto:codebysnorlax@gmail.com", icon: Mail, isExternal: false },
-  { name: "Blogs", url: "https://www.notion.so/Cohort-26-2f017cc30ca680beb217e0ab72262f79?source=copy_link", icon: BookOpen, isExternal: true },
+  { name: "Blogs", url: "https://codebysnorlax.hashnode.dev", icon: BookOpen, isExternal: true },
   { name: "Instagram", url: "https://instagram.com/nr_snorlax", icon: Instagram, isExternal: true },
   { name: "Twitter", url: "https://twitter.com/codebysnorlax", icon: Twitter, isExternal: true },
-  { name: "LinkedIn", url: "https://linkedin.com/in/ravi-ranjan-9b338b333", icon: Linkedin, isExternal: true },
+  { name: "LinkedIn", url: "https://linkedin.com/in/codebysnorlax", icon: Linkedin, isExternal: true },
 ];
 
 const Info: React.FC = () => {
