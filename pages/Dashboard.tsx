@@ -243,32 +243,66 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 mb-4">
 
         {/* Weekly Goal — progress bar */}
-        <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <Target className="w-3 h-3 text-orange-400" />
-              <h2 className="text-[11px] font-bold text-white uppercase tracking-wide">Weekly Goal</h2>
+        {(() => {
+          const targetKm = goals?.weekly_distance_km || 0;
+          const rawExtra = currentWeekDistance - targetKm;
+          const isOverachieved = targetKm > 0 && rawExtra >= 0.05; // At least 0.1 after rounding
+          const extraPercentage = isOverachieved ? (rawExtra / targetKm) * 100 : 0;
+          const purpleWidth = extraPercentage > 0 && extraPercentage % 100 === 0 ? 100 : extraPercentage % 100;
+          const progressWidth = Math.min(goalProgress, 100);
+
+          return (
+            <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-1.5">
+                  <Target className={`w-3 h-3 ${isOverachieved ? 'text-purple-400' : 'text-orange-400'}`} />
+                  <h2 className={`text-[11px] font-bold uppercase tracking-wide ${isOverachieved ? 'text-purple-300' : 'text-white'}`}>
+                    Weekly Goal
+                  </h2>
+                </div>
+                <div className="text-[11px] font-bold text-white flex items-center gap-1">
+                  <span>{progressWidth.toFixed(0)}%</span>
+                  {isOverachieved && (
+                    <span className="text-purple-400 animate-pulse">+ {extraPercentage.toFixed(0)}%</span>
+                  )}
+                </div>
+              </div>
+              <div className="w-full h-1.5 bg-gray-700/50 rounded-full mb-3 overflow-hidden relative">
+                {/* Base Orange Bar (Shows up to 100% or is fully 100% when overachieved) */}
+                <div 
+                  className="h-full rounded-full transition-all duration-700 absolute inset-y-0 left-0 bg-gradient-to-r from-brand-orange to-orange-500"
+                  style={{ width: isOverachieved ? '100%' : `${progressWidth}%` }} 
+                />
+
+                {/* Overachieved Purple overlay with dynamic shimmer flow */}
+                {isOverachieved && (
+                  <div 
+                    className="h-full rounded-full transition-all duration-700 absolute inset-y-0 left-0 bg-[#1f2937]"
+                    style={{ width: `${purpleWidth}%` }}
+                  >
+                    <div className="w-full h-full rounded-full bg-gradient-to-r from-purple-600 via-purple-400 to-purple-500 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/70 to-transparent animate-shimmer" />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-gray-500">Done</span>
+                  <span className="text-white font-medium">{currentWeekDistance.toFixed(1)} km</span>
+                </div>
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-gray-500">Target</span>
+                  <span className={`${isOverachieved ? 'text-purple-400' : 'text-orange-400'} font-medium`}>{targetKm} km</span>
+                </div>
+                <div className="flex justify-between text-[11px] pt-1 border-t border-gray-700/30">
+                  <span className="text-gray-500">Left</span>
+                  <span className="text-white font-medium">{Math.max(0, targetKm - currentWeekDistance).toFixed(1)} km</span>
+                </div>
+              </div>
             </div>
-            <span className="text-[11px] font-bold text-white">{Math.min(goalProgress, 100).toFixed(0)}%</span>
-          </div>
-          <div className="w-full h-1.5 bg-gray-700/50 rounded-full mb-3 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-brand-orange to-orange-500 rounded-full transition-all duration-700" style={{ width: `${Math.min(goalProgress, 100)}%` }} />
-          </div>
-          <div className="space-y-1">
-            <div className="flex justify-between text-[11px]">
-              <span className="text-gray-500">Done</span>
-              <span className="text-white font-medium">{currentWeekDistance.toFixed(1)} km</span>
-            </div>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-gray-500">Target</span>
-              <span className="text-orange-400 font-medium">{goals?.weekly_distance_km || 0} km</span>
-            </div>
-            <div className="flex justify-between text-[11px] pt-1 border-t border-gray-700/30">
-              <span className="text-gray-500">Left</span>
-              <span className="text-white font-medium">{Math.max(0, (goals?.weekly_distance_km || 0) - currentWeekDistance).toFixed(1)} km</span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Today's Run */}
         <div className="bg-transparent border border-dashed border-gray-700/50 rounded-2xl px-3.5 py-3">
@@ -368,7 +402,25 @@ const Dashboard: React.FC = () => {
           <div className="space-y-2">
             {[
               { label: "Distance", sub: "Longest", val: `${(personalRecords.longestDistance / 1000).toFixed(2)}`, unit: "km", icon: Route, bg: "bg-blue-500/10", border: "border-blue-500/15", color: "text-blue-400" },
-              { label: "Duration", sub: "Longest", val: formatDuration(personalRecords.longestDuration), unit: "", icon: Clock, bg: "bg-purple-500/10", border: "border-purple-500/15", color: "text-purple-400" },
+              { 
+                label: "Duration", 
+                sub: "Longest", 
+                val: (
+                  <div className="flex items-baseline">
+                    {Math.floor(personalRecords.longestDuration / 3600) > 0 ? (
+                      <>
+                        {Math.floor(personalRecords.longestDuration / 3600)}
+                        <span className="text-[10px] font-normal text-gray-500 ml-0.5 mr-1">h</span>
+                        {Math.floor((personalRecords.longestDuration % 3600) / 60)}
+                      </>
+                    ) : (
+                      Math.floor(personalRecords.longestDuration / 60)
+                    )}
+                  </div>
+                ), 
+                unit: "min", 
+                icon: Clock, bg: "bg-purple-500/10", border: "border-purple-500/15", color: "text-purple-400" 
+              },
               { label: "Speed", sub: "Top", val: `${personalRecords.fastestAvgSpeed.toFixed(1)}`, unit: "km/h", icon: Zap, bg: "bg-yellow-500/10", border: "border-yellow-500/15", color: "text-yellow-400" },
               { label: "Streak", sub: "Highest", val: `${streakData.longestStreak}`, unit: "days", icon: Flame, bg: "bg-orange-500/10", border: "border-orange-500/15", color: "text-orange-400" },
             ].map((r) => {
@@ -382,9 +434,9 @@ const Dashboard: React.FC = () => {
                       <p className="text-[11px] text-gray-300">{r.label}</p>
                     </div>
                   </div>
-                  <p className="text-sm font-bold text-white">
+                  <div className="flex items-baseline justify-end text-sm font-bold text-white">
                     {r.val}{r.unit && <span className="text-[10px] font-normal text-gray-500 ml-0.5">{r.unit}</span>}
-                  </p>
+                  </div>
                 </div>
               );
             })}

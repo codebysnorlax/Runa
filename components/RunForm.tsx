@@ -20,7 +20,7 @@ interface RunFormProps {
         avg_speed_kmh: number;
         max_speed_kmh: number;
         notes: string;
-    }) => void;
+    }) => void | boolean;
 }
 
 const defaultFormData: RunFormData = {
@@ -40,7 +40,14 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
     const [submitting, setSubmitting] = useState(false);
 
     const handleChange = (field: keyof RunFormData, value: string) => {
-        setForm(prev => ({ ...prev, [field]: value }));
+        let newValue = value;
+        if (field === 'distanceM' && value.length > 6) newValue = value.slice(0, 6); // Max 999,999m (999km)
+        if (field === 'minutes' && value.length > 4) newValue = value.slice(0, 4);   // Max 9999m (~166 hours)
+        if (field === 'seconds' && value.length > 2) newValue = value.slice(0, 2);   // Max 99s
+        if (field === 'maxSpeed' && value.length > 3) newValue = value.slice(0, 3);  // Max 999km/h
+        if (field === 'notes' && value.length > 500) newValue = value.slice(0, 500); // Sensible limit
+
+        setForm(prev => ({ ...prev, [field]: newValue }));
     };
 
     const totalTimeSec = useMemo(() => {
@@ -61,7 +68,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
         if (submitting) return;
 
         setSubmitting(true);
-        onSubmit({
+        const result = onSubmit({
             date: new Date(form.date).toISOString(),
             distance_m: parseFloat(form.distanceM),
             total_time_sec: totalTimeSec,
@@ -69,6 +76,14 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
             max_speed_kmh: parseFloat(form.maxSpeed) || 0,
             notes: form.notes,
         });
+
+        if (result === false) {
+            setSubmitting(false);
+        }
+    };
+
+    const handleWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+        (e.target as HTMLInputElement).blur();
     };
 
     return (
@@ -94,6 +109,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
                             type="number"
                             value={form.distanceM}
                             onChange={e => handleChange('distanceM', e.target.value)}
+                            onWheel={handleWheel}
                             placeholder="e.g., 5000"
                             className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
                         />
@@ -108,6 +124,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
                             type="number"
                             value={form.minutes}
                             onChange={e => handleChange('minutes', e.target.value)}
+                            onWheel={handleWheel}
                             placeholder="e.g., 25"
                             className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
                         />
@@ -118,6 +135,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
                             type="number"
                             value={form.seconds}
                             onChange={e => handleChange('seconds', e.target.value)}
+                            onWheel={handleWheel}
                             placeholder="e.g., 30"
                             className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
                         />
@@ -140,6 +158,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
                             type="number"
                             value={form.maxSpeed}
                             onChange={e => handleChange('maxSpeed', e.target.value)}
+                            onWheel={handleWheel}
                             placeholder="Optional"
                             className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
                         />

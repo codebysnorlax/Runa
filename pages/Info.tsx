@@ -26,8 +26,8 @@ const SOCIAL_LINKS: { name: string; url: string; icon: LucideIcon; isExternal: b
 
 const Info: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto space-y-4 px-4 sm:px-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6">
+    <div className="space-y-4 -mx-2 sm:mx-0">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 px-2 sm:px-0">
         About & Developer Info
       </h1>
 
