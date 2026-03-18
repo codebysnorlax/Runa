@@ -193,7 +193,18 @@ const Settings: React.FC = () => {
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (profileState) {
-      setProfileState({ ...profileState, [e.target.name]: e.target.value });
+      const { name, value } = e.target;
+      let newValue = value;
+      
+      // Prevent massive inputs from breaking layout before save
+      if ((name === "age" || name === "height_cm" || name === "weight_kg") && value.length > 3) {
+        newValue = value.slice(0, 3);
+      }
+      if (name === "name" && value.length > 50) {
+        newValue = value.slice(0, 50);
+      }
+      
+      setProfileState({ ...profileState, [name]: newValue });
     }
   };
 
@@ -261,6 +272,20 @@ const Settings: React.FC = () => {
         height_cm: Number(profileState.height_cm) || 0,
         weight_kg: Number(profileState.weight_kg) || 0,
       };
+
+      if (finalProfile.age > 0 && (finalProfile.age < 10 || finalProfile.age > 120)) {
+        addToast("Please enter a valid age between 10 and 120", "error");
+        return;
+      }
+      if (finalProfile.height_cm > 0 && (finalProfile.height_cm < 50 || finalProfile.height_cm > 300)) {
+        addToast("Please enter a valid height between 50cm and 300cm", "error");
+        return;
+      }
+      if (finalProfile.weight_kg > 0 && (finalProfile.weight_kg < 20 || finalProfile.weight_kg > 500)) {
+        addToast("Please enter a valid weight between 20kg and 500kg", "error");
+        return;
+      }
+
       updateProfile(finalProfile);
       addToast("Profile updated successfully!", "success");
     }

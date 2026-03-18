@@ -21,6 +21,18 @@ const AddRun: React.FC = () => {
             addToast('Please fill all required fields.', 'error');
             return false;
         }
+        if (data.distance_m > 300000) {
+            addToast('Distance too high (max 300km per run).', 'error');
+            return false;
+        }
+        if (data.total_time_sec > 86400) {
+            addToast('Duration too high (max 24 hours per run).', 'error');
+            return false;
+        }
+        if (data.avg_speed_kmh > 45 || data.max_speed_kmh > 50) {
+            addToast('Speed is unrealistically fast!', 'error');
+            return false;
+        }
 
         addRun(data);
         addToast('Run added successfully!', 'success');
