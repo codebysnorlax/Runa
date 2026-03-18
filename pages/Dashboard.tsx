@@ -402,7 +402,25 @@ const Dashboard: React.FC = () => {
           <div className="space-y-2">
             {[
               { label: "Distance", sub: "Longest", val: `${(personalRecords.longestDistance / 1000).toFixed(2)}`, unit: "km", icon: Route, bg: "bg-blue-500/10", border: "border-blue-500/15", color: "text-blue-400" },
-              { label: "Duration", sub: "Longest", val: formatDuration(personalRecords.longestDuration), unit: "", icon: Clock, bg: "bg-purple-500/10", border: "border-purple-500/15", color: "text-purple-400" },
+              { 
+                label: "Duration", 
+                sub: "Longest", 
+                val: (
+                  <div className="flex items-baseline">
+                    {Math.floor(personalRecords.longestDuration / 3600) > 0 ? (
+                      <>
+                        {Math.floor(personalRecords.longestDuration / 3600)}
+                        <span className="text-[10px] font-normal text-gray-500 ml-0.5 mr-1">h</span>
+                        {Math.floor((personalRecords.longestDuration % 3600) / 60)}
+                      </>
+                    ) : (
+                      Math.floor(personalRecords.longestDuration / 60)
+                    )}
+                  </div>
+                ), 
+                unit: "min", 
+                icon: Clock, bg: "bg-purple-500/10", border: "border-purple-500/15", color: "text-purple-400" 
+              },
               { label: "Speed", sub: "Top", val: `${personalRecords.fastestAvgSpeed.toFixed(1)}`, unit: "km/h", icon: Zap, bg: "bg-yellow-500/10", border: "border-yellow-500/15", color: "text-yellow-400" },
               { label: "Streak", sub: "Highest", val: `${streakData.longestStreak}`, unit: "days", icon: Flame, bg: "bg-orange-500/10", border: "border-orange-500/15", color: "text-orange-400" },
             ].map((r) => {
@@ -416,9 +434,9 @@ const Dashboard: React.FC = () => {
                       <p className="text-[11px] text-gray-300">{r.label}</p>
                     </div>
                   </div>
-                  <p className="text-sm font-bold text-white">
+                  <div className="flex items-baseline justify-end text-sm font-bold text-white">
                     {r.val}{r.unit && <span className="text-[10px] font-normal text-gray-500 ml-0.5">{r.unit}</span>}
-                  </p>
+                  </div>
                 </div>
               );
             })}
