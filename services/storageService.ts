@@ -1,4 +1,4 @@
-import { Profile, Run, Goal, InsightsData } from '../types';
+import { Profile, Run, Goal, InsightsData } from '@/types';
 
 const PROFILE_KEY = 'profile.json';
 const RUNS_KEY = 'runs.json';

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2 } from 'lucide-react';
-import { useAudio } from '../context/AudioContext';
+import { useAudio } from '@/context/AudioContext';
 
 interface AudioHelpProps {
   audioType: 'male' | 'female';

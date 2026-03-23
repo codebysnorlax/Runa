@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useAppContext } from "../context/AppContext";
-import { generateInsightsAndPlan } from "../services/aiService";
-import Card from "../components/Card";
-import Skeleton from "../components/Skeleton";
+import { useAppCore } from '@/context/AppCoreContext';
+import { useProfile } from '@/context/ProfileContext';
+import { useRuns } from '@/context/RunsContext';
+import { useGoals } from '@/context/GoalsContext';
+import { useInsights } from '@/context/InsightsContext';
+import { generateInsightsAndPlan } from "@/services/aiService";
+import Card from "@/components/Card";
+import Skeleton from "@/components/Skeleton";
 import {
   Loader2,
   Zap,
@@ -21,7 +25,7 @@ import {
   Brain,
   BarChart3,
 } from "lucide-react";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "@/context/ToastContext";
 
 const AiInsightsSkeleton: React.FC = () => (
   <div className="space-y-6">
@@ -104,14 +108,11 @@ const GeneratingContentSkeleton: React.FC = () => (
 );
 
 const AiInsights: React.FC = () => {
-  const {
-    runs,
-    goals,
-    profile,
-    insights,
-    updateInsights,
-    loading: contextLoading,
-  } = useAppContext();
+  const { loading: contextLoading } = useAppCore();
+  const { profile } = useProfile();
+  const { runs } = useRuns();
+  const { goals } = useGoals();
+  const { insights, updateInsights } = useInsights();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();

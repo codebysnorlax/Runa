@@ -1,11 +1,11 @@
 import React from 'react';
-import { useAppContext } from '../context/AppContext';
-import { useToast } from '../context/ToastContext';
+import { useRuns } from '@/context/RunsContext';
+import { useToast } from '@/context/ToastContext';
 import { useNavigate } from 'react-router-dom';
-import RunForm from '../components/RunForm';
+import RunForm from '@/components/RunForm';
 
 const AddRun: React.FC = () => {
-    const { addRun } = useAppContext();
+    const { addRun } = useRuns();
     const { addToast } = useToast();
     const navigate = useNavigate();
 

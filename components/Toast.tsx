@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useToast, ToastItem } from "../context/ToastContext";
+import { useToast, ToastItem } from "@/context/ToastContext";
 
 /* ─── Styles injected once ─── */
 const toastStyles = `

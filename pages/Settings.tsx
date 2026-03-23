@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useAppContext } from "../context/AppContext";
+import { useAppCore } from '@/context/AppCoreContext';
+import { useProfile } from '@/context/ProfileContext';
+import { useRuns } from '@/context/RunsContext';
+import { useGoals } from '@/context/GoalsContext';
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { Goal, Profile, DistanceGoal } from "../types";
-import Card from "../components/Card";
-import Skeleton from "../components/Skeleton";
-import { useToast } from "../context/ToastContext";
-import AudioHelp from "../components/AudioHelp";
-import { AudioProvider } from "../context/AudioContext";
+import { Goal, Profile, DistanceGoal } from "@/types";
+import Card from "@/components/Card";
+import Skeleton from "@/components/Skeleton";
+import { useToast } from "@/context/ToastContext";
+import AudioHelp from "@/components/AudioHelp";
+import { AudioProvider } from "@/context/AudioContext";
 import {
   User,
   Target,
@@ -34,15 +37,15 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import * as storage from "../services/storageService";
+import * as storage from "@/services/storageService";
 import FeedbackStep, {
   FeedbackQuestion,
   UserResponse,
 } from "../components/FeedbackStep";
-import FeedbackSummary from "../components/FeedbackSummary";
-import FAQ from "../components/FAQ";
-import InfoPage from "./Info";
-import { calculateStreak } from "../utils/streakUtils";
+import FeedbackSummary from "@/components/FeedbackSummary";
+import FAQ from "@/components/FAQ";
+import InfoPage from "@/pages/Info";
+import { calculateStreak } from "@/utils/streakUtils";
 
 const SettingsSkeleton: React.FC = () => (
   <div className="max-w-4xl mx-auto">
@@ -72,16 +75,10 @@ type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "faq" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
-  const {
-    profile,
-    goals,
-    updateProfile,
-    updateGoals,
-    loading,
-    currentUser,
-    refreshData,
-    runs,
-  } = useAppContext();
+  const { loading, currentUser, refreshData } = useAppCore();
+  const { profile, updateProfile } = useProfile();
+  const { runs } = useRuns();
+  const { goals, updateGoals } = useGoals();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     const params = new URLSearchParams(
@@ -176,14 +173,14 @@ const Settings: React.FC = () => {
   // Timer for rate limiting - updates every second
   useEffect(() => {
     // Initial check
-    import("../services/telegramService").then(({ getRemainingCooldown }) => {
+    import("@/services/telegramService").then(({ getRemainingCooldown }) => {
       setCooldownTimer(getRemainingCooldown());
     });
 
     // Update every second
     const interval = setInterval(async () => {
       const { getRemainingCooldown } =
-        await import("../services/telegramService");
+        await import("@/services/telegramService");
       const remaining = getRemainingCooldown();
       setCooldownTimer(remaining);
     }, 1000);
@@ -389,7 +386,7 @@ const Settings: React.FC = () => {
       }
 
       // Check cooldown before attempting to send
-      const { canSendFeedback } = await import("../services/telegramService");
+      const { canSendFeedback } = await import("@/services/telegramService");
       if (!canSendFeedback()) {
         addToast("Please wait before sending another feedback", "error");
         return;
@@ -399,7 +396,7 @@ const Settings: React.FC = () => {
       setFeedbackSubmitting(true);
       try {
         const { sendFeedbackToTelegram } =
-          await import("../services/telegramService");
+          await import("@/services/telegramService");
         const result = await sendFeedbackToTelegram(
           FEEDBACK_QUESTIONS,
           feedbackResponses,
@@ -410,7 +407,7 @@ const Settings: React.FC = () => {
           // Send confirmation email
           if (user?.primaryEmailAddress?.emailAddress && user?.fullName) {
             const { sendFeedbackConfirmation } =
-              await import("../services/emailService");
+              await import("@/services/emailService");
             await sendFeedbackConfirmation(
               user.primaryEmailAddress.emailAddress,
               user.fullName || user.firstName || "User",

@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
-import { useAppContext } from '../context/AppContext';
-import { useToast } from '../context/ToastContext';
+import { useRuns } from '@/context/RunsContext';
+import { useToast } from '@/context/ToastContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import RunForm, { RunFormData } from '../components/RunForm';
+import RunForm, { RunFormData } from '@/components/RunForm';
 
 const EditRun: React.FC = () => {
     const { runId } = useParams<{ runId: string }>();
-    const { runs, editRun } = useAppContext();
+    const { runs, editRun } = useRuns();
     const navigate = useNavigate();
     const { addToast } = useToast();
 

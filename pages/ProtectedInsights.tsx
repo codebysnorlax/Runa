@@ -1,5 +1,5 @@
 import React from "react";
-import AiInsights from "./AiInsights";
+import AiInsights from "@/pages/AiInsights";
 
 const ProtectedInsights: React.FC = () => {
   return <AiInsights />;

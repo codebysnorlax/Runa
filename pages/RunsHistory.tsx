@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { useAppContext } from "../context/AppContext";
-import Skeleton from "../components/Skeleton";
-import Modal from "../components/Modal";
+import { useAppCore } from '@/context/AppCoreContext';
+import { useRuns } from '@/context/RunsContext';
+import Skeleton from "@/components/Skeleton";
+import Modal from "@/components/Modal";
 import {
   ArrowUp,
   ArrowDown,
@@ -14,7 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Run } from "../types";
+import { Run } from "@/types";
 
 type SortKey = "date" | "distance_m" | "avg_speed_kmh";
 type SortDirection = "asc" | "desc";
@@ -77,7 +78,8 @@ const RunsHistorySkeleton: React.FC = () => (
 );
 
 const RunsHistory: React.FC = () => {
-  const { runs, deleteRun, loading } = useAppContext();
+  const { loading } = useAppCore();
+  const { runs, deleteRun } = useRuns();
   const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");

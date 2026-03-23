@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { playClickSound } from '../utils/audioUtils';
+import { playClickSound } from '@/utils/audioUtils';
 
 export type QuestionType = 'single-choice' | 'multi-choice' | 'text';
 
