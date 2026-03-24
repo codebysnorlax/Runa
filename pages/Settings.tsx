@@ -100,6 +100,7 @@ const Settings: React.FC = () => {
   );
   const [feedbackCompleted, setFeedbackCompleted] = useState(false);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
   const [cooldownTimer, setCooldownTimer] = useState(0);
   const [calendarMonthOffset, setCalendarMonthOffset] = useState(0);
 
@@ -393,6 +394,8 @@ const Settings: React.FC = () => {
       }
 
       // Send to Telegram with user info
+      if (submitLockRef.current) return;
+      submitLockRef.current = true;
       setFeedbackSubmitting(true);
       try {
         const { sendFeedbackToTelegram } =
@@ -405,13 +408,15 @@ const Settings: React.FC = () => {
 
         if (result.success) {
           // Send confirmation email
-          if (user?.primaryEmailAddress?.emailAddress && user?.fullName) {
+          if (user?.primaryEmailAddress?.emailAddress) {
             const { sendFeedbackConfirmation } =
               await import("@/services/emailService");
-            await sendFeedbackConfirmation(
+            sendFeedbackConfirmation(
               user.primaryEmailAddress.emailAddress,
               user.fullName || user.firstName || "User",
-            );
+            ).then(ok => {
+              if (!ok) console.error("Feedback email failed to send");
+            });
           }
           setFeedbackCompleted(true);
           addToast(result.message, "success");
@@ -422,6 +427,7 @@ const Settings: React.FC = () => {
         addToast("Failed to send feedback. Please try again.", "error");
       } finally {
         setFeedbackSubmitting(false);
+        submitLockRef.current = false;
       }
     }
   };
@@ -436,6 +442,7 @@ const Settings: React.FC = () => {
     setFeedbackResponses([]);
     setFeedbackStep(0);
     setFeedbackCompleted(false);
+    submitLockRef.current = false;
   };
 
   /* User Status Logic — must stay before early return to respect Rules of Hooks */

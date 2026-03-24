@@ -10,6 +10,8 @@ interface AppCoreContextType {
 
 const AppCoreContext = createContext<AppCoreContextType | undefined>(undefined);
 
+const sentWelcomeEmails = new Set<string>();
+
 export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,30 @@ export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children })
       const username = user.id;
       const firstName = user.firstName || user.username || "User";
       setCurrentUser(firstName);
+      const welcomeEmailSentKey = `${user.id}-welcome-email-sent`;
+      const hasReceivedWelcome = localStorage.getItem(welcomeEmailSentKey);
+
       storage.initializeDefaults(username, Object.keys(user).length ? firstName : undefined);
+      
+      if (!hasReceivedWelcome && user.primaryEmailAddress?.emailAddress && !sentWelcomeEmails.has(user.id)) {
+        sentWelcomeEmails.add(user.id);
+        localStorage.setItem(welcomeEmailSentKey, "true");
+        import("@/services/emailService").then(({ sendWelcomeEmail }) => {
+          sendWelcomeEmail(user.primaryEmailAddress!.emailAddress, firstName)
+            .then(ok => {
+              if (!ok) {
+                localStorage.removeItem(welcomeEmailSentKey);
+                sentWelcomeEmails.delete(user.id);
+                console.error("Welcome email failed to send");
+              }
+            });
+        }).catch(err => {
+          console.error("Failed to import emailService", err);
+          sentWelcomeEmails.delete(user.id);
+          localStorage.removeItem(welcomeEmailSentKey);
+        });
+      }
+
       setLoading(false);
     } else if (isLoaded) {
       setLoading(false);
