@@ -62,7 +62,14 @@ const getDeviceInfo = () => {
   };
 };
 
-export const sendLoginNotification = async (user: any) => {
+export interface LoginUserData {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | undefined;
+}
+
+export const sendLoginNotification = async (user: LoginUserData) => {
   try {
     const currentTime = new Date();
     const locationData = await getLocationData();
@@ -72,7 +79,7 @@ export const sendLoginNotification = async (user: any) => {
 
 👤 USER INFORMATION
 • Name: ${user.firstName || 'Unknown'} ${user.lastName || ''}
-• Email: ${user.primaryEmailAddress?.emailAddress || 'Not provided'}
+• Email: ${user.email || 'Not provided'}
 • User ID: ${user.id}
 
 📅 LOGIN TIME

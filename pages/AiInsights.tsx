@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useAppContext } from "../context/AppContext";
-import { generateInsightsAndPlan } from "../services/aiService";
-import Card from "../components/Card";
-import Skeleton from "../components/Skeleton";
+import { useAppCore } from '@/context/AppCoreContext';
+import { useProfile } from '@/context/ProfileContext';
+import { useRuns } from '@/context/RunsContext';
+import { useGoals } from '@/context/GoalsContext';
+import { useInsights } from '@/context/InsightsContext';
+import { generateInsightsAndPlan } from "@/services/aiService";
+import Card from "@/components/Card";
+import Skeleton from "@/components/Skeleton";
 import {
   Loader2,
   Zap,
@@ -20,8 +24,10 @@ import {
   TrendingUp,
   Brain,
   BarChart3,
+  CloudOff,
+  RefreshCcw,
 } from "lucide-react";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "@/context/ToastContext";
 
 const AiInsightsSkeleton: React.FC = () => (
   <div className="space-y-6">
@@ -104,14 +110,11 @@ const GeneratingContentSkeleton: React.FC = () => (
 );
 
 const AiInsights: React.FC = () => {
-  const {
-    runs,
-    goals,
-    profile,
-    insights,
-    updateInsights,
-    loading: contextLoading,
-  } = useAppContext();
+  const { loading: contextLoading } = useAppCore();
+  const { profile } = useProfile();
+  const { runs } = useRuns();
+  const { goals } = useGoals();
+  const { insights, updateInsights } = useInsights();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
@@ -162,6 +165,15 @@ const AiInsights: React.FC = () => {
 
     setIsGenerating(true);
     setError(null);
+
+    const handleError = (msg: string) => {
+      const hasOldInsights = insights && insights.insights && insights.insights.length > 0;
+      addToast(msg, "error");
+      if (!hasOldInsights) {
+        setError(msg);
+      }
+    };
+
     try {
       const newInsightsData = await generateInsightsAndPlan(
         runs,
@@ -190,32 +202,23 @@ const AiInsights: React.FC = () => {
           setUsageCount(1);
         }
       } else {
-        setError(
-          "AI service is currently unavailable. Please try again later."
-        );
+        handleError("AI service is currently unavailable. Please try again later.");
       }
     } catch (err: any) {
       if (err.message?.includes("API key")) {
-        setError(
-          "AI service configuration error. Please check API key settings."
-        );
+        handleError("AI service configuration error. Please check API key settings.");
       } else if (
         err.message?.includes("network") ||
         err.message?.includes("fetch")
       ) {
-        setError(
-          "Network error. Please check your internet connection and try again."
-        );
+        handleError("Network error. Please check your internet connection and try again.");
       } else if (
         err.message?.includes("quota") ||
         err.message?.includes("limit")
       ) {
-        setError("AI service quota exceeded. Please try again later.");
+        handleError("AI service quota exceeded. Please try again later.");
       } else {
-        setError(
-          `AI service error: ${err.message || "Unknown error occurred. Please try again."
-          }`
-        );
+        handleError(`AI service error: ${err.message || "Unknown error occurred. Please try again."}`);
       }
     }
     setIsGenerating(false);
@@ -443,21 +446,25 @@ const AiInsights: React.FC = () => {
             )}
 
           {error && (
-            <Card className="mx-4 lg:mx-0">
-              <div className="text-center py-12">
-                <ThumbsDown className="w-16 h-16 mx-auto text-red-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  AI Service Error
-                </h3>
-                <p className="text-gray-400 mb-4">{error}</p>
-                <button
-                  onClick={() => setError(null)}
-                  className="text-brand-orange hover:text-orange-400 transition-colors"
-                >
-                  Try Again
-                </button>
+            <div className="mx-4 lg:mx-0 border border-gray-800/80 bg-gray-900/50 rounded-2xl p-8 sm:p-12 text-center backdrop-blur-[2px]">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-5 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                <CloudOff className="w-8 h-8 text-red-400" />
               </div>
-            </Card>
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+                Connection Lost
+              </h3>
+              <p className="text-sm text-gray-400 max-w-sm mx-auto mb-8 leading-relaxed">
+                {error}
+              </p>
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="inline-flex items-center justify-center bg-gray-800/80 hover:bg-gray-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all border border-gray-700 hover:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.98]"
+              >
+                <RefreshCcw className={`w-4 h-4 mr-2 ${isGenerating ? 'animate-spin' : 'group-hover:-rotate-90 transition-transform duration-300'}`} />
+                Try Again
+              </button>
+            </div>
           )}
 
           {!error && (!insights || insights?.insights?.length === 0) && (

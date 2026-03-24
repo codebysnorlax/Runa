@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Run, Goal, PersonalRecords } from '../types';
-import { calculateStreak, getHeatmapData, StreakData } from '../utils/streakUtils';
+import { Run, Goal, PersonalRecords } from '@/types';
+import { calculateStreak, getHeatmapData, StreakData } from '@/utils/streakUtils';
 
 export interface DashboardStats {
     personalRecords: PersonalRecords;

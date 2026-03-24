@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { InputField } from '@/components/InputField';
 
 export interface RunFormData {
     date: string;
@@ -37,17 +38,21 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
         ...defaultFormData,
         ...initialData,
     }));
+    const [errors, setErrors] = useState<Partial<Record<keyof RunFormData, string>>>({});
     const [submitting, setSubmitting] = useState(false);
 
     const handleChange = (field: keyof RunFormData, value: string) => {
         let newValue = value;
-        if (field === 'distanceM' && value.length > 6) newValue = value.slice(0, 6); // Max 999,999m (999km)
-        if (field === 'minutes' && value.length > 4) newValue = value.slice(0, 4);   // Max 9999m (~166 hours)
-        if (field === 'seconds' && value.length > 2) newValue = value.slice(0, 2);   // Max 99s
-        if (field === 'maxSpeed' && value.length > 3) newValue = value.slice(0, 3);  // Max 999km/h
-        if (field === 'notes' && value.length > 500) newValue = value.slice(0, 500); // Sensible limit
+        if (field === 'distanceM' && value.length > 6) newValue = value.slice(0, 6);
+        if (field === 'minutes' && value.length > 4) newValue = value.slice(0, 4);
+        if (field === 'seconds' && value.length > 2) newValue = value.slice(0, 2);
+        if (field === 'maxSpeed' && value.length > 3) newValue = value.slice(0, 3);
+        if (field === 'notes' && value.length > 500) newValue = value.slice(0, 500);
 
         setForm(prev => ({ ...prev, [field]: newValue }));
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: undefined }));
+        }
     };
 
     const totalTimeSec = useMemo(() => {
@@ -63,9 +68,34 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
         return '0.00';
     }, [form.distanceM, totalTimeSec]);
 
+    const validateForm = () => {
+        const newErrors: Partial<Record<keyof RunFormData, string>> = {};
+        if (!form.date) newErrors.date = 'Date is required';
+        else if (new Date(form.date) > new Date()) newErrors.date = 'Date cannot be in the future';
+
+        const dist = parseFloat(form.distanceM);
+        if (!form.distanceM) newErrors.distanceM = 'Distance is required';
+        else if (isNaN(dist) || dist <= 0) newErrors.distanceM = 'Must be greater than 0';
+
+        if (totalTimeSec <= 0) {
+            newErrors.minutes = 'Total time must be > 0';
+        }
+
+        if (form.maxSpeed) {
+            const maxS = parseFloat(form.maxSpeed);
+            if (isNaN(maxS) || maxS < parseFloat(avgSpeedKmh)) {
+                newErrors.maxSpeed = 'Max speed must be >= average speed';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (submitting) return;
+        if (!validateForm()) return;
 
         setSubmitting(true);
         const result = onSubmit({
@@ -90,59 +120,51 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
         <div className="max-w-2xl mx-auto px-4 sm:px-6 pb-24 lg:pb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 animate-fade-in">{title}</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Row 1: Date & Distance */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Date</label>
-                        <input
+                        <InputField
+                            label="Date"
                             type="date"
                             value={form.date}
                             onChange={e => handleChange('date', e.target.value)}
                             max={new Date().toISOString().split('T')[0]}
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500"
+                            error={errors.date}
                         />
                     </div>
-
                     <div className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Distance (meters)</label>
-                        <input
+                        <InputField
+                            label="Distance (meters)"
                             type="number"
                             value={form.distanceM}
                             onChange={e => handleChange('distanceM', e.target.value)}
                             onWheel={handleWheel}
                             placeholder="e.g., 5000"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
+                            error={errors.distanceM}
                         />
                     </div>
                 </div>
 
-                {/* Row 2: Duration */}
                 <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.4s' }}>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (minutes)</label>
-                        <input
-                            type="number"
-                            value={form.minutes}
-                            onChange={e => handleChange('minutes', e.target.value)}
-                            onWheel={handleWheel}
-                            placeholder="e.g., 25"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Time (seconds)</label>
-                        <input
-                            type="number"
-                            value={form.seconds}
-                            onChange={e => handleChange('seconds', e.target.value)}
-                            onWheel={handleWheel}
-                            placeholder="e.g., 30"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
-                        />
-                    </div>
+                    <InputField
+                        label="Time (minutes)"
+                        type="number"
+                        value={form.minutes}
+                        onChange={e => handleChange('minutes', e.target.value)}
+                        onWheel={handleWheel}
+                        placeholder="e.g., 25"
+                        error={errors.minutes}
+                    />
+                    <InputField
+                        label="Time (seconds)"
+                        type="number"
+                        value={form.seconds}
+                        onChange={e => handleChange('seconds', e.target.value)}
+                        onWheel={handleWheel}
+                        placeholder="e.g., 30"
+                        error={errors.seconds}
+                    />
                 </div>
 
-                {/* Row 3: Speeds */}
                 <div className="grid grid-cols-2 gap-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
                     <div>
                         <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Avg Speed (km/h)</label>
@@ -152,20 +174,19 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
                             </span>
                         </div>
                     </div>
-                    <div>
-                        <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Max Speed (km/h)</label>
-                        <input
+                    <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
+                        <InputField
+                            label="Max Speed (km/h)"
                             type="number"
                             value={form.maxSpeed}
                             onChange={e => handleChange('maxSpeed', e.target.value)}
                             onWheel={handleWheel}
                             placeholder="Optional"
-                            className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-sm font-medium focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600"
+                            error={errors.maxSpeed}
                         />
                     </div>
                 </div>
 
-                {/* Notes */}
                 <div className="animate-slide-up" style={{ animationDelay: '0.6s' }}>
                     <label className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mb-1.5 block">Notes</label>
                     <textarea
@@ -173,7 +194,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
                         onChange={e => handleChange('notes', e.target.value)}
                         placeholder="How did the run feel?"
                         rows={2}
-                        className="w-full bg-transparent border border-dashed border-gray-700/50 rounded-lg px-3 py-2 text-white text-[13px] focus:ring-1 focus:ring-brand-orange focus:border-brand-orange transition-all duration-200 hover:border-gray-500 placeholder-gray-600 resize-none"
+                        className="w-full bg-transparent border border-dashed rounded-lg px-3 py-2 text-white text-[13px] focus:outline-none focus:ring-1 transition-all duration-200 placeholder-gray-600 resize-none border-gray-700/50 focus:ring-brand-orange focus:border-brand-orange hover:border-gray-500"
                     />
                 </div>
 

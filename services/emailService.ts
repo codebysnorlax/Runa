@@ -9,7 +9,7 @@ export const sendFeedbackConfirmation = async (userEmail: string, userName: stri
 
     await emailjs.send(
       import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID_FED || '',
       templateParams,
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
     );
@@ -17,6 +17,27 @@ export const sendFeedbackConfirmation = async (userEmail: string, userName: stri
     return true;
   } catch (error) {
     console.error('Email send error:', error);
+    return false;
+  }
+};
+
+export const sendWelcomeEmail = async (userEmail: string, userName: string): Promise<boolean> => {
+  try {
+    const templateParams = {
+      to_email: userEmail,
+      to_name: userName || 'User',
+    };
+
+    await emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID_WEL || '',
+      templateParams,
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Welcome email send error:', error);
     return false;
   }
 };

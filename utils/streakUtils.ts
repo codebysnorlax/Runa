@@ -1,4 +1,4 @@
-import { Run } from '../types';
+import { Run } from '@/types';
 
 export interface StreakData {
   currentStreak: number;

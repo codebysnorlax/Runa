@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { Run, Goal, Profile, InsightsData } from '../types';
+import { Run, Goal, Profile, InsightsData } from '@/types';
 
 const getAI = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;

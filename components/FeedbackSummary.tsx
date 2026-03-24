@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { FeedbackQuestion, UserResponse } from './FeedbackStep';
+import { FeedbackQuestion, UserResponse } from '@/components/FeedbackStep';
 
 interface FeedbackSummaryProps {
   questions: FeedbackQuestion[];
