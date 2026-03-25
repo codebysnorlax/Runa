@@ -1,38 +1,58 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { InsightsData } from "@/types";
-import * as storage from "@/services/storageService";
 
 interface InsightsContextType {
   insights: InsightsData | null;
   updateInsights: (newInsights: InsightsData) => void;
+  isLoading: boolean;
 }
 
 const InsightsContext = createContext<InsightsContextType | undefined>(undefined);
 
 export const InsightsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
-  const [insights, setInsights] = useState<InsightsData | null>(null);
+  const userId = isLoaded && user ? user.id : undefined;
 
-  useEffect(() => {
-    const loadInsights = () => {
-      if (isLoaded && user) {
-        setInsights(storage.getInsights(user.id));
+  const convexInsights = useQuery(
+    api.insights.getByUser,
+    userId ? { userId } : "skip"
+  );
+
+  const upsertMutation = useMutation(api.insights.upsert);
+
+  // Map Convex document to the augmented InsightsData shape
+  const insights: InsightsData | null = convexInsights
+    ? {
+        insights: convexInsights.insights,
+        weeklyPlan: convexInsights.weeklyPlan,
+        improvementScore: convexInsights.improvementScore,
+        dailyCount: convexInsights.dailyCount,
+        lastGeneratedDate: convexInsights.lastGeneratedDate,
       }
-    };
-    loadInsights();
-    window.addEventListener("appDataRefresh", loadInsights);
-    return () => window.removeEventListener("appDataRefresh", loadInsights);
-  }, [user, isLoaded]);
+    : null;
+
+  const isLoading = convexInsights === undefined;
 
   const updateInsights = (newInsights: InsightsData) => {
-    if (!user) return;
-    setInsights(newInsights);
-    storage.saveInsights(newInsights, user.id);
+    if (!userId) return;
+    upsertMutation({
+      userId,
+      insights: newInsights.insights.map((i) => ({
+        id: i.id,
+        title: i.title,
+        content: i.content,
+        type: i.type,
+      })),
+      weeklyPlan: newInsights.weeklyPlan,
+      improvementScore: newInsights.improvementScore,
+    });
   };
 
   return (
-    <InsightsContext.Provider value={{ insights, updateInsights }}>
+    <InsightsContext.Provider value={{ insights, updateInsights, isLoading }}>
       {children}
     </InsightsContext.Provider>
   );

@@ -11,6 +11,7 @@ import FullPageLoader from '@/components/FullPageLoader';
 import PageSkeleton from '@/components/PageSkeleton';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useLoginNotification } from '@/hooks/useLoginNotification';
+import { useMigrateLocalStorage } from '@/hooks/useMigrateLocalStorage';
 
 // Lazy load pages for better performance
 const Login = lazy(() => import('@/pages/Login'));
@@ -45,6 +46,9 @@ const AppContent: React.FC = () => {
 
   // Initialize login notification hook
   useLoginNotification();
+
+  // One-time migration from localStorage to Convex
+  useMigrateLocalStorage();
 
   if (!loaded) {
     return <FullPageLoader />;

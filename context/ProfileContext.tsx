@@ -1,38 +1,53 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Profile } from "@/types";
-import * as storage from "@/services/storageService";
 
 interface ProfileContextType {
   profile: Profile | null;
   updateProfile: (newProfile: Profile) => void;
+  isLoading: boolean;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const userId = isLoaded && user ? user.id : undefined;
 
-  useEffect(() => {
-    const loadProfile = () => {
-      if (isLoaded && user) {
-        setProfile(storage.getProfile(user.id));
+  const convexProfile = useQuery(
+    api.profile.getByUser,
+    userId ? { userId } : "skip"
+  );
+
+  const upsertMutation = useMutation(api.profile.upsert);
+
+  // Map Convex document to the existing Profile shape
+  const profile: Profile | null = convexProfile
+    ? {
+        name: convexProfile.name,
+        height_cm: convexProfile.height_cm,
+        weight_kg: convexProfile.weight_kg,
+        age: convexProfile.age,
       }
-    };
-    loadProfile();
-    window.addEventListener("appDataRefresh", loadProfile);
-    return () => window.removeEventListener("appDataRefresh", loadProfile);
-  }, [user, isLoaded]);
+    : null;
+
+  const isLoading = convexProfile === undefined;
 
   const updateProfile = (newProfile: Profile) => {
-    if (!user) return;
-    setProfile(newProfile);
-    storage.saveProfile(newProfile, user.id);
+    if (!userId) return;
+    upsertMutation({
+      userId,
+      name: newProfile.name,
+      height_cm: newProfile.height_cm,
+      weight_kg: newProfile.weight_kg,
+      age: newProfile.age,
+    });
   };
 
   return (
-    <ProfileContext.Provider value={{ profile, updateProfile }}>
+    <ProfileContext.Provider value={{ profile, updateProfile, isLoading }}>
       {children}
     </ProfileContext.Provider>
   );

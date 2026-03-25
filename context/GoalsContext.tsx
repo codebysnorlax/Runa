@@ -1,38 +1,60 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Goal } from "@/types";
-import * as storage from "@/services/storageService";
 
 interface GoalsContextType {
   goals: Goal | null;
   updateGoals: (newGoals: Goal) => void;
+  isLoading: boolean;
 }
 
 const GoalsContext = createContext<GoalsContextType | undefined>(undefined);
 
 export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
-  const [goals, setGoals] = useState<Goal | null>(null);
+  const userId = isLoaded && user ? user.id : undefined;
 
-  useEffect(() => {
-    const loadGoals = () => {
-      if (isLoaded && user) {
-        setGoals(storage.getGoals(user.id));
+  const convexGoals = useQuery(
+    api.goals.getByUser,
+    userId ? { userId } : "skip"
+  );
+
+  const upsertMutation = useMutation(api.goals.upsert);
+
+  // Map Convex document to the existing Goal shape
+  const goals: Goal | null = convexGoals
+    ? {
+        weekly_distance_km: convexGoals.weekly_distance_km,
+        weekly_runs: convexGoals.weekly_runs,
+        distance_goals: convexGoals.distance_goals,
+        start_date: convexGoals.start_date,
       }
-    };
-    loadGoals();
-    window.addEventListener("appDataRefresh", loadGoals);
-    return () => window.removeEventListener("appDataRefresh", loadGoals);
-  }, [user, isLoaded]);
+    : convexGoals === undefined
+      ? null // still loading
+      : null; // no data yet
+
+  const isLoading = convexGoals === undefined;
 
   const updateGoals = (newGoals: Goal) => {
-    if (!user) return;
-    setGoals(newGoals);
-    storage.saveGoals(newGoals, user.id);
+    if (!userId) return;
+    upsertMutation({
+      userId,
+      weekly_distance_km: newGoals.weekly_distance_km,
+      weekly_runs: newGoals.weekly_runs,
+      distance_goals: newGoals.distance_goals.map((dg) => ({
+        id: dg.id,
+        distance_km: dg.distance_km,
+        target_time: dg.target_time,
+        name: dg.name,
+      })),
+      start_date: newGoals.start_date,
+    });
   };
 
   return (
-    <GoalsContext.Provider value={{ goals, updateGoals }}>
+    <GoalsContext.Provider value={{ goals, updateGoals, isLoading }}>
       {children}
     </GoalsContext.Provider>
   );

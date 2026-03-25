@@ -20,12 +20,15 @@ import { RecentRuns } from "@/components/dashboard/RecentRuns";
 
 const Dashboard: React.FC = () => {
   const { loading, currentUser } = useAppCore();
-  const { profile } = useProfile();
-  const { runs } = useRuns();
-  const { goals } = useGoals();
-  const { insights } = useInsights();
+  const { profile, isLoading: profileLoading } = useProfile();
+  const { runs, isLoading: runsLoading } = useRuns();
+  const { goals, isLoading: goalsLoading } = useGoals();
+  const { insights, isLoading: insightsLoading } = useInsights();
   const { addToast } = useToast();
   const backupReminderShown = useRef(false);
+
+  // Always call hooks before any early returns (Rules of Hooks)
+  const dashboardStats = useDashboardStats(runs, goals, insights);
 
   useEffect(() => {
     if (backupReminderShown.current) return;
@@ -40,7 +43,20 @@ const Dashboard: React.FC = () => {
     }
   }, [addToast]);
 
-  if (loading) return <DashboardSkeleton />;
+  const isDataLoading = loading || runsLoading || profileLoading || goalsLoading || insightsLoading;
+  if (isDataLoading) return <DashboardSkeleton />;
+
+  const {
+    personalRecords,
+    streakData,
+    heatmapData,
+    todayRun,
+    yesterdayRun,
+    currentWeekDistance,
+    goalProgress,
+    totalDistance,
+    latestInsight,
+  } = dashboardStats;
 
   // ── Show onboarding when no runs ──
   if (runs.length === 0) {
@@ -56,17 +72,6 @@ const Dashboard: React.FC = () => {
   }
 
   // ── Normal dashboard with data ──
-  const {
-    personalRecords,
-    streakData,
-    heatmapData,
-    todayRun,
-    yesterdayRun,
-    currentWeekDistance,
-    goalProgress,
-    totalDistance,
-    latestInsight,
-  } = useDashboardStats(runs, goals, insights);
 
   const getGreeting = () => {
     const hour = new Date().getHours();

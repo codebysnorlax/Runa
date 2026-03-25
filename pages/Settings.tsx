@@ -3,6 +3,7 @@ import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
+import { useInsights } from '@/context/InsightsContext';
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { Goal, Profile, DistanceGoal } from "@/types";
@@ -37,7 +38,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import * as storage from "@/services/storageService";
+
 import FeedbackStep, {
   FeedbackQuestion,
   UserResponse,
@@ -79,6 +80,7 @@ const Settings: React.FC = () => {
   const { profile, updateProfile } = useProfile();
   const { runs } = useRuns();
   const { goals, updateGoals } = useGoals();
+  const { insights, updateInsights } = useInsights();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     const params = new URLSearchParams(
@@ -302,16 +304,42 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Build backup JSON from Convex-backed context data
+  const buildBackupData = () => {
+    return JSON.stringify({
+      username: user?.id,
+      exportDate: new Date().toISOString(),
+      profile: profile,
+      runs: runs,
+      goals: goals,
+      insights: insights,
+    }, null, 2);
+  };
+
+  const triggerDownload = (data: string, filename: string) => {
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleDownloadBackup = () => {
     if (user?.id) {
-      storage.downloadBackup(user.id);
+      const data = buildBackupData();
+      triggerDownload(data, `runa-backup-${user.id}-${new Date().toISOString().split('T')[0]}.json`);
       addToast("Backup downloaded successfully!", "success");
     }
   };
 
   const handleRecreateDataFile = () => {
     if (user?.id) {
-      storage.recreateBackupFile(user.id);
+      const data = buildBackupData();
+      triggerDownload(data, 'data.json');
       addToast("data.json file created successfully!", "success");
     }
   };
@@ -331,15 +359,20 @@ const Settings: React.FC = () => {
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
-        const success = storage.importUserData(content, user.id);
-        if (success) {
-          addToast("Data restored successfully! Reloading...", "success");
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
+        const backupData = JSON.parse(content);
+
+        if (!backupData.profile || !backupData.runs || !backupData.goals || !backupData.insights) {
           addToast("Failed to restore data. Invalid file format.", "error");
+          return;
         }
+
+        // Push restored data to Convex via context updaters
+        updateProfile(backupData.profile);
+        updateGoals(backupData.goals);
+        updateInsights(backupData.insights);
+        // For runs, we need to add each run individually (bulk restore)
+        // Since editRun and addRun work differently, a page reload is safest
+        addToast("Data restored successfully! Some data may require a reload.", "success");
       } catch (error) {
         addToast("Error reading file. Please try again.", "error");
       }

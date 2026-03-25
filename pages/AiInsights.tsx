@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useUser } from "@clerk/clerk-react";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
 import { useInsights } from '@/context/InsightsContext';
-import { generateInsightsAndPlan } from "@/services/aiService";
 import Card from "@/components/Card";
 import Skeleton from "@/components/Skeleton";
 import {
@@ -30,6 +32,7 @@ import {
 import { useToast } from "@/context/ToastContext";
 
 const AiInsightsSkeleton: React.FC = () => (
+// ... existing skeleton components ...
   <div className="space-y-6">
     <div className="flex justify-between items-center">
       <Skeleton className="h-9 w-1/3" />
@@ -110,42 +113,33 @@ const GeneratingContentSkeleton: React.FC = () => (
 );
 
 const AiInsights: React.FC = () => {
+  const { user } = useUser();
   const { loading: contextLoading } = useAppCore();
-  const { profile } = useProfile();
-  const { runs } = useRuns();
-  const { goals } = useGoals();
-  const { insights, updateInsights } = useInsights();
+  const { profile, isLoading: profileLoading } = useProfile();
+  const { runs, isLoading: runsLoading } = useRuns();
+  const { goals, isLoading: goalsLoading } = useGoals();
+  // We don't need updateInsights because the Convex Action will write to DB directly
+  const { insights: ctxInsights, isLoading: insightsLoading } = useInsights();
+  const generateAI = useAction(api.ai.generateInsightsAndPlan);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addToast } = useToast();
-  const [usageCount, setUsageCount] = useState(0);
   const [resetTime, setResetTime] = useState("");
+
+  // Safely extract insights and rate-limit data from context
+  const insights = ctxInsights as any; // Cast as any because schema adds new fields not yet in types
+  const today = new Date().toDateString();
+  const usageCount = (insights?.lastGeneratedDate === today) ? (insights?.dailyCount || 0) : 0;
 
   useEffect(() => {
     const updateTimer = () => {
-      const today = new Date().toDateString();
-      const savedDate = localStorage.getItem("insightsDate");
-      const savedCount = parseInt(localStorage.getItem("insightsCount") || "0");
-
-      if (savedDate === today) {
-        setUsageCount(savedCount);
-      } else {
-        // Reset count for new day
-        localStorage.setItem("insightsDate", today);
-        localStorage.setItem("insightsCount", "0");
-        setUsageCount(0);
-      }
-
-      // Calculate reset time
+      // Calculate reset time (midnight)
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      const hours = Math.floor(
-        (tomorrow.getTime() - Date.now()) / (1000 * 60 * 60)
-      );
-      const minutes = Math.floor(
-        ((tomorrow.getTime() - Date.now()) % (1000 * 60 * 60)) / (1000 * 60)
-      );
+      const hours = Math.floor((tomorrow.getTime() - Date.now()) / (1000 * 60 * 60));
+      const minutes = Math.floor(((tomorrow.getTime() - Date.now()) % (1000 * 60 * 60)) / (1000 * 60));
       setResetTime(`${hours}h ${minutes}m`);
     };
 
@@ -155,11 +149,8 @@ const AiInsights: React.FC = () => {
   }, []);
 
   const handleGenerate = async () => {
-    if (!profile || !goals || runs.length === 0) {
-      addToast(
-        "Complete your profile, set goals, and add at least one run to generate insights.",
-        "error"
-      );
+    if (!profile || !goals || runs.length === 0 || !user?.id) {
+      addToast("Complete your profile, set goals, and add at least one run to generate insights.", "error");
       return;
     }
 
@@ -170,59 +161,33 @@ const AiInsights: React.FC = () => {
       const hasOldInsights = insights && insights.insights && insights.insights.length > 0;
       addToast(msg, "error");
       if (!hasOldInsights) {
-        setError(msg);
+         setError(msg);
       }
     };
 
     try {
-      const newInsightsData = await generateInsightsAndPlan(
+      // Securely calling the Convex Action. Convex handles the DB quota counting under the hood!
+      await generateAI({
+        userId: user.id,
+        clientDate: today,
         runs,
         goals,
         profile
-      );
-      if (newInsightsData) {
-        updateInsights(newInsightsData);
-        addToast("Insights generated successfully!", "success");
-
-        // Increment count on successful generation
-        const today = new Date().toDateString();
-        const savedDate = localStorage.getItem("insightsDate");
-
-        if (savedDate === today) {
-          const currentCount = parseInt(
-            localStorage.getItem("insightsCount") || "0"
-          );
-          const newCount = currentCount + 1;
-          localStorage.setItem("insightsCount", newCount.toString());
-          setUsageCount(newCount);
-        } else {
-          // First use of the day
-          localStorage.setItem("insightsDate", today);
-          localStorage.setItem("insightsCount", "1");
-          setUsageCount(1);
-        }
-      } else {
-        handleError("AI service is currently unavailable. Please try again later.");
-      }
+      });
+      // Component will automatically re-render when the database is updated.
+      addToast("Insights generated successfully!", "success");
     } catch (err: any) {
-      if (err.message?.includes("API key")) {
+      if (err.message?.includes("Daily limit reached")) {
+        handleError("Daily limit reached. Try again tomorrow.");
+      } else if (err.message?.includes("GEMINI_API_KEY")) {
         handleError("AI service configuration error. Please check API key settings.");
-      } else if (
-        err.message?.includes("network") ||
-        err.message?.includes("fetch")
-      ) {
-        handleError("Network error. Please check your internet connection and try again.");
-      } else if (
-        err.message?.includes("quota") ||
-        err.message?.includes("limit")
-      ) {
-        handleError("AI service quota exceeded. Please try again later.");
       } else {
         handleError(`AI service error: ${err.message || "Unknown error occurred. Please try again."}`);
       }
     }
     setIsGenerating(false);
   };
+
 
   const getInsightIcon = (type: "positive" | "negative" | "neutral") => {
     const iconClass = "w-5 h-5 flex-shrink-0";
@@ -251,7 +216,8 @@ const AiInsights: React.FC = () => {
     }
   };
 
-  if (contextLoading) {
+  const isDataLoading = contextLoading || profileLoading || runsLoading || goalsLoading || insightsLoading;
+  if (isDataLoading) {
     return <AiInsightsSkeleton />;
   }
 

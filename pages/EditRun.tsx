@@ -6,7 +6,7 @@ import RunForm, { RunFormData } from '@/components/RunForm';
 
 const EditRun: React.FC = () => {
     const { runId } = useParams<{ runId: string }>();
-    const { runs, editRun } = useRuns();
+    const { runs, editRun, isLoading } = useRuns();
     const navigate = useNavigate();
     const { addToast } = useToast();
 
@@ -23,6 +23,11 @@ const EditRun: React.FC = () => {
             notes: runToEdit.notes,
         };
     }, [runToEdit]);
+
+    // Wait for data to load before making decisions
+    if (isLoading) {
+        return <div className="text-center p-8 text-gray-400">Loading run data...</div>;
+    }
 
     // If runs are loaded but run not found, redirect
     if (!runToEdit && runs.length > 0) {
