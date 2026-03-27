@@ -3,6 +3,26 @@ import { v } from "convex/values";
 import { internal, api } from "./_generated/api";
 import { GoogleGenAI, Type } from "@google/genai";
 
+interface DistanceGoal {
+  name: string;
+  distance_km: number;
+  target_time: string;
+}
+
+interface Run {
+  date: string;
+  distance_m: number;
+  total_time_sec: number;
+  avg_speed_kmh: number;
+}
+
+interface Insight {
+  id?: string;
+  title: string;
+  content: string;
+  type: "positive" | "negative" | "neutral";
+}
+
 export const generateInsightsAndPlan = action({
   args: {
     userId: v.string(),
@@ -38,10 +58,10 @@ export const generateInsightsAndPlan = action({
     User Goals:
     - Weekly Distance Target: ${args.goals?.weekly_distance_km || 0} km
     - Weekly Running Days Target: ${args.goals?.weekly_runs || 0} days
-    - Distance Goals: ${args.goals?.distance_goals?.map((g: any) => `${g.name}: ${g.distance_km}km in ${g.target_time}`).join(', ') || 'None set'}
+    - Distance Goals: ${args.goals?.distance_goals?.map((g: DistanceGoal) => `${g.name}: ${g.distance_km}km in ${g.target_time}`).join(', ') || 'None set'}
 
     Recent Runs (up to last 10, most recent first):
-    ${args.runs.slice(0, 10).map((r: any) =>
+    ${args.runs.slice(0, 10).map((r: Run) =>
       `- Date: ${r.date}, Distance: ${r.distance_m}m, Time: ${r.total_time_sec}s, Avg Speed: ${r.avg_speed_kmh.toFixed(2)} km/h`
     ).join('\n')}
 
@@ -49,7 +69,7 @@ export const generateInsightsAndPlan = action({
     1.  An overall "Improvement Score" from 0 to 100, where 100 is excellent progress. Keep this harsh but fair based strictly on consistency.
     2.  4-6 concise "Insight Cards". Each card should have a title, content, and a type ('positive', 'negative', 'neutral'). 
         RULES: 
-        - Reference exact distances/speeds or notes from their past runs (e.g. "Your 3.2km run at 10.5km/h was excellent..."). Avoid generic platitudes.
+        - Reference exact distances/speeds or notes from their past runs (e.g. "Your 3.2km run at 10.5km/h was excellent...").Avoid generic platitudes.
         - If their data is sparse or they consistently miss targets, explicitly call them out on it with tough-love motivation.
     3.  A "Weekly Recommendation Plan" with a short, actionable suggestion for each day of the week (Monday to Sunday).
         RULES:
@@ -109,8 +129,9 @@ export const generateInsightsAndPlan = action({
           contents: prompt,
           config: generateConfig,
         });
-      } catch (e: any) {
-        if (e.message?.includes("503") || e.message?.includes("Overloaded") || e.status === 503) {
+      } catch (e: unknown) {
+        const error = e as { message?: string; status?: number };
+        if (error.message?.includes("503") || error.message?.includes("Overloaded") || error.status === 503) {
           console.log("503 on gemini-2.5-flash. Falling back to gemini-1.5-pro.");
           response = await ai.models.generateContent({
             model: "gemini-1.5-pro",
@@ -138,7 +159,7 @@ export const generateInsightsAndPlan = action({
       // 7. Update user insights table in Convex
       await ctx.runMutation(api.insights.upsert, {
         userId: args.userId,
-        insights: parsedData.insights.map((i: any) => ({
+        insights: parsedData.insights.map((i: Insight) => ({
            id: i.id || crypto.randomUUID(),
            title: i.title || "Insight",
            content: i.content || "",
@@ -150,8 +171,9 @@ export const generateInsightsAndPlan = action({
 
       return { success: true };
 
-    } catch (error: any) {
-      console.error("AI Generation Error: ", error.message || error);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      console.error("AI Generation Error: ", err.message || error);
       
       // Critical: Refund the user's daily count if AI generation failed
       await ctx.runMutation(internal.insights.decrementLimit, {
@@ -159,7 +181,7 @@ export const generateInsightsAndPlan = action({
         clientDate: args.clientDate
       });
 
-      throw new Error("AI service error: " + (error.message || "Could not complete the process"));
+      throw new Error("AI service error: " + (err.message || "Could not complete the process"));
     }
   },
 });

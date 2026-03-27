@@ -1,11 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
-
-export interface ToastItem {
-    id: string;
-    message: string;
-    type: 'success' | 'error' | 'info' | 'warning';
-    createdAt: number;
-}
+import { ToastItem } from '@/types';
 
 interface ToastContextType {
     toasts: ToastItem[];
@@ -47,6 +41,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
 };
 
+// It's a common pattern to export the consumer hook alongside the provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = (): ToastContextType => {
     const context = useContext(ToastContext);
     if (!context) {

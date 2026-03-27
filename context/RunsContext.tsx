@@ -81,6 +81,8 @@ export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+// It's a common pattern to export the consumer hook alongside the provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useRuns = () => {
   const context = useContext(RunsContext);
   if (context === undefined) {

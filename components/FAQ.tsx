@@ -32,7 +32,6 @@ const FAQItem: React.FC<{ item: FAQItem; isOpen: boolean; onToggle: () => void }
 const FAQ: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqData, setFaqData] = useState<FAQItem[]>([]);
-  const [lastFetch, setLastFetch] = useState(Date.now());
 
   const loadFAQs = () => {
 
@@ -43,7 +42,6 @@ const FAQ: React.FC = () => {
       })
       .then(data => {
         setFaqData(data);
-        setLastFetch(Date.now());
       })
       .catch(err => {
         console.error('Failed to load FAQ:', err);

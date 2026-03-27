@@ -1,7 +1,17 @@
 import React, { useMemo } from 'react';
 import Card from '@/components/Card';
+import { Run } from '@/types';
 
-export const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
+interface Day {
+  date: Date;
+  distance: number;
+  avgSpeed: number;
+
+  time: number;
+  intensity: number;
+}
+
+export const Heatmap: React.FC<{ runs: Run[] }> = ({ runs }) => {
   const data = useMemo(() => {
     const runDataByDate: {
       [key: string]: {
@@ -29,7 +39,7 @@ export const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
     startDate.setDate(endDate.getDate() - 364);
 
     const days = [];
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dateStr = currentDate.toISOString().split("T")[0];
       const dayData = runDataByDate[dateStr];
@@ -68,15 +78,15 @@ export const Heatmap: React.FC<{ runs: any[] }> = ({ runs }) => {
   const firstDayOffset = data.length > 0 ? data[0].date.getDay() : 0;
 
   // Group data into weeks
-  const weeks: any[][] = [];
-  let currentWeek: any[] = [];
+  const weeks: (Day | null)[][] = [];
+  let currentWeek: (Day | null)[] = [];
 
   // Add empty cells for first week offset
   for (let i = 0; i < firstDayOffset; i++) {
     currentWeek.push(null);
   }
 
-  data.forEach((day, index) => {
+  data.forEach((day) => {
     currentWeek.push(day);
     if (currentWeek.length === 7) {
       weeks.push(currentWeek);

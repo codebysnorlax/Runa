@@ -17,6 +17,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
+// It's a common pattern to export the consumer hook alongside the provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) {

@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
 import { useInsights } from '@/context/InsightsContext';
-import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { Goal, Profile, DistanceGoal } from "@/types";
+import { Goal, Profile, DistanceGoal, Run } from "@/types";
 import Card from "@/components/Card";
 import Skeleton from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
@@ -76,12 +75,11 @@ type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "faq" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
-  const { loading, currentUser, refreshData } = useAppCore();
-  const { profile, updateProfile } = useProfile();
-  const { runs } = useRuns();
-  const { goals, updateGoals } = useGoals();
+  const { loading } = useAppCore();
+  const { profile, updateProfile, isLoading: profileLoading } = useProfile();
+  const { runs, isLoading: runsLoading } = useRuns();
+  const { goals, updateGoals, isLoading: goalsLoading } = useGoals();
   const { insights, updateInsights } = useInsights();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     const params = new URLSearchParams(
       window.location.hash.split("?")[1] || "",
@@ -162,16 +160,33 @@ const Settings: React.FC = () => {
   const { addToast } = useToast();
 
   useEffect(() => {
+    if (profileLoading || goalsLoading) return;
+
     if (profile) {
       setProfileState(profile);
+    } else if (profile === null) {
+      setProfileState({
+        name: user?.firstName || user?.username || "",
+        height_cm: 0,
+        weight_kg: 0,
+        age: 0,
+      } as Profile);
     }
+
     if (goals) {
       setGoalState({
         ...goals,
         distance_goals: goals.distance_goals || [],
       });
+    } else if (goals === null) {
+      setGoalState({
+        weekly_distance_km: 0,
+        weekly_runs: 0,
+        distance_goals: [],
+        start_date: new Date().toISOString(),
+      } as Goal);
     }
-  }, [profile, goals]);
+  }, [profile, goals, profileLoading, goalsLoading, user]);
 
   // Timer for rate limiting - updates every second
   useEffect(() => {
@@ -373,7 +388,7 @@ const Settings: React.FC = () => {
         // For runs, we need to add each run individually (bulk restore)
         // Since editRun and addRun work differently, a page reload is safest
         addToast("Data restored successfully! Some data may require a reload.", "success");
-      } catch (error) {
+      } catch {
         addToast("Error reading file. Please try again.", "error");
       }
     };
@@ -456,7 +471,7 @@ const Settings: React.FC = () => {
         } else {
           addToast(result.message, "error");
         }
-      } catch (error) {
+      } catch {
         addToast("Failed to send feedback. Please try again.", "error");
       } finally {
         setFeedbackSubmitting(false);
@@ -479,7 +494,7 @@ const Settings: React.FC = () => {
   };
 
   /* User Status Logic — must stay before early return to respect Rules of Hooks */
-  const getUserStatus = (): {
+  const getUserStatus = useCallback((): {
     label: string;
     color: string;
     icon: React.ElementType;
@@ -606,7 +621,7 @@ const Settings: React.FC = () => {
 
     // Priority 6: Dormant (30+ days)
     return { label: "Dormant", color: "text-gray-500", icon: Moon };
-  };
+  }, [runs]);
 
   const getBMIStatus = (height: number, weight: number) => {
     if (!height || !weight) return null;
@@ -617,9 +632,11 @@ const Settings: React.FC = () => {
     return { label: "Obese", color: "text-red-400" };
   };
 
-  const status = useMemo(() => getUserStatus(), [runs]);
+  const status = useMemo(() => getUserStatus(), [getUserStatus]);
 
-  if (loading || !profileState || !goalState) {
+  const isDataLoading = loading || profileLoading || goalsLoading || runsLoading || !profileState || !goalState;
+
+  if (isDataLoading) {
     return <SettingsSkeleton />;
   }
 
@@ -808,7 +825,7 @@ const Settings: React.FC = () => {
                     <div className="rounded-xl p-3 sm:p-4 border border-dashed border-gray-700/50 flex flex-col justify-center">
                       <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 mb-2">
                         <div className="flex-shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-transparent sm:bg-purple-500/15 flex items-center justify-center">
-                          <Target className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-purple-400" />
+                          <Target className="w-4 h-4 sm:w-3.5 h-3.5 text-purple-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
                           Age
@@ -826,7 +843,7 @@ const Settings: React.FC = () => {
                     <div className="rounded-xl p-3 sm:p-4 border border-dashed border-gray-700/50 flex flex-col justify-center">
                       <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 mb-2">
                         <div className="flex-shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-transparent sm:bg-blue-500/15 flex items-center justify-center">
-                          <TrendingUp className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-blue-400" />
+                          <TrendingUp className="w-4 h-4 sm:w-3.5 h-3.5 text-blue-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
                           Height <span className="text-gray-600 ml-0.5">cm</span>
@@ -844,7 +861,7 @@ const Settings: React.FC = () => {
                     <div className="rounded-xl p-3 sm:p-4 border border-dashed border-gray-700/50 flex flex-col justify-center">
                       <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 mb-2">
                         <div className="flex-shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-transparent sm:bg-green-500/15 flex items-center justify-center">
-                          <Activity className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-green-400" />
+                          <Activity className="w-4 h-4 sm:w-3.5 h-3.5 text-green-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
                           Weight <span className="text-gray-600 ml-0.5">kg</span>
@@ -910,7 +927,7 @@ const Settings: React.FC = () => {
                     const maxOffset = 1;
                     if (runs && runs.length > 0) {
                       const earliestRunTime = Math.min(
-                        ...runs.map((r: any) => new Date(r.date).getTime()),
+                        ...runs.map((r: Run) => new Date(r.date).getTime()),
                       );
                       const earliestRun = new Date(earliestRunTime);
                       const diff =
@@ -939,7 +956,7 @@ const Settings: React.FC = () => {
 
                     const activeDaysThisMonth = new Set(
                       runs
-                        .map((r: any) => new Date(r.date))
+                        .map((r: Run) => new Date(r.date))
                         .filter(
                           (d: Date) =>
                             d.getMonth() === month && d.getFullYear() === year,
@@ -1396,7 +1413,7 @@ const Settings: React.FC = () => {
                             Create data.json
                           </div>
                           <div className="text-gray-400 text-sm">
-                            Creates a simple "data.json" file for easy sharing
+                            Creates a simple &quot;data.json&quot; file for easy sharing
                           </div>
                         </div>
                       </div>
@@ -1421,6 +1438,7 @@ const Settings: React.FC = () => {
             <div className="animate-fade-in -mx-4 sm:-mx-6">
               {!feedbackCompleted ? (
                 <FeedbackStep
+                  key={FEEDBACK_QUESTIONS[feedbackStep].id}
                   question={FEEDBACK_QUESTIONS[feedbackStep]}
                   stepNumber={feedbackStep + 1}
                   totalSteps={FEEDBACK_QUESTIONS.length}

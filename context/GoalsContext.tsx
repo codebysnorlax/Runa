@@ -60,6 +60,8 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
+// It's a common pattern to export the consumer hook alongside the provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useGoals = () => {
   const context = useContext(GoalsContext);
   if (context === undefined) {

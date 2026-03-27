@@ -42,6 +42,7 @@ export const upsert = mutation({
       .first();
 
     if (existing) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { userId: _, ...fields } = args;
       await ctx.db.patch(existing._id, fields);
       return existing._id;

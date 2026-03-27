@@ -9,14 +9,14 @@ const AudioLoader: React.FC<AudioLoaderProps> = ({ progress }) => {
     <div className="audio-loader">
       <div className="container">
         <svg width="120" height="120" viewBox="-1 -1 22 22">
-          <path style={{ ['--order' as any]: 7 }} className="eight e-8" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 6 }} className="eight e-7" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 5 }} className="eight e-6" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 4 }} className="eight e-5" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 3 }} className="eight e-4" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 2 }} className="eight e-3" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 1 }} className="eight e-2" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
-          <path style={{ ['--order' as any]: 0 }} className="eight e-1" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 7 } as React.CSSProperties} className="eight e-8" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 6 } as React.CSSProperties} className="eight e-7" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 5 } as React.CSSProperties} className="eight e-6" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 4 } as React.CSSProperties} className="eight e-5" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 3 } as React.CSSProperties} className="eight e-4" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 2 } as React.CSSProperties} className="eight e-3" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 1 } as React.CSSProperties} className="eight e-2" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
+          <path style={{ '--order': 0 } as React.CSSProperties} className="eight e-1" d="m5 5a1 1 0 0110 0c0 4-10 6-10 10a1 1 0 0010 0c0-4-10-6-10-10" />
         </svg>
       </div>
       <div className="progress-text">{progress}%</div>

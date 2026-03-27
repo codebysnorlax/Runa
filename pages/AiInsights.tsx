@@ -9,6 +9,7 @@ import { useGoals } from '@/context/GoalsContext';
 import { useInsights } from '@/context/InsightsContext';
 import Card from "@/components/Card";
 import Skeleton from "@/components/Skeleton";
+import { Insight } from "@/types";
 import {
   Loader2,
   Zap,
@@ -112,6 +113,14 @@ const GeneratingContentSkeleton: React.FC = () => (
   </div>
 );
 
+interface InsightsData {
+  insights: Insight[];
+  weeklyPlan: { [key: string]: string };
+  improvementScore: number;
+  lastGeneratedDate?: string;
+  dailyCount?: number;
+}
+
 const AiInsights: React.FC = () => {
   const { user } = useUser();
   const { loading: contextLoading } = useAppCore();
@@ -128,7 +137,7 @@ const AiInsights: React.FC = () => {
   const [resetTime, setResetTime] = useState("");
 
   // Safely extract insights and rate-limit data from context
-  const insights = ctxInsights as any; // Cast as any because schema adds new fields not yet in types
+  const insights = ctxInsights as InsightsData; // Cast as any because schema adds new fields not yet in types
   const today = new Date().toDateString();
   const usageCount = (insights?.lastGeneratedDate === today) ? (insights?.dailyCount || 0) : 0;
 
@@ -176,13 +185,15 @@ const AiInsights: React.FC = () => {
       });
       // Component will automatically re-render when the database is updated.
       addToast("Insights generated successfully!", "success");
-    } catch (err: any) {
-      if (err.message?.includes("Daily limit reached")) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      if (error.message?.includes("Daily limit reached")) {
         handleError("Daily limit reached. Try again tomorrow.");
-      } else if (err.message?.includes("GEMINI_API_KEY")) {
+      } else if (error.message?.includes("GEMINI_API_KEY")) {
         handleError("AI service configuration error. Please check API key settings.");
       } else {
-        handleError(`AI service error: ${err.message || "Unknown error occurred. Please try again."}`);
+        // Show a brief, friendly error message instead of the long API stack trace
+        handleError("AI service is currently busy or unavailable. Please try again later.");
       }
     }
     setIsGenerating(false);
@@ -546,7 +557,7 @@ const AiInsights: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-4 h-4 text-gray-500" />
-                  <h3 className="text-lg font-bold text-white">What You'll Get</h3>
+                  <h3 className="text-lg font-bold text-white">What You&apos;ll Get</h3>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

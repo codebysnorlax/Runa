@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -11,12 +11,11 @@ interface AppCoreContextType {
 
 const AppCoreContext = createContext<AppCoreContextType | undefined>(undefined);
 
-const sentWelcomeEmails = new Set<string>();
-
 export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const sentWelcomeEmails = useRef(new Set<string>());
 
   // Convex mutation for initializing default profile (only creates if new)
   const initProfile = useMutation(api.profile.initIfNew);
@@ -37,21 +36,21 @@ export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Silently handle — profile likely already exists
       });
       
-      if (!hasReceivedWelcome && user.primaryEmailAddress?.emailAddress && !sentWelcomeEmails.has(user.id)) {
-        sentWelcomeEmails.add(user.id);
+      if (!hasReceivedWelcome && user.primaryEmailAddress?.emailAddress && !sentWelcomeEmails.current.has(user.id)) {
+        sentWelcomeEmails.current.add(user.id);
         localStorage.setItem(welcomeEmailSentKey, "true");
         import("@/services/emailService").then(({ sendWelcomeEmail }) => {
           sendWelcomeEmail(user.primaryEmailAddress!.emailAddress, firstName)
             .then(ok => {
               if (!ok) {
                 localStorage.removeItem(welcomeEmailSentKey);
-                sentWelcomeEmails.delete(user.id);
+                sentWelcomeEmails.current.delete(user.id);
                 console.error("Welcome email failed to send");
               }
             });
         }).catch(err => {
           console.error("Failed to import emailService", err);
-          sentWelcomeEmails.delete(user.id);
+          sentWelcomeEmails.current.delete(user.id);
           localStorage.removeItem(welcomeEmailSentKey);
         });
       }
@@ -60,7 +59,7 @@ export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children })
     } else if (isLoaded) {
       setLoading(false);
     }
-  }, [user, isLoaded]);
+  }, [user, isLoaded, initProfile]);
 
   const refreshData = () => {
     // With Convex, data is reactive — no manual refresh needed
@@ -74,6 +73,8 @@ export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children })
   );
 };
 
+// It's a common pattern to export the consumer hook alongside the provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppCore = () => {
   const context = useContext(AppCoreContext);
   if (context === undefined) {

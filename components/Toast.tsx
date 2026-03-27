@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useToast, ToastItem } from "@/context/ToastContext";
 
 /* ─── Styles injected once ─── */
@@ -213,6 +213,19 @@ export const ToastContainer: React.FC = () => {
   );
   const leaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const handleDismiss = useCallback((id: string) => {
+    setExitingIds((prev) => new Set(prev).add(id));
+    // Wait for exit animation, then truly remove
+    setTimeout(() => {
+      removeToast(id);
+      setExitingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 350);
+  }, [removeToast]);
+
   // Set up auto-dismiss timers
   useEffect(() => {
     toasts.forEach((toast) => {
@@ -232,20 +245,7 @@ export const ToastContainer: React.FC = () => {
         timerRefs.current.delete(id);
       }
     });
-  }, [toasts]);
-
-  const handleDismiss = (id: string) => {
-    setExitingIds((prev) => new Set(prev).add(id));
-    // Wait for exit animation, then truly remove
-    setTimeout(() => {
-      removeToast(id);
-      setExitingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    }, 350);
-  };
+  }, [toasts, exitingIds, handleDismiss]);
 
   const handleMouseEnter = () => {
     // Cancel any pending collapse
@@ -375,12 +375,13 @@ interface ToastProps {
 }
 
 const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
-  const dummyItem: ToastItem = {
+  const [createdAt] = useState(() => Date.now());
+  const dummyItem: ToastItem = useMemo(() => ({
     id: "legacy",
     message,
     type,
-    createdAt: Date.now(),
-  };
+    createdAt,
+  }), [message, type, createdAt]);
   return <ToastCard item={dummyItem} onClose={onClose} isExiting={false} />;
 };
 

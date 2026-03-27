@@ -45,6 +45,7 @@ const AudioHelp: React.FC<AudioHelpProps> = ({ audioType }) => {
   useEffect(() => {
     if (currentlyPlaying !== audioId && isPlaying) {
       audioRef.current?.pause();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsPlaying(false);
     }
   }, [currentlyPlaying, audioId, isPlaying]);

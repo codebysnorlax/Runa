@@ -5,8 +5,7 @@ import { AppProviders } from '@/context/AppProviders';
 import { ToastProvider } from '@/context/ToastContext';
 import { ToastContainer } from '@/components/Toast';
 import Layout from '@/components/Layout';
-import Card from '@/components/Card';
-import Skeleton from '@/components/Skeleton';
+
 import FullPageLoader from '@/components/FullPageLoader';
 import PageSkeleton from '@/components/PageSkeleton';
 import ProtectedRoute from '@/components/ProtectedRoute';

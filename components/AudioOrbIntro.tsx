@@ -1,10 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import './AudioOrbIntro.css';
 
 interface AudioOrbIntroProps {
   audioSrc: string;
   onComplete?: () => void;
   onCancel?: () => void;
+}
+
+interface CustomWindow extends Window {
+  webkitAudioContext?: typeof AudioContext;
 }
 
 export const AudioOrbIntro = ({ audioSrc, onComplete, onCancel }: AudioOrbIntroProps) => {
@@ -16,24 +20,7 @@ export const AudioOrbIntro = ({ audioSrc, onComplete, onCancel }: AudioOrbIntroP
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    // Start playing automatically
-    togglePlay();
-
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      // Don't close the context, just suspend it to allow reuse in strict mode or re-mounts with same ref
-      if (contextRef.current?.ctx.state === 'running') {
-        contextRef.current?.ctx.suspend().catch(() => { });
-      }
-      setIsPlaying(false);
-    };
-  }, []); // Run once on mount
-
-  const animate = () => {
+  const animate = useCallback(() => {
     if (!contextRef.current || !containerLinesRef.current || !orbRef.current) return;
 
     const { analyser, data } = contextRef.current;
@@ -81,10 +68,11 @@ export const AudioOrbIntro = ({ audioSrc, onComplete, onCancel }: AudioOrbIntroP
       }
     }
 
+    // eslint-disable-next-line react-hooks/immutability
     animationRef.current = requestAnimationFrame(animate);
-  };
+  }, []);
 
-  const togglePlay = async () => {
+  const togglePlay = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -108,7 +96,7 @@ export const AudioOrbIntro = ({ audioSrc, onComplete, onCancel }: AudioOrbIntroP
     } else {
       if (!contextRef.current) {
         try {
-          const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+          const AudioCtx = window.AudioContext || (window as CustomWindow).webkitAudioContext;
           const ctx = new AudioCtx();
           const analyser = ctx.createAnalyser();
           analyser.fftSize = 1024;
@@ -117,17 +105,13 @@ export const AudioOrbIntro = ({ audioSrc, onComplete, onCancel }: AudioOrbIntroP
           if (!sourceRef.current) {
             sourceRef.current = ctx.createMediaElementSource(audio);
           }
-
-          // Reconnecting might throw if already connected, but createMediaElementSource is usually safe to reuse node if we stored it?
-          // Actually you can't connect source to multiple things easily or reconnect. 
-          // Better check if source is already connected.
-          // But here we just created it if null.
-          // NOTE: disconnect() if needed? 
-          // Let's safe-guard:
+          
           try {
             sourceRef.current.disconnect();
             analyser.disconnect();
-          } catch (e) { }
+          } catch {
+            // suppress errors
+          }
 
           sourceRef.current.connect(analyser);
           analyser.connect(ctx.destination);
@@ -150,8 +134,25 @@ export const AudioOrbIntro = ({ audioSrc, onComplete, onCancel }: AudioOrbIntroP
         console.error("Play failed", e);
       }
     }
-  };
+  }, [isPlaying, animate]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Start playing automatically
+    togglePlay();
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      // Don't close the context, just suspend it to allow reuse in strict mode or re-mounts with same ref
+      if (contextRef.current?.ctx.state === 'running') {
+        contextRef.current?.ctx.suspend().catch(() => { /* ignore */ });
+      }
+      setIsPlaying(false);
+    };
+  }, [togglePlay]); // Run once on mount
+  
   const handleBackgroundClick = () => {
     if (audioRef.current) {
       audioRef.current.pause();
