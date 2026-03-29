@@ -3,20 +3,15 @@ import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
-import { useInsights } from '@/context/InsightsContext';
 import { useUser } from "@clerk/clerk-react";
 import { Goal, Profile, DistanceGoal, Run } from "@/types";
 import Card from "@/components/Card";
 import Skeleton from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
-import AudioHelp from "@/components/AudioHelp";
 import { AudioProvider } from "@/context/AudioContext";
 import {
   User,
   Target,
-  Download,
-  Upload,
-  Database,
   Plus,
   Trash2,
   Info,
@@ -71,7 +66,7 @@ const SettingsSkeleton: React.FC = () => (
   </div>
 );
 
-type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "faq" | "info";
+type ActiveTab = "profile" | "goals" | "feedback" | "faq" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
@@ -79,7 +74,6 @@ const Settings: React.FC = () => {
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
   const { runs, isLoading: runsLoading } = useRuns();
   const { goals, updateGoals, isLoading: goalsLoading } = useGoals();
-  const { insights, updateInsights } = useInsights();
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     const params = new URLSearchParams(
       window.location.hash.split("?")[1] || "",
@@ -89,7 +83,6 @@ const Settings: React.FC = () => {
 
   const [profileState, setProfileState] = useState<Profile | null>(null);
   const [goalState, setGoalState] = useState<Goal | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
 
@@ -316,90 +309,6 @@ const Settings: React.FC = () => {
       };
       updateGoals(finalGoals);
       addToast("Goals updated successfully!", "success");
-    }
-  };
-
-  // Build backup JSON from Convex-backed context data
-  const buildBackupData = () => {
-    return JSON.stringify({
-      username: user?.id,
-      exportDate: new Date().toISOString(),
-      profile: profile,
-      runs: runs,
-      goals: goals,
-      insights: insights,
-    }, null, 2);
-  };
-
-  const triggerDownload = (data: string, filename: string) => {
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadBackup = () => {
-    if (user?.id) {
-      const data = buildBackupData();
-      triggerDownload(data, `runa-backup-${user.id}-${new Date().toISOString().split('T')[0]}.json`);
-      addToast("Backup downloaded successfully!", "success");
-    }
-  };
-
-  const handleRecreateDataFile = () => {
-    if (user?.id) {
-      const data = buildBackupData();
-      triggerDownload(data, 'data.json');
-      addToast("data.json file created successfully!", "success");
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      addToast("No file selected", "error");
-      return;
-    }
-    if (!user?.id) {
-      addToast("User not authenticated", "error");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const content = event.target?.result as string;
-        const backupData = JSON.parse(content);
-
-        if (!backupData.profile || !backupData.runs || !backupData.goals || !backupData.insights) {
-          addToast("Failed to restore data. Invalid file format.", "error");
-          return;
-        }
-
-        // Push restored data to Convex via context updaters
-        updateProfile(backupData.profile);
-        updateGoals(backupData.goals);
-        updateInsights(backupData.insights);
-        // For runs, we need to add each run individually (bulk restore)
-        // Since editRun and addRun work differently, a page reload is safest
-        addToast("Data restored successfully! Some data may require a reload.", "success");
-      } catch {
-        addToast("Error reading file. Please try again.", "error");
-      }
-    };
-    reader.onerror = () => {
-      addToast("Failed to read file.", "error");
-    };
-    reader.readAsText(file);
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
     }
   };
 
@@ -676,7 +585,6 @@ const Settings: React.FC = () => {
           <div className="flex space-x-1 min-w-max">
             <TabButton tab="profile" label="Profile" icon={User} />
             <TabButton tab="goals" label="Goals" icon={Target} />
-            <TabButton tab="backup" label="Backup" icon={Database} />
             <TabButton tab="feedback" label="Feedback" icon={MessageSquare} />
             <TabButton tab="faq" label="FAQ" icon={HelpCircle} />
             <TabButton tab="info" label="Info" icon={Info} />
@@ -1338,101 +1246,6 @@ const Settings: React.FC = () => {
                 </p>
               </div>
             </form>
-          )}
-          {activeTab === "backup" && (
-            <div className="animate-fade-in">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    Data Backup & Restore
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-6">
-                    Keep your fitness data safe by creating backups and
-                    restoring from previous saves.
-                  </p>
-
-                  <div className="space-y-4 mb-6">
-                    <button
-                      onClick={handleDownloadBackup}
-                      className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      Download Backup
-                    </button>
-
-                    <button
-                      onClick={handleRecreateDataFile}
-                      className="w-full flex items-center justify-center bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                    >
-                      <Database className="w-5 h-5 mr-2" />
-                      Create data.json
-                    </button>
-
-                    <div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".json"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full flex items-center justify-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
-                      >
-                        <Upload className="w-5 h-5 mr-2" />
-                        Restore from Backup
-                      </button>
-                    </div>
-                  </div>
-
-                  <AudioHelp audioType="male" />
-                </div>
-
-                <div className="space-y-6">
-                  <div className="bg-transparent border border-dashed border-gray-700/50 p-6 rounded-2xl">
-                    <h4 className="text-white font-medium mb-4">
-                      How it works:
-                    </h4>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="text-white font-medium">
-                            Download Backup
-                          </div>
-                          <div className="text-gray-400 text-sm">
-                            Creates a timestamped backup file with all your data
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="text-white font-medium">
-                            Create data.json
-                          </div>
-                          <div className="text-gray-400 text-sm">
-                            Creates a simple &quot;data.json&quot; file for easy sharing
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="text-white font-medium">Restore</div>
-                          <div className="text-gray-400 text-sm">
-                            Upload any backup file to restore your data
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <AudioHelp audioType="female" />
-                </div>
-              </div>
-            </div>
           )}
           {activeTab === "feedback" && (
             <div className="animate-fade-in -mx-4 sm:-mx-6">

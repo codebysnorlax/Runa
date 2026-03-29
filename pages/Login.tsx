@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { SignInButton, SignUpButton } from "@clerk/clerk-react";
-import { Volume2, HelpCircle, ArrowLeft } from "lucide-react";
-import { AudioOrbIntro } from "@/components/AudioOrbIntro";
+import { HelpCircle, ArrowLeft } from "lucide-react";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/login/Footer";
 import ImageCarousel from "@/components/login/ImageCarousel";
@@ -12,7 +11,6 @@ const fontStyle = `
 `;
 
 const Login = () => {
-  const [showAudioModal, setShowAudioModal] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
 
   return (
@@ -35,13 +33,6 @@ const Login = () => {
                 ) : (
                   <><HelpCircle className="w-4 h-4" /><span className="text-sm font-medium">FAQ</span></>
                 )}
-              </button>
-              <button
-                onClick={() => setShowAudioModal(true)}
-                className="flex items-center gap-2 bg-brand-orange/10 hover:bg-brand-orange/20 border border-brand-orange/30 text-brand-orange px-4 py-2 rounded-lg transition-all hover:scale-105"
-              >
-                <Volume2 className="w-4 h-4" />
-                <span className="text-sm font-medium">Intro</span>
               </button>
             </div>
           </div>
@@ -87,14 +78,6 @@ const Login = () => {
           </div>
 
         </main>
-
-        {showAudioModal && (
-          <AudioOrbIntro
-            audioSrc={`${import.meta.env.BASE_URL}audio/RunaIntro.wav`}
-            onComplete={() => setShowAudioModal(false)}
-            onCancel={() => setShowAudioModal(false)}
-          />
-        )}
 
         <Footer />
       </div>

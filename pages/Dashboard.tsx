@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
 import { useInsights } from '@/context/InsightsContext';
 import DashboardSkeleton from "@/components/DashboardSkeleton";
-import { useToast } from "@/context/ToastContext";
+
 import StreakHeatmap from "@/components/StreakHeatmap";
 import useDashboardStats from "@/hooks/useDashboardStats";
 import { CalendarDays } from "lucide-react";
@@ -24,24 +24,13 @@ const Dashboard: React.FC = () => {
   const { runs, isLoading: runsLoading } = useRuns();
   const { goals, isLoading: goalsLoading } = useGoals();
   const { insights, isLoading: insightsLoading } = useInsights();
-  const { addToast } = useToast();
-  const backupReminderShown = useRef(false);
+
+  const betaTextStyle = {
+    fontFamily: 'Caveat, cursive',
+  };
 
   // Always call hooks before any early returns (Rules of Hooks)
   const dashboardStats = useDashboardStats(runs, goals, insights);
-
-  useEffect(() => {
-    if (backupReminderShown.current) return;
-    const lastBackupReminder = localStorage.getItem("lastBackupReminder");
-    const today = new Date().toDateString();
-    const hour = new Date().getHours();
-
-    if (lastBackupReminder !== today && hour >= 6 && hour < 12) {
-      addToast("💾 Backup your data in Settings", "success");
-      localStorage.setItem("lastBackupReminder", today);
-      backupReminderShown.current = true;
-    }
-  }, [addToast]);
 
   const isDataLoading = loading || runsLoading || profileLoading || goalsLoading || insightsLoading;
   if (isDataLoading) return <DashboardSkeleton />;
@@ -88,7 +77,7 @@ const Dashboard: React.FC = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-white">
             {getGreeting()}, {currentUser || "Runner"}!
           </h1>
-          <span className="px-1.5 py-0 text-[11px] font-bold italic bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30" style={{ fontFamily: "'Caveat', cursive" }}>Beta</span>
+          <span className="px-1.5 py-0 text-[11px] font-bold italic bg-brand-orange/20 text-brand-orange rounded border border-brand-orange/30" style={betaTextStyle}>Beta</span>
         </div>
         <p className="text-xs text-gray-500 mt-0.5">Here's your fitness overview</p>
       </div>

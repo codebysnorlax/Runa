@@ -130,8 +130,6 @@ const Info: React.FC = () => {
                 <li>• Set and monitor fitness goals</li>
                 <li>• View analytics and performance trends</li>
                 <li>• AI-powered insights and recommendations</li>
-                <li>• Data backup and restore functionality</li>
-                <li>• Local storage for privacy</li>
               </ul>
             </div>
           </div>
@@ -170,7 +168,6 @@ const Info: React.FC = () => {
                 <li>View your progress on the Dashboard</li>
                 <li>Check Analytics for performance trends</li>
                 <li>Get AI insights for improvement suggestions</li>
-                <li>Backup your data regularly in Settings</li>
               </ol>
             </div>
           </div>
@@ -189,13 +186,11 @@ const Info: React.FC = () => {
 
           <div className="text-gray-300 text-sm space-y-2">
             <p>
-              • All your data is stored locally in your browser - no external
-              servers
+              • All your data is securely stored in Convex DB.
             </p>
-            <p>• Your personal information never leaves your device</p>
-            <p>• Use the backup feature to save your data as JSON files</p>
-            <p>• Password protection ensures only authorized access</p>
-            <p>• Open source approach for transparency and trust</p>
+            <p>• Your personal information is linked to your user account.</p>
+            <p>• Password protection ensures only authorized access.</p>
+            <p>• Open source approach for transparency and trust.</p>
           </div>
         </div>
       </Card>

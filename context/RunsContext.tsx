@@ -10,6 +10,7 @@ interface RunsContextType {
   addRun: (newRun: Omit<Run, "id">) => void;
   editRun: (updatedRun: Run) => void;
   deleteRun: (runId: string) => void;
+  bulkRestoreRuns: (runs: Run[]) => void;
   isLoading: boolean;
 }
 
@@ -28,6 +29,7 @@ export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addMutation = useMutation(api.runs.add);
   const editMutation = useMutation(api.runs.edit);
   const removeMutation = useMutation(api.runs.remove);
+  const bulkRestoreMutation = useMutation(api.runs.bulkRestore);
 
   // Map Convex documents to the existing Run shape
   // Convex docs have _id (Id<"runs">) but our app uses `id: string`
@@ -74,8 +76,16 @@ export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     removeMutation({ id: runId as Id<"runs"> });
   };
 
+  const bulkRestoreRuns = (runsToRestore: Run[]) => {
+    if (!userId) return;
+    bulkRestoreMutation({
+      userId,
+      runs: runsToRestore,
+    });
+  };
+
   return (
-    <RunsContext.Provider value={{ runs, addRun, editRun, deleteRun, isLoading }}>
+    <RunsContext.Provider value={{ runs, addRun, editRun, deleteRun, bulkRestoreRuns, isLoading }}>
       {children}
     </RunsContext.Provider>
   );

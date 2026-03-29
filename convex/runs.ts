@@ -74,3 +74,37 @@ export const bulkAdd = mutation({
     }
   },
 });
+
+export const bulkRestore = mutation({
+    args: {
+        userId: v.string(),
+        runs: v.array(
+          v.object({
+            id: v.string(),
+            date: v.string(),
+            distance_m: v.number(),
+            total_time_sec: v.number(),
+            avg_speed_kmh: v.number(),
+            max_speed_kmh: v.number(),
+            notes: v.string(),
+          })
+        ),
+      },
+      handler: async (ctx, args) => {
+        // 1. Delete all existing runs for the user
+        const existingRuns = await ctx.db
+          .query("runs")
+          .withIndex("by_user", (q) => q.eq("userId", args.userId))
+          .collect();
+    
+        for (const run of existingRuns) {
+          await ctx.db.delete(run._id);
+        }
+    
+        // 2. Insert all the new runs
+        for (const run of args.runs) {
+          const { id, ...runData } = run;
+          await ctx.db.insert("runs", { ...runData, userId: args.userId });
+        }
+      },
+})

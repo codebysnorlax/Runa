@@ -221,7 +221,7 @@ const RunForm: React.FC<RunFormProps> = ({ title, submitLabel, initialData, onSu
             </form>
 
             <div className="mt-4 flex items-center justify-center text-gray-500 text-[11px] font-medium animate-fade-in" style={{ animationDelay: '0.8s' }}>
-                <span>Your running data is stored at <a className="text-brand-orange" href="https://convex.dev">convex database</a> 100% Secure.</span>
+                <span className="text-center">Your running data is stored at <a className="text-brand-orange" href="https://convex.dev">convex database</a> 100% Secure.<br />don't worry, we are soon automating this field</span>
             </div>
         </div>
     );
