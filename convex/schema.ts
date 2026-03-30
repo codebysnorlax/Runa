@@ -44,6 +44,7 @@ export default defineSchema({
     deleted: v.optional(v.boolean()),
     edited: v.optional(v.boolean()),
     actionBy: v.optional(v.string()),
+    originalMessage: v.optional(v.string()),
     replyTo: v.optional(v.object({
       id: v.string(),
       userName: v.string(),

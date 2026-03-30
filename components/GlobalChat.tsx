@@ -287,12 +287,14 @@ const GlobalChat: React.FC = () => {
                           >
                             <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
                           </button>
-                          <button
-                            onClick={() => { setEditingId(msg._id); setEditText(msg.message); }}
-                            className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
-                          >
-                            <Pencil className="w-2.5 h-2.5" />
-                          </button>
+                          {(!msg.edited || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && (
+                            <button
+                              onClick={() => { setEditingId(msg._id); setEditText(msg.message); }}
+                              className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
+                            >
+                              <Pencil className="w-2.5 h-2.5" />
+                            </button>
+                          )}
                           {confirmDeleteId === msg._id ? (
                             <span className="flex items-center gap-1">
                               <span className="text-[10px] text-red-400">Sure?</span>

@@ -27,8 +27,15 @@ export const editMessage = mutation({
     const msg = await ctx.db.get(id);
     if (!msg) return;
     if (msg.userId !== userId && userEmail !== DEVELOPER_EMAIL) return;
+    // Regular users can only edit once
+    if (msg.edited && userEmail !== DEVELOPER_EMAIL) return;
     const isDev = userEmail === DEVELOPER_EMAIL && msg.userId !== userId;
-    await ctx.db.patch(id, { message, edited: true, ...(isDev ? { actionBy: "developer" } : {}) });
+    await ctx.db.patch(id, {
+      message,
+      edited: true,
+      originalMessage: msg.originalMessage ?? msg.message, // preserve original on first edit
+      ...(isDev ? { actionBy: "developer" } : {}),
+    });
   },
 });
 

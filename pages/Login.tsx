@@ -47,7 +47,7 @@ const Login = () => {
               AI-Powered Fitness Tracker
             </h2>
             <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto lg:mx-0 leading-relaxed mb-6 lg:mb-8">
-              For those who truly want to track their runs, analyze performance, and get intelligent insights.
+              Built for runners who want more than just stats — visualize every run with rich, intuitive graphs, uncover AI-driven performance insights, and stay consistent through a real-time global community that runs with you.
             </p>
             
             <div className="flex flex-row gap-3 w-full lg:max-w-md mx-auto lg:mx-0">
