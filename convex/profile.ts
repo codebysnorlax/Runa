@@ -14,6 +14,7 @@ export const getByUser = query({
 export const upsert = mutation({
   args: {
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     name: v.string(),
     height_cm: v.number(),
     weight_kg: v.number(),
@@ -43,6 +44,7 @@ export const upsert = mutation({
 export const initIfNew = mutation({
   args: {
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     name: v.string(),
   },
   handler: async (ctx, args) => {
@@ -54,6 +56,7 @@ export const initIfNew = mutation({
     if (!existing) {
       return await ctx.db.insert("profiles", {
         userId: args.userId,
+        userEmail: args.userEmail,
         name: args.name,
         height_cm: 0,
         weight_kg: 0,

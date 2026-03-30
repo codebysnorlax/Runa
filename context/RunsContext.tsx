@@ -19,6 +19,7 @@ const RunsContext = createContext<RunsContextType | undefined>(undefined);
 export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
   const userId = isLoaded && user ? user.id : undefined;
+  const userEmail = isLoaded && user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress : undefined;
 
   // Convex reactive query — returns undefined while loading, then the data
   const convexRuns = useQuery(
@@ -49,6 +50,7 @@ export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!userId) return;
     addMutation({
       userId,
+      userEmail,
       date: newRunData.date,
       distance_m: newRunData.distance_m,
       total_time_sec: newRunData.total_time_sec,
@@ -80,6 +82,7 @@ export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!userId) return;
     bulkRestoreMutation({
       userId,
+      userEmail,
       runs: runsToRestore,
     });
   };

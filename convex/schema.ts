@@ -4,6 +4,7 @@ import { v } from "convex/values";
 export default defineSchema({
   runs: defineTable({
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     date: v.string(),
     distance_m: v.number(),
     total_time_sec: v.number(),
@@ -14,6 +15,7 @@ export default defineSchema({
 
   profiles: defineTable({
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     name: v.string(),
     height_cm: v.optional(v.number()),
     weight_kg: v.optional(v.number()),
@@ -22,6 +24,7 @@ export default defineSchema({
 
   goals: defineTable({
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     weekly_distance_km: v.number(),
     weekly_runs: v.number(),
     distance_goals: v.array(
@@ -54,6 +57,7 @@ export default defineSchema({
 
   insights: defineTable({
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     insights: v.array(
       v.object({
         id: v.string(),

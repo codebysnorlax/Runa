@@ -15,6 +15,7 @@ const GoalsContext = createContext<GoalsContextType | undefined>(undefined);
 export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
   const userId = isLoaded && user ? user.id : undefined;
+  const userEmail = isLoaded && user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress : undefined;
 
   const convexGoals = useQuery(
     api.goals.getByUser,
@@ -41,6 +42,7 @@ export const GoalsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (!userId) return;
     upsertMutation({
       userId,
+      userEmail,
       weekly_distance_km: newGoals.weekly_distance_km,
       weekly_runs: newGoals.weekly_runs,
       distance_goals: newGoals.distance_goals.map((dg) => ({

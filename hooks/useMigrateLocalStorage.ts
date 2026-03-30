@@ -30,6 +30,7 @@ export function useMigrateLocalStorage() {
     const migrate = async () => {
       try {
         const userId = user.id;
+        const userEmail = user.primaryEmailAddress?.emailAddress || undefined;
 
         // Migrate runs
         const runsRaw = localStorage.getItem(`${userId}-runs.json`);
@@ -39,6 +40,7 @@ export function useMigrateLocalStorage() {
             await bulkAddRuns({
               runs: runs.map((r) => ({
                 userId,
+                userEmail,
                 date: r.date,
                 distance_m: r.distance_m,
                 total_time_sec: r.total_time_sec,
@@ -56,6 +58,7 @@ export function useMigrateLocalStorage() {
           const profile: Profile = JSON.parse(profileRaw);
           await upsertProfile({
             userId,
+            userEmail,
             name: profile.name || "User",
             height_cm: profile.height_cm || 0,
             weight_kg: profile.weight_kg || 0,
@@ -69,6 +72,7 @@ export function useMigrateLocalStorage() {
           const goals: Goal = JSON.parse(goalsRaw);
           await upsertGoals({
             userId,
+            userEmail,
             weekly_distance_km: goals.weekly_distance_km || 0,
             weekly_runs: goals.weekly_runs || 0,
             distance_goals: (goals.distance_goals || []).map((dg) => ({
@@ -87,6 +91,7 @@ export function useMigrateLocalStorage() {
           const insights: InsightsData = JSON.parse(insightsRaw);
           await upsertInsights({
             userId,
+            userEmail,
             insights: (insights.insights || []).map((i) => ({
               id: i.id,
               title: i.title,

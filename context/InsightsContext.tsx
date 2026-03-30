@@ -15,6 +15,7 @@ const InsightsContext = createContext<InsightsContextType | undefined>(undefined
 export const InsightsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
   const userId = isLoaded && user ? user.id : undefined;
+  const userEmail = isLoaded && user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress : undefined;
 
   const convexInsights = useQuery(
     api.insights.getByUser,
@@ -40,6 +41,7 @@ export const InsightsProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (!userId) return;
     upsertMutation({
       userId,
+      userEmail,
       insights: newInsights.insights.map((i) => ({
         id: i.id,
         title: i.title,

@@ -26,6 +26,7 @@ interface Insight {
 export const generateInsightsAndPlan = action({
   args: {
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     clientDate: v.string(),
     runs: v.any(),
     goals: v.any(),
@@ -35,6 +36,7 @@ export const generateInsightsAndPlan = action({
     // 1. Secure Database Check - Verify standard rate limit with "lazy reset"
     await ctx.runMutation(internal.insights.checkLimitAndIncrement, {
       userId: args.userId,
+      userEmail: args.userEmail,
       clientDate: args.clientDate,
     });
 
@@ -159,6 +161,7 @@ export const generateInsightsAndPlan = action({
       // 7. Update user insights table in Convex
       await ctx.runMutation(api.insights.upsert, {
         userId: args.userId,
+        userEmail: args.userEmail,
         insights: parsedData.insights.map((i: Insight) => ({
            id: i.id || crypto.randomUUID(),
            title: i.title || "Insight",

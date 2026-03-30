@@ -31,6 +31,7 @@ export const getByUser = query({
 export const upsert = mutation({
   args: {
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     insights: v.array(insightValidator),
     weeklyPlan: weeklyPlanValidator,
     improvementScore: v.number(),
@@ -55,6 +56,7 @@ export const upsert = mutation({
 export const checkLimitAndIncrement = internalMutation({
   args: { 
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     clientDate: v.string(),
   },
   handler: async (ctx, args) => {
@@ -69,6 +71,7 @@ export const checkLimitAndIncrement = internalMutation({
       // First time ever creating insights
       await ctx.db.insert("insights", {
         userId: args.userId,
+        userEmail: args.userEmail,
         insights: [],
         weeklyPlan: { monday: "", tuesday: "", wednesday: "", thursday: "", friday: "", saturday: "", sunday: "" },
         improvementScore: 0,

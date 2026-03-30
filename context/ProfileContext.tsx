@@ -15,6 +15,7 @@ const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
   const userId = isLoaded && user ? user.id : undefined;
+  const userEmail = isLoaded && user?.primaryEmailAddress?.emailAddress ? user.primaryEmailAddress.emailAddress : undefined;
 
   const convexProfile = useQuery(
     api.profile.getByUser,
@@ -39,6 +40,7 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (!userId) return;
     upsertMutation({
       userId,
+      userEmail,
       name: newProfile.name,
       height_cm: newProfile.height_cm,
       weight_kg: newProfile.weight_kg,

@@ -18,6 +18,7 @@ export const getByUser = query({
 export const add = mutation({
   args: {
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     date: v.string(),
     distance_m: v.number(),
     total_time_sec: v.number(),
@@ -59,6 +60,7 @@ export const bulkAdd = mutation({
     runs: v.array(
       v.object({
         userId: v.string(),
+        userEmail: v.optional(v.string()),
         date: v.string(),
         distance_m: v.number(),
         total_time_sec: v.number(),
@@ -78,6 +80,7 @@ export const bulkAdd = mutation({
 export const bulkRestore = mutation({
     args: {
         userId: v.string(),
+        userEmail: v.optional(v.string()),
         runs: v.array(
           v.object({
             id: v.string(),
@@ -104,7 +107,7 @@ export const bulkRestore = mutation({
         // 2. Insert all the new runs
         for (const run of args.runs) {
           const { id, ...runData } = run;
-          await ctx.db.insert("runs", { ...runData, userId: args.userId });
+          await ctx.db.insert("runs", { ...runData, userId: args.userId, userEmail: args.userEmail });
         }
       },
 })

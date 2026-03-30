@@ -24,6 +24,7 @@ export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children })
     if (isLoaded && user) {
       const username = user.id;
       const firstName = user.firstName || user.username || "User";
+      const userEmail = user.primaryEmailAddress?.emailAddress || undefined;
       setCurrentUser(firstName);
       const welcomeEmailSentKey = `${user.id}-welcome-email-sent`;
       const hasReceivedWelcome = localStorage.getItem(welcomeEmailSentKey);
@@ -31,6 +32,7 @@ export const AppCoreProvider: React.FC<{ children: ReactNode }> = ({ children })
       // Initialize default profile in Convex if this is a new user
       initProfile({
         userId: username,
+        userEmail,
         name: firstName,
       }).catch(() => {
         // Silently handle — profile likely already exists

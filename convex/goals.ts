@@ -21,6 +21,7 @@ export const getByUser = query({
 export const upsert = mutation({
   args: {
     userId: v.string(),
+    userEmail: v.optional(v.string()),
     weekly_distance_km: v.number(),
     weekly_runs: v.number(),
     distance_goals: v.array(distanceGoalValidator),
