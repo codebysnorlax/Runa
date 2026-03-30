@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, CirclePlus, History, TrendingUp, Sparkles, Settings } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/clerk-react';
+import GlobalChat from '@/components/GlobalChat';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,6 +18,38 @@ const navItems = [
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
+const GlobalChatButton: React.FC = () => {
+  const [unread, setUnread] = React.useState<false | "dev" | true>(false);
+
+  React.useEffect(() => {
+    const onUnread = (e: Event) => setUnread((e as CustomEvent).detail);
+    window.addEventListener("chat-unread", onUnread);
+    return () => window.removeEventListener("chat-unread", onUnread);
+  }, []);
+
+  const handleClick = () => {
+    window.dispatchEvent(new CustomEvent("toggle-global-chat"));
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="relative text-gray-400 hover:text-brand-orange transition-colors"
+      aria-label="Toggle global chat"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C6.477 2 2 6.253 2 11.5c0 2.304.87 4.41 2.306 6.038L3.05 21.15a.75.75 0 0 0 .943.943l3.773-1.22A10.12 10.12 0 0 0 12 21c5.523 0 10-4.253 10-9.5S17.523 2 12 2Z" fill="currentColor" fillOpacity=".15" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        <circle cx="8.5" cy="11.5" r="1" fill="currentColor"/>
+        <circle cx="12" cy="11.5" r="1" fill="currentColor"/>
+        <circle cx="15.5" cy="11.5" r="1" fill="currentColor"/>
+      </svg>
+      {unread && (
+        <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-dark-card ${unread === "dev" ? "bg-blue-500" : "bg-brand-orange"}`} />
+      )}
+    </button>
+  );
+};
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user } = useUser();
 
@@ -28,7 +61,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile/Tablet Header */}
         <header className="lg:hidden sticky top-0 z-40 bg-transparent backdrop-blur-xl px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold julee-regular gradient-text">Runa</h1>
-          <UserButton afterSignOutUrl="/#/login" />
+          <div className="flex items-center gap-3">
+            <GlobalChatButton />
+            <UserButton afterSignOutUrl="/#/login" />
+          </div>
         </header>
 
         {/* Sidebar for Desktop */}
@@ -72,6 +108,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center space-x-3 p-3">
             <UserButton afterSignOutUrl="/#/login" />
             <span className="text-sm text-gray-400">Account</span>
+            <GlobalChatButton />
           </div>
         </aside>
 
@@ -96,6 +133,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+      <GlobalChat />
     </>
   );
 };

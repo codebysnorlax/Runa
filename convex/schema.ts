@@ -35,6 +35,16 @@ export default defineSchema({
     start_date: v.string(),
   }).index("by_user", ["userId"]),
 
+  globalChat: defineTable({
+    userId: v.string(),
+    userName: v.string(),
+    userImage: v.optional(v.string()),
+    userEmail: v.optional(v.string()),
+    message: v.string(),
+    deleted: v.optional(v.boolean()),
+    edited: v.optional(v.boolean()),
+  }).index("by_time", ["userId"]),
+
   insights: defineTable({
     userId: v.string(),
     insights: v.array(
