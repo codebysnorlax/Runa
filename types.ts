@@ -57,3 +57,10 @@ export interface PersonalRecords {
   longestDuration: number; // in seconds
   fastestAvgSpeed: number; // in km/h
 }
+
+export interface ToastItem {
+    id: string;
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+    createdAt: number;
+}

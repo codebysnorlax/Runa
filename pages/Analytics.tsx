@@ -1,13 +1,12 @@
-import React, { useMemo, useState, memo, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useAppCore } from '@/context/AppCoreContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
 import Card from "@/components/Card";
 import Skeleton from "@/components/Skeleton";
-import { Filter, X, Download } from "lucide-react";
+import { Filter, Download } from "lucide-react";
 import { exportChartToImage } from "@/utils/chartExport";
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -15,17 +14,11 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  BarChart,
   Bar,
   AreaChart,
   Area,
   ComposedChart,
   ReferenceLine,
-  PieChart,
-  Pie,
-  Cell,
-  RadialBarChart,
-  RadialBar,
 } from "recharts";
 
 const AnalyticsSkeleton: React.FC = () => (
@@ -52,7 +45,7 @@ const AnalyticsSkeleton: React.FC = () => (
   </div>
 );
 
-import { formatPace, CustomTooltip } from "@/components/analytics/CustomTooltip";
+import { CustomTooltip } from "@/components/analytics/CustomTooltip";
 import { Heatmap } from "@/components/analytics/Heatmap";
 import { FilterModal } from "@/components/analytics/FilterModal";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
@@ -65,15 +58,12 @@ const Analytics: React.FC = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [appliedTime, setAppliedTime] = useState<number | null>(null);
   const [appliedDistRange, setAppliedDistRange] = useState<[number, number] | null>(null);
-  const [isFiltering, setIsFiltering] = useState(false);
 
   const handleApply = useCallback((time: number | null, distRange: [number, number] | null) => {
-    setIsFiltering(true);
     setShowFilter(false);
     setTimeout(() => {
       setAppliedTime(time);
       setAppliedDistRange(distRange);
-      setIsFiltering(false);
     }, 600);
   }, []);
 
@@ -83,12 +73,10 @@ const Analytics: React.FC = () => {
   }, []);
 
   const {
-    chartData,
     filteredChartData,
     weeklyDistanceData,
     monthlyData,
     goalProgressData,
-    performanceData,
     filteredPerformanceData
   } = useAnalyticsData(runs, goals, appliedTime, appliedDistRange);
 
@@ -104,51 +92,6 @@ const Analytics: React.FC = () => {
       </div>
     );
   }
-
-  const renderChart = (
-    title: string,
-    data: any[],
-    yKey: string,
-    yUnit: string,
-    color: string
-  ) => (
-    <Card>
-      <h2 className="text-lg font-semibold text-white mb-4">{title}</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart
-          data={data}
-          margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#2D2D2D" />
-          <XAxis
-            dataKey="name"
-            stroke="#888"
-            fontSize={10}
-            tick={{ fill: "#9CA3AF" }}
-          />
-          <YAxis
-            stroke="#888"
-            fontSize={10}
-            tick={{ fill: "#9CA3AF" }}
-            unit={yUnit}
-            domain={["dataMin - 1", "dataMax + 1"]}
-            tickFormatter={yKey === "pace" ? formatPace : undefined}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend />
-          <Line
-            type="monotone"
-            dataKey={yKey}
-            stroke={color}
-            strokeWidth={2}
-            dot={{ r: 3 }}
-            activeDot={{ r: 6 }}
-            name={title.split("(")[0].trim()}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </Card>
-  );
 
   return (
     <div className="space-y-4 pb-24 lg:pb-6 relative">
@@ -189,13 +132,13 @@ const Analytics: React.FC = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Target:</span>
                     <span className="text-white">
-                      {formatPace(goal.target)} min/km
+                      {goal.target} min/km
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-400">Best:</span>
                     <span className="text-green-400">
-                      {goal.best > 0 ? formatPace(goal.best) : "N/A"} min/km
+                      {goal.best > 0 ? goal.best : "N/A"} min/km
                     </span>
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-2">

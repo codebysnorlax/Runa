@@ -1,61 +1,98 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Run } from "@/types";
-import * as storage from "@/services/storageService";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface RunsContextType {
   runs: Run[];
   addRun: (newRun: Omit<Run, "id">) => void;
   editRun: (updatedRun: Run) => void;
   deleteRun: (runId: string) => void;
+  bulkRestoreRuns: (runs: Run[]) => void;
+  isLoading: boolean;
 }
 
 const RunsContext = createContext<RunsContextType | undefined>(undefined);
 
 export const RunsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isLoaded } = useUser();
-  const [runs, setRuns] = useState<Run[]>([]);
+  const userId = isLoaded && user ? user.id : undefined;
 
-  useEffect(() => {
-    const loadRuns = () => {
-      if (isLoaded && user) {
-        setRuns(storage.getRuns(user.id));
-      }
-    };
-    loadRuns();
-    window.addEventListener("appDataRefresh", loadRuns);
-    return () => window.removeEventListener("appDataRefresh", loadRuns);
-  }, [user, isLoaded]);
+  // Convex reactive query — returns undefined while loading, then the data
+  const convexRuns = useQuery(
+    api.runs.getByUser,
+    userId ? { userId } : "skip"
+  );
+
+  const addMutation = useMutation(api.runs.add);
+  const editMutation = useMutation(api.runs.edit);
+  const removeMutation = useMutation(api.runs.remove);
+  const bulkRestoreMutation = useMutation(api.runs.bulkRestore);
+
+  // Map Convex documents to the existing Run shape
+  // Convex docs have _id (Id<"runs">) but our app uses `id: string`
+  const runs: Run[] = (convexRuns ?? []).map((doc) => ({
+    id: doc._id as string,
+    date: doc.date,
+    distance_m: doc.distance_m,
+    total_time_sec: doc.total_time_sec,
+    avg_speed_kmh: doc.avg_speed_kmh,
+    max_speed_kmh: doc.max_speed_kmh,
+    notes: doc.notes,
+  }));
+
+  const isLoading = convexRuns === undefined;
 
   const addRun = (newRunData: Omit<Run, "id">) => {
-    if (!user) return;
-    const newRun: Run = { ...newRunData, id: crypto.randomUUID() };
-    const updatedRuns = [newRun, ...runs];
-    setRuns(updatedRuns);
-    storage.saveRuns(updatedRuns, user.id);
+    if (!userId) return;
+    addMutation({
+      userId,
+      date: newRunData.date,
+      distance_m: newRunData.distance_m,
+      total_time_sec: newRunData.total_time_sec,
+      avg_speed_kmh: newRunData.avg_speed_kmh,
+      max_speed_kmh: newRunData.max_speed_kmh,
+      notes: newRunData.notes,
+    });
   };
 
   const editRun = (updatedRun: Run) => {
-    if (!user) return;
-    const updatedRuns = runs.map((run) => (run.id === updatedRun.id ? updatedRun : run));
-    setRuns(updatedRuns);
-    storage.saveRuns(updatedRuns, user.id);
+    if (!userId) return;
+    editMutation({
+      id: updatedRun.id as Id<"runs">,
+      date: updatedRun.date,
+      distance_m: updatedRun.distance_m,
+      total_time_sec: updatedRun.total_time_sec,
+      avg_speed_kmh: updatedRun.avg_speed_kmh,
+      max_speed_kmh: updatedRun.max_speed_kmh,
+      notes: updatedRun.notes,
+    });
   };
 
   const deleteRun = (runId: string) => {
-    if (!user) return;
-    const updatedRuns = runs.filter((run) => run.id !== runId);
-    setRuns(updatedRuns);
-    storage.saveRuns(updatedRuns, user.id);
+    if (!userId) return;
+    removeMutation({ id: runId as Id<"runs"> });
+  };
+
+  const bulkRestoreRuns = (runsToRestore: Run[]) => {
+    if (!userId) return;
+    bulkRestoreMutation({
+      userId,
+      runs: runsToRestore,
+    });
   };
 
   return (
-    <RunsContext.Provider value={{ runs, addRun, editRun, deleteRun }}>
+    <RunsContext.Provider value={{ runs, addRun, editRun, deleteRun, bulkRestoreRuns, isLoading }}>
       {children}
     </RunsContext.Provider>
   );
 };
 
+// It's a common pattern to export the consumer hook alongside the provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useRuns = () => {
   const context = useContext(RunsContext);
   if (context === undefined) {

@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import { X } from 'lucide-react';
 
-export const FilterModal = memo(({ onClose, onApply, onClear, maxDistKm, initialTime, initialDistRange }: {
+const FilterModalComponent = ({ onClose, onApply, onClear, maxDistKm, initialTime, initialDistRange }: {
   onClose: () => void;
   onApply: (time: number | null, distRange: [number, number] | null) => void;
   onClear: () => void;
@@ -183,4 +183,6 @@ export const FilterModal = memo(({ onClose, onApply, onClear, maxDistKm, initial
       </div>
     </div>
   );
-});
+};
+FilterModalComponent.displayName = 'FilterModal';
+export const FilterModal = memo(FilterModalComponent);

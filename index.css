@@ -30,6 +30,15 @@
   animation: gradient-shine 2.5s ease-in-out infinite;
 }
 
+.text-shine-orange {
+  background: linear-gradient(90deg, #FFA500, #FF7A00, #FF6B00, #FF7A00, #FFA500);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shine 3s ease-in-out infinite;
+}
+
 .rock-salt-regular {
   font-family: "Rock Salt", cursive;
   font-weight: 400;
@@ -105,6 +114,7 @@
 }
 
 .animate-fade-in {
+  opacity: 0;
   animation: fade-in 0.5s ease-out forwards;
 }
 
@@ -209,4 +219,56 @@ select:focus-visible {
   background-position: 0 center;
   background-repeat: repeat-x;
   animation: wave-progress 1s linear infinite;
+}
+
+/* User Profile Loader */
+.avatar-spinner-wrapper {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  z-index: 0;
+  /* Base background so nothing beneath bleeds through */
+  background-color: #1f2937;
+}
+
+.avatar-spinner-wrapper::after,
+.avatar-spinner-wrapper::before {
+  content: '';  
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #FFF;
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* Set initial state so it doesn't show as a solid white circle during animation delay */
+  transform: scale(0);
+  opacity: 0;
+  animation: animloader 2s linear infinite;
+  z-index: 1; /* Float above the wrapper background */
+  pointer-events: none;
+}
+
+.avatar-spinner-wrapper::after {
+  animation-delay: 1s;
+}
+
+/* Guarantee the image covers the spinner once loaded */
+.avatar-spinner-wrapper img {
+  position: relative;
+  z-index: 2;
+  /* Hide the alt text while loading from network natively */
+  color: transparent;
+}
+
+@keyframes animloader {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
 }

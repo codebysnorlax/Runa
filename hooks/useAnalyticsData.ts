@@ -7,6 +7,9 @@ export const useAnalyticsData = (
   appliedTime: number | null,
   appliedDistRange: [number, number] | null
 ) => {
+  const now = useMemo(() => Date.now(), [appliedTime]);
+  const cutoff = appliedTime ? now - appliedTime * 86400000 : null;
+
   const chartData = useMemo(() => {
     return runs
       .map((run) => ({
@@ -28,8 +31,7 @@ export const useAnalyticsData = (
 
   const filteredChartData = useMemo(() => {
     let filtered = runs;
-    if (appliedTime) {
-      const cutoff = Date.now() - appliedTime * 86400000;
+    if (cutoff) {
       filtered = filtered.filter((run) => new Date(run.date).getTime() >= cutoff);
     }
     if (appliedDistRange) {
@@ -45,7 +47,7 @@ export const useAnalyticsData = (
         distance: run.distance_m / 1000,
         time: run.total_time_sec / 60,
       }));
-  }, [runs, appliedTime, appliedDistRange]);
+  }, [runs, cutoff, appliedDistRange]);
 
   const weeklyDistanceData = useMemo(() => {
     const weeks: {

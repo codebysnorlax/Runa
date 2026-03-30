@@ -20,7 +20,7 @@ export const TodayRun: React.FC<TodayRunProps> = ({ todayRun, yesterdayRun }) =>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <Footprints className="w-3 h-3 text-blue-400" />
-          <h2 className="text-[11px] font-bold text-white uppercase tracking-wide">Today's Run</h2>
+          <h2 className="text-[11px] font-bold text-white uppercase tracking-wide">Today&apos;s Run</h2>
         </div>
         {todayRun && yesterdayRun && yesterdayRun.distance_m > 0 && (
           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${todayRun.distance_m > yesterdayRun.distance_m ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>

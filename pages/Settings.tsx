@@ -1,22 +1,17 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
 import { useGoals } from '@/context/GoalsContext';
-import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { Goal, Profile, DistanceGoal } from "@/types";
+import { Goal, Profile, DistanceGoal, Run } from "@/types";
 import Card from "@/components/Card";
 import Skeleton from "@/components/Skeleton";
 import { useToast } from "@/context/ToastContext";
-import AudioHelp from "@/components/AudioHelp";
 import { AudioProvider } from "@/context/AudioContext";
 import {
   User,
   Target,
-  Download,
-  Upload,
-  Database,
   Plus,
   Trash2,
   Info,
@@ -37,7 +32,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import * as storage from "@/services/storageService";
+
 import FeedbackStep, {
   FeedbackQuestion,
   UserResponse,
@@ -45,6 +40,7 @@ import FeedbackStep, {
 import FeedbackSummary from "@/components/FeedbackSummary";
 import FAQ from "@/components/FAQ";
 import InfoPage from "@/pages/Info";
+import Avatar from "@/components/Avatar";
 import { calculateStreak } from "@/utils/streakUtils";
 
 const SettingsSkeleton: React.FC = () => (
@@ -71,15 +67,14 @@ const SettingsSkeleton: React.FC = () => (
   </div>
 );
 
-type ActiveTab = "profile" | "goals" | "backup" | "feedback" | "faq" | "info";
+type ActiveTab = "profile" | "goals" | "feedback" | "faq" | "info";
 
 const Settings: React.FC = () => {
   const { user } = useUser();
-  const { loading, currentUser, refreshData } = useAppCore();
-  const { profile, updateProfile } = useProfile();
-  const { runs } = useRuns();
-  const { goals, updateGoals } = useGoals();
-  const navigate = useNavigate();
+  const { loading } = useAppCore();
+  const { profile, updateProfile, isLoading: profileLoading } = useProfile();
+  const { runs, isLoading: runsLoading } = useRuns();
+  const { goals, updateGoals, isLoading: goalsLoading } = useGoals();
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
     const params = new URLSearchParams(
       window.location.hash.split("?")[1] || "",
@@ -89,8 +84,6 @@ const Settings: React.FC = () => {
 
   const [profileState, setProfileState] = useState<Profile | null>(null);
   const [goalState, setGoalState] = useState<Goal | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
 
   // Feedback state
@@ -160,16 +153,33 @@ const Settings: React.FC = () => {
   const { addToast } = useToast();
 
   useEffect(() => {
+    if (profileLoading || goalsLoading) return;
+
     if (profile) {
       setProfileState(profile);
+    } else if (profile === null) {
+      setProfileState({
+        name: user?.firstName || user?.username || "",
+        height_cm: 0,
+        weight_kg: 0,
+        age: 0,
+      } as Profile);
     }
+
     if (goals) {
       setGoalState({
         ...goals,
         distance_goals: goals.distance_goals || [],
       });
+    } else if (goals === null) {
+      setGoalState({
+        weekly_distance_km: 0,
+        weekly_runs: 0,
+        distance_goals: [],
+        start_date: new Date().toISOString(),
+      } as Goal);
     }
-  }, [profile, goals]);
+  }, [profile, goals, profileLoading, goalsLoading, user]);
 
   // Timer for rate limiting - updates every second
   useEffect(() => {
@@ -302,59 +312,6 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleDownloadBackup = () => {
-    if (user?.id) {
-      storage.downloadBackup(user.id);
-      addToast("Backup downloaded successfully!", "success");
-    }
-  };
-
-  const handleRecreateDataFile = () => {
-    if (user?.id) {
-      storage.recreateBackupFile(user.id);
-      addToast("data.json file created successfully!", "success");
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      addToast("No file selected", "error");
-      return;
-    }
-    if (!user?.id) {
-      addToast("User not authenticated", "error");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const content = event.target?.result as string;
-        const success = storage.importUserData(content, user.id);
-        if (success) {
-          addToast("Data restored successfully! Reloading...", "success");
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          addToast("Failed to restore data. Invalid file format.", "error");
-        }
-      } catch (error) {
-        addToast("Error reading file. Please try again.", "error");
-      }
-    };
-    reader.onerror = () => {
-      addToast("Failed to read file.", "error");
-    };
-    reader.readAsText(file);
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
   // Feedback handlers
   const handleFeedbackResponse = (
     questionId: number,
@@ -423,7 +380,7 @@ const Settings: React.FC = () => {
         } else {
           addToast(result.message, "error");
         }
-      } catch (error) {
+      } catch {
         addToast("Failed to send feedback. Please try again.", "error");
       } finally {
         setFeedbackSubmitting(false);
@@ -446,7 +403,7 @@ const Settings: React.FC = () => {
   };
 
   /* User Status Logic — must stay before early return to respect Rules of Hooks */
-  const getUserStatus = (): {
+  const getUserStatus = useCallback((): {
     label: string;
     color: string;
     icon: React.ElementType;
@@ -573,7 +530,7 @@ const Settings: React.FC = () => {
 
     // Priority 6: Dormant (30+ days)
     return { label: "Dormant", color: "text-gray-500", icon: Moon };
-  };
+  }, [runs]);
 
   const getBMIStatus = (height: number, weight: number) => {
     if (!height || !weight) return null;
@@ -584,9 +541,11 @@ const Settings: React.FC = () => {
     return { label: "Obese", color: "text-red-400" };
   };
 
-  const status = useMemo(() => getUserStatus(), [runs]);
+  const status = useMemo(() => getUserStatus(), [getUserStatus]);
 
-  if (loading || !profileState || !goalState) {
+  const isDataLoading = loading || profileLoading || goalsLoading || runsLoading || !profileState || !goalState;
+
+  if (isDataLoading) {
     return <SettingsSkeleton />;
   }
 
@@ -626,7 +585,6 @@ const Settings: React.FC = () => {
           <div className="flex space-x-1 min-w-max">
             <TabButton tab="profile" label="Profile" icon={User} />
             <TabButton tab="goals" label="Goals" icon={Target} />
-            <TabButton tab="backup" label="Backup" icon={Database} />
             <TabButton tab="feedback" label="Feedback" icon={MessageSquare} />
             <TabButton tab="faq" label="FAQ" icon={HelpCircle} />
             <TabButton tab="info" label="Info" icon={Info} />
@@ -656,20 +614,11 @@ const Settings: React.FC = () => {
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-brand-orange via-orange-500 to-pink-500 p-0.5">
                       <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
                         {user?.imageUrl ? (
-                          <>
-                            {!imageLoaded && (
-                              <div className="absolute inset-0 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 animate-pulse">
-                                <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-                              </div>
-                            )}
-                            <img
+                          <Avatar
                               src={user.imageUrl}
                               alt="Profile"
-                              className="w-full h-full object-cover rounded-full"
-                              onLoad={() => setImageLoaded(true)}
-                              onError={() => setImageLoaded(false)}
-                            />
-                          </>
+                              className="w-full h-full rounded-full"
+                          />
                         ) : (
                           <div className="w-full h-full rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
                             <User className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
@@ -775,7 +724,7 @@ const Settings: React.FC = () => {
                     <div className="rounded-xl p-3 sm:p-4 border border-dashed border-gray-700/50 flex flex-col justify-center">
                       <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 mb-2">
                         <div className="flex-shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-transparent sm:bg-purple-500/15 flex items-center justify-center">
-                          <Target className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-purple-400" />
+                          <Target className="w-4 h-4 sm:w-3.5 h-3.5 text-purple-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
                           Age
@@ -793,7 +742,7 @@ const Settings: React.FC = () => {
                     <div className="rounded-xl p-3 sm:p-4 border border-dashed border-gray-700/50 flex flex-col justify-center">
                       <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 mb-2">
                         <div className="flex-shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-transparent sm:bg-blue-500/15 flex items-center justify-center">
-                          <TrendingUp className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-blue-400" />
+                          <TrendingUp className="w-4 h-4 sm:w-3.5 h-3.5 text-blue-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
                           Height <span className="text-gray-600 ml-0.5">cm</span>
@@ -811,7 +760,7 @@ const Settings: React.FC = () => {
                     <div className="rounded-xl p-3 sm:p-4 border border-dashed border-gray-700/50 flex flex-col justify-center">
                       <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2 mb-2">
                         <div className="flex-shrink-0 w-5 h-5 sm:w-7 sm:h-7 rounded-lg bg-transparent sm:bg-green-500/15 flex items-center justify-center">
-                          <Activity className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-green-400" />
+                          <Activity className="w-4 h-4 sm:w-3.5 h-3.5 text-green-400" />
                         </div>
                         <label className="text-[10px] sm:text-[11px] text-gray-400 font-medium whitespace-nowrap">
                           Weight <span className="text-gray-600 ml-0.5">kg</span>
@@ -877,7 +826,7 @@ const Settings: React.FC = () => {
                     const maxOffset = 1;
                     if (runs && runs.length > 0) {
                       const earliestRunTime = Math.min(
-                        ...runs.map((r: any) => new Date(r.date).getTime()),
+                        ...runs.map((r: Run) => new Date(r.date).getTime()),
                       );
                       const earliestRun = new Date(earliestRunTime);
                       const diff =
@@ -906,7 +855,7 @@ const Settings: React.FC = () => {
 
                     const activeDaysThisMonth = new Set(
                       runs
-                        .map((r: any) => new Date(r.date))
+                        .map((r: Run) => new Date(r.date))
                         .filter(
                           (d: Date) =>
                             d.getMonth() === month && d.getFullYear() === year,
@@ -1289,105 +1238,11 @@ const Settings: React.FC = () => {
               </div>
             </form>
           )}
-          {activeTab === "backup" && (
-            <div className="animate-fade-in">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    Data Backup & Restore
-                  </h3>
-                  <p className="text-gray-400 text-sm mb-6">
-                    Keep your fitness data safe by creating backups and
-                    restoring from previous saves.
-                  </p>
-
-                  <div className="space-y-4 mb-6">
-                    <button
-                      onClick={handleDownloadBackup}
-                      className="w-full flex items-center justify-center bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200"
-                    >
-                      <Download className="w-5 h-5 mr-2" />
-                      Download Backup
-                    </button>
-
-                    <button
-                      onClick={handleRecreateDataFile}
-                      className="w-full flex items-center justify-center bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                    >
-                      <Database className="w-5 h-5 mr-2" />
-                      Create data.json
-                    </button>
-
-                    <div>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".json"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full flex items-center justify-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors duration-200"
-                      >
-                        <Upload className="w-5 h-5 mr-2" />
-                        Restore from Backup
-                      </button>
-                    </div>
-                  </div>
-
-                  <AudioHelp audioType="male" />
-                </div>
-
-                <div className="space-y-6">
-                  <div className="bg-transparent border border-dashed border-gray-700/50 p-6 rounded-2xl">
-                    <h4 className="text-white font-medium mb-4">
-                      How it works:
-                    </h4>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <Download className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="text-white font-medium">
-                            Download Backup
-                          </div>
-                          <div className="text-gray-400 text-sm">
-                            Creates a timestamped backup file with all your data
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="text-white font-medium">
-                            Create data.json
-                          </div>
-                          <div className="text-gray-400 text-sm">
-                            Creates a simple "data.json" file for easy sharing
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-start space-x-3">
-                        <Upload className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <div className="text-white font-medium">Restore</div>
-                          <div className="text-gray-400 text-sm">
-                            Upload any backup file to restore your data
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <AudioHelp audioType="female" />
-                </div>
-              </div>
-            </div>
-          )}
           {activeTab === "feedback" && (
             <div className="animate-fade-in -mx-4 sm:-mx-6">
               {!feedbackCompleted ? (
                 <FeedbackStep
+                  key={FEEDBACK_QUESTIONS[feedbackStep].id}
                   question={FEEDBACK_QUESTIONS[feedbackStep]}
                   stepNumber={feedbackStep + 1}
                   totalSteps={FEEDBACK_QUESTIONS.length}

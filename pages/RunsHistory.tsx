@@ -77,6 +77,40 @@ const RunsHistorySkeleton: React.FC = () => (
   </div>
 );
 
+const SortableHeader: React.FC<{
+  sortKeyId: SortKey;
+  children: React.ReactNode;
+  sortKey: SortKey;
+  sortDirection: SortDirection;
+  onSort: (key: SortKey) => void;
+}> = ({ sortKeyId, children, sortKey, sortDirection, onSort }) => (
+  <th
+    scope="col"
+    className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
+    onClick={() => onSort(sortKeyId)}
+  >
+    <div className="flex items-center">
+      {children}
+      {sortKey === sortKeyId && (
+        <span className="ml-2">{sortDirection === "desc" ? "▼" : "▲"}</span>
+      )}
+    </div>
+  </th>
+);
+
+const TrendIndicator: React.FC<{ current: number; previous: number }> = ({
+  current,
+  previous,
+}) => {
+  if (current > previous) {
+    return <ArrowUp className="w-4 h-4 text-green-400" />;
+  }
+  if (current < previous) {
+    return <ArrowDown className="w-4 h-4 text-red-400" />;
+  }
+  return <Minus className="w-4 h-4 text-gray-400" />;
+};
+
 const RunsHistory: React.FC = () => {
   const { loading } = useAppCore();
   const { runs, deleteRun } = useRuns();
@@ -147,37 +181,6 @@ const RunsHistory: React.FC = () => {
     }
   };
 
-  const SortableHeader: React.FC<{
-    sortKeyId: SortKey;
-    children: React.ReactNode;
-  }> = ({ sortKeyId, children }) => (
-    <th
-      scope="col"
-      className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider cursor-pointer"
-      onClick={() => handleSort(sortKeyId)}
-    >
-      <div className="flex items-center">
-        {children}
-        {sortKey === sortKeyId && (
-          <span className="ml-2">{sortDirection === "desc" ? "▼" : "▲"}</span>
-        )}
-      </div>
-    </th>
-  );
-
-  const TrendIndicator: React.FC<{ current: number; previous: number }> = ({
-    current,
-    previous,
-  }) => {
-    if (current > previous) {
-      return <ArrowUp className="w-4 h-4 text-green-400" />;
-    }
-    if (current < previous) {
-      return <ArrowDown className="w-4 h-4 text-red-400" />;
-    }
-    return <Minus className="w-4 h-4 text-gray-400" />;
-  };
-
   if (loading) {
     return <RunsHistorySkeleton />;
   }
@@ -227,11 +230,11 @@ const RunsHistory: React.FC = () => {
           <table className="min-w-full divide-y divide-dashed divide-gray-700/50">
             <thead className="bg-gray-900/40">
               <tr>
-                <SortableHeader sortKeyId="date">Date</SortableHeader>
-                <SortableHeader sortKeyId="distance_m">
+                <SortableHeader sortKeyId="date" sortKey={sortKey} sortDirection={sortDirection} onSort={handleSort}>Date</SortableHeader>
+                <SortableHeader sortKeyId="distance_m" sortKey={sortKey} sortDirection={sortDirection} onSort={handleSort}>
                   Distance
                 </SortableHeader>
-                <SortableHeader sortKeyId="avg_speed_kmh">
+                <SortableHeader sortKeyId="avg_speed_kmh" sortKey={sortKey} sortDirection={sortDirection} onSort={handleSort}>
                   Avg Speed
                 </SortableHeader>
                 <th

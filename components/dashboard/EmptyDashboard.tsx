@@ -90,7 +90,7 @@ export const EmptyDashboard: React.FC<{
 
       {/* ── What You'll Unlock ── */}
       <div className="animate-slide-up" style={{ animationDelay: "0.15s" }}>
-        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">What you'll unlock</p>
+        <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-3">What you&apos;ll unlock</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {features.map((f) => {
             const Icon = f.icon;

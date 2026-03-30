@@ -37,6 +37,9 @@ const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
     };
 
     requestAnimationFrame(animate);
+    // The animation effect should only re-run when the target value or duration changes.
+    // The displayValue is intentionally not included as a dependency to avoid re-triggering the effect on every frame.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, duration]);
 
   return (

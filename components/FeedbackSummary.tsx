@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FeedbackQuestion, UserResponse } from '@/components/FeedbackStep';
 
 interface FeedbackSummaryProps {
@@ -130,7 +130,7 @@ const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .stagger-item {
           animation: staggerPop 0.4s cubic-bezier(0.2, 1, 0.3, 1) backwards;
         }

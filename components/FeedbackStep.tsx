@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { playClickSound } from '@/utils/audioUtils';
 
 export type QuestionType = 'single-choice' | 'multi-choice' | 'text';
@@ -74,24 +74,25 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
   cooldownTimer = 0,
   isSubmitting = false
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [localText, setLocalText] = useState('');
-  const [tappedOption, setTappedOption] = useState<string | null>(null);
-
-  useEffect(() => {
+  const [selectedOptions, setSelectedOptions] = useState<string[]>(() => {
     if (currentResponse) {
       if (question.type === 'multi-choice' && Array.isArray(currentResponse.answer)) {
-        setSelectedOptions(currentResponse.answer);
-      } else if (question.type === 'text' && typeof currentResponse.answer === 'string') {
-        setLocalText(currentResponse.answer);
+        return currentResponse.answer;
       } else if (question.type === 'single-choice' && typeof currentResponse.answer === 'string') {
-        setSelectedOptions([currentResponse.answer]);
+        return [currentResponse.answer];
       }
-    } else {
-      setSelectedOptions([]);
-      setLocalText('');
     }
-  }, [question.id, currentResponse]);
+    return [];
+  });
+  const [localText, setLocalText] = useState(() => {
+    if (currentResponse) {
+      if (question.type === 'text' && typeof currentResponse.answer === 'string') {
+        return currentResponse.answer;
+      }
+    }
+    return '';
+  });
+  const [tappedOption, setTappedOption] = useState<string | null>(null);
 
   const handleOptionClick = (option: string) => {
     playClickSound();
@@ -289,7 +290,7 @@ const FeedbackStep: React.FC<FeedbackStepProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .stagger-item {
           animation: staggerPop 0.4s cubic-bezier(0.2, 1, 0.3, 1) backwards;
         }
