@@ -249,7 +249,8 @@ select:focus-visible {
 .avatar-spinner-wrapper img {
   position: relative;
   z-index: 2;
-  background-color: #1f2937;
+  /* Hide the alt text while loading from network natively */
+  color: transparent;
 }
 
 @keyframes animloader {
