@@ -15,9 +15,9 @@ export default defineSchema({
   profiles: defineTable({
     userId: v.string(),
     name: v.string(),
-    height_cm: v.number(),
-    weight_kg: v.number(),
-    age: v.number(),
+    height_cm: v.optional(v.number()),
+    weight_kg: v.optional(v.number()),
+    age: v.optional(v.number()),
   }).index("by_user", ["userId"]),
 
   goals: defineTable({
