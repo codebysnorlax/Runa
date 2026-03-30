@@ -211,3 +211,54 @@ select:focus-visible {
   background-repeat: repeat-x;
   animation: wave-progress 1s linear infinite;
 }
+
+/* User Profile Loader */
+.avatar-spinner-wrapper {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  z-index: 0;
+  /* Base background so nothing beneath bleeds through */
+  background-color: #1f2937;
+}
+
+.avatar-spinner-wrapper::after,
+.avatar-spinner-wrapper::before {
+  content: '';  
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #FFF;
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* Set initial state so it doesn't show as a solid white circle during animation delay */
+  transform: scale(0);
+  opacity: 0;
+  animation: animloader 2s linear infinite;
+  z-index: 1; /* Float above the wrapper background */
+  pointer-events: none;
+}
+
+.avatar-spinner-wrapper::after {
+  animation-delay: 1s;
+}
+
+/* Guarantee the image covers the spinner once loaded */
+.avatar-spinner-wrapper img {
+  position: relative;
+  z-index: 2;
+  background-color: #1f2937;
+}
+
+@keyframes animloader {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}

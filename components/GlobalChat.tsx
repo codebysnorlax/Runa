@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { X, Pencil, Trash2, Check } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import Avatar from "@/components/Avatar";
 
 const GlobalChat: React.FC = () => {
   const { user } = useUser();
@@ -208,10 +209,10 @@ const GlobalChat: React.FC = () => {
               const isDeleted = msg.deleted;
               return (
                 <div key={msg._id} className={`flex items-end gap-2 group ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                  <img
+                  <Avatar
                     src={msg.userImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.userName)}&background=random`}
                     alt={msg.userName}
-                    className="w-6 h-6 rounded-full flex-shrink-0 object-cover ring-1 ring-white/10"
+                    className="w-6 h-6 rounded-full ring-1 ring-white/10"
                   />
                   <div className={`max-w-[72%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
                     {!isMe && (
@@ -346,10 +347,10 @@ const GlobalChat: React.FC = () => {
             )}
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
               style={{ background: "#121212", border: "1px solid #2D2D2D" }}>
-              <img
+              <Avatar
                 src={user?.imageUrl || `https://ui-avatars.com/api/?name=U&background=random`}
                 alt="me"
-                className="w-6 h-6 rounded-full flex-shrink-0 object-cover"
+                className="w-6 h-6 rounded-full"
               />
               <input
                 value={text}

@@ -1,5 +1,6 @@
 import React from "react";
 import Card from "@/components/Card";
+import Avatar from "@/components/Avatar";
 import {
   Github,
   Mail,
@@ -36,7 +37,7 @@ const Info: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between lg:grid lg:grid-cols-3 gap-3 sm:gap-6 mb-4 lg:items-center">
             <div className="lg:col-span-2 flex items-center space-x-3">
-              <img
+              <Avatar
                 src="https://github.com/codebysnorlax.png"
                 alt="Ravi Ranjan Sharma"
                 className="w-8 h-8 sm:w-6 sm:h-6 rounded-full"
