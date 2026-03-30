@@ -46,5 +46,9 @@
   {
     "question": "Why is there no light mode?",
     "answer": "Right now, Runa rocks a sleek, dark aesthetic to look great and save battery. But don't worry—a proper Light Mode is actively in the works and will be rolling out soon!"
+  },
+  {
+    "question": "What is Global Chat and how does it work?",
+    "answer": "Global Chat is a live, real-time community space built into Runa where all users can talk to each other. Open it by tapping the chat bubble icon in the navbar. You can send messages, reply to any message by hovering it and clicking the reply arrow, and edit or delete your own messages anytime. The chat loads the latest 50 messages and fetches older ones as you scroll up. An orange dot on the icon means a new message is waiting — it disappears once you open the chat."
   }
 ]

@@ -12,6 +12,7 @@ const GlobalChat: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [replyTo, setReplyTo] = useState<{ id: string; userName: string; message: string } | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [olderMessages, setOlderMessages] = useState<any[]>([]);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -39,18 +40,36 @@ const GlobalChat: React.FC = () => {
 
   const liveMessages = result?.messages ?? [];
   const liveCount = liveMessages.length;
-  const seenCountRef = useRef(liveCount);
+  const seenCountRef = useRef<number>(
+    parseInt(localStorage.getItem("chat_last_seen_ts") || "0", 10)
+  );
+  const mountedRef = useRef(false);
 
   // Fire unread event when new messages arrive while chat is closed
   useEffect(() => {
-    if (!open && liveCount > seenCountRef.current) {
-      const latest = liveMessages[liveMessages.length - 1];
-      const isDev = latest?.userEmail === "codebysnorlax@gmail.com";
-      window.dispatchEvent(new CustomEvent("chat-unread", { detail: isDev ? "dev" : true }));
-    }
+    if (!liveMessages.length) return;
+    const lastTs = liveMessages[liveMessages.length - 1]?._creationTime ?? 0;
+
     if (open) {
-      seenCountRef.current = liveCount;
+      seenCountRef.current = lastTs;
+      localStorage.setItem("chat_last_seen_ts", String(lastTs));
       window.dispatchEvent(new CustomEvent("chat-unread", { detail: false }));
+      return;
+    }
+
+    // Skip on first mount — only show dot for messages that arrive after page load
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      seenCountRef.current = lastTs;
+      localStorage.setItem("chat_last_seen_ts", String(lastTs));
+      return;
+    }
+
+    if (lastTs > seenCountRef.current) {
+      const newMsgs = liveMessages.filter((m: any) => m._creationTime > seenCountRef.current);
+      const hasUser = newMsgs.some((m: any) => m.userEmail !== "codebysnorlax@gmail.com");
+      const hasDev = newMsgs.some((m: any) => m.userEmail === "codebysnorlax@gmail.com");
+      window.dispatchEvent(new CustomEvent("chat-unread", { detail: { user: hasUser, dev: hasDev } }));
     }
   }, [liveCount, open]);
 
@@ -122,10 +141,12 @@ const GlobalChat: React.FC = () => {
       {open && (
         <motion.div
           key="chat-panel"
-          initial={{ opacity: 0, y: 24, scale: 0.96 }}
+          initial={{ opacity: 0, y: window.innerWidth < 1024 ? "100%" : 24, scale: window.innerWidth < 1024 ? 1 : 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 24, scale: 0.96 }}
-          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          exit={{ opacity: 0, y: window.innerWidth < 1024 ? "100%" : 24, scale: window.innerWidth < 1024 ? 1 : 0.96 }}
+          transition={window.innerWidth < 1024
+            ? { type: "tween", duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }
+            : { type: "spring", stiffness: 380, damping: 30 }}
           drag={window.innerWidth >= 1024}
           dragMomentum={false}
           dragElastic={0}
@@ -259,7 +280,7 @@ const GlobalChat: React.FC = () => {
                         <span className="text-[10px] text-blue-500/70">· removed by Developer</span>
                       )}
                       {(isMe || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && !isDeleted && editingId !== msg._id && (
-                        <span className="hidden group-hover:flex items-center gap-1 ml-0.5">
+                        <span className={`flex items-center gap-1 ml-0.5 overflow-hidden transition-all duration-150 ease-out delay-1000 group-hover:delay-0 ${confirmDeleteId === msg._id ? "max-w-[8rem]" : "max-w-0 group-hover:max-w-[4rem]"}`}>
                           <button
                             onClick={() => setReplyTo({ id: msg._id, userName: msg.userName, message: msg.message })}
                             className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
@@ -272,16 +293,24 @@ const GlobalChat: React.FC = () => {
                           >
                             <Pencil className="w-2.5 h-2.5" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(msg._id)}
-                            className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all"
-                          >
-                            <Trash2 className="w-2.5 h-2.5" />
-                          </button>
+                          {confirmDeleteId === msg._id ? (
+                            <span className="flex items-center gap-1">
+                              <span className="text-[10px] text-red-400">Sure?</span>
+                              <button onClick={() => { handleDelete(msg._id); setConfirmDeleteId(null); }} className="text-[10px] text-red-400 hover:text-red-300 font-medium">Yes</button>
+                              <button onClick={() => setConfirmDeleteId(null)} className="text-[10px] text-gray-500 hover:text-gray-300">No</button>
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmDeleteId(msg._id)}
+                              className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                            >
+                              <Trash2 className="w-2.5 h-2.5" />
+                            </button>
+                          )}
                         </span>
                       )}
                       {!(isMe || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && !isDeleted && (
-                        <span className="hidden group-hover:flex items-center gap-1 ml-0.5">
+                        <span className="flex items-center gap-1 ml-0.5 overflow-hidden max-w-0 group-hover:max-w-[2rem] transition-all duration-150 ease-out delay-1000 group-hover:delay-0">
                           <button
                             onClick={() => setReplyTo({ id: msg._id, userName: msg.userName, message: msg.message })}
                             className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"

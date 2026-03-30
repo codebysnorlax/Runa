@@ -19,7 +19,7 @@ const navItems = [
 ];
 
 const GlobalChatButton: React.FC = () => {
-  const [unread, setUnread] = React.useState<false | "dev" | true>(false);
+  const [unread, setUnread] = React.useState<{ user: boolean; dev: boolean } | false>(false);
 
   React.useEffect(() => {
     const onUnread = (e: Event) => setUnread((e as CustomEvent).detail);
@@ -43,8 +43,11 @@ const GlobalChatButton: React.FC = () => {
         <circle cx="12" cy="11.5" r="1" fill="currentColor"/>
         <circle cx="15.5" cy="11.5" r="1" fill="currentColor"/>
       </svg>
-      {unread && (
-        <span className={`absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-dark-card ${unread === "dev" ? "bg-blue-500" : "bg-brand-orange"}`} />
+      {unread && unread.dev && (
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-500 ring-1 ring-dark-card" />
+      )}
+      {unread && unread.user && (
+        <span className={`absolute -top-0.5 w-2 h-2 rounded-full bg-brand-orange ring-1 ring-dark-card ${unread.dev ? "-right-1.5" : "-right-0.5"}`} />
       )}
     </button>
   );
