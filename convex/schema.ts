@@ -53,6 +53,7 @@ export default defineSchema({
       userName: v.string(),
       message: v.string(),
     })),
+    reactions: v.optional(v.any()),
   }).index("by_time", ["userId"]),
 
   insights: defineTable({

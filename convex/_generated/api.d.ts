@@ -12,6 +12,7 @@ import type * as ai from "../ai.js";
 import type * as chat from "../chat.js";
 import type * as goals from "../goals.js";
 import type * as insights from "../insights.js";
+import type * as migrations from "../migrations.js";
 import type * as profile from "../profile.js";
 import type * as runs from "../runs.js";
 
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   goals: typeof goals;
   insights: typeof insights;
+  migrations: typeof migrations;
   profile: typeof profile;
   runs: typeof runs;
 }>;
