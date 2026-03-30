@@ -178,6 +178,7 @@ const AiInsights: React.FC = () => {
       // Securely calling the Convex Action. Convex handles the DB quota counting under the hood!
       await generateAI({
         userId: user.id,
+        userEmail: user.primaryEmailAddress?.emailAddress || undefined,
         clientDate: today,
         runs,
         goals,
