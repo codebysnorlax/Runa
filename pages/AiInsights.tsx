@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -494,7 +495,7 @@ const AiInsights: React.FC = () => {
                         icon: User,
                         title: "Complete Profile",
                         description: "Add your age, height, and weight",
-                        link: "#/settings",
+                        link: "/settings",
                         gradient: "from-blue-500/10 to-transparent",
                         border: "border-dashed border-gray-700/50",
                         iconColor: "text-blue-400",
@@ -504,7 +505,7 @@ const AiInsights: React.FC = () => {
                         icon: Target,
                         title: "Set Goals",
                         description: "Define your weekly targets",
-                        link: "#/settings",
+                        link: "/settings?tab=goals",
                         gradient: "from-purple-500/10 to-transparent",
                         border: "border-dashed border-gray-700/50",
                         iconColor: "text-purple-400",
@@ -514,7 +515,7 @@ const AiInsights: React.FC = () => {
                         icon: Footprints,
                         title: "Log a Run",
                         description: "Record at least one run",
-                        link: "#/add-run",
+                        link: "/add-run",
                         gradient: "from-orange-500/10 to-transparent",
                         border: "border-dashed border-gray-700/50",
                         iconColor: "text-brand-orange",
@@ -524,9 +525,9 @@ const AiInsights: React.FC = () => {
                     return items.map((item) => {
                       const Icon = item.icon;
                       return (
-                        <a
+                        <Link
                           key={item.title}
-                          href={item.link}
+                          to={item.link}
                           className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${item.gradient} border ${item.border} p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
                         >
                           <div className="flex items-center gap-3 mb-2">
@@ -547,7 +548,7 @@ const AiInsights: React.FC = () => {
                             {item.done ? "Completed" : "Get Started"}
                             <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                           </div>
-                        </a>
+                        </Link>
                       );
                     });
                   })()}

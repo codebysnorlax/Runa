@@ -25,9 +25,9 @@ export const EmptyDashboard: React.FC<{
   };
 
   const steps = [
-    { title: "Profile", desc: "Add your details", icon: User, done: hasProfile, link: "#/settings", iconColor: "text-blue-400", bg: "from-blue-500/15 to-blue-600/5", border: "border-blue-500/25" },
-    { title: "Goals", desc: "Set weekly targets", icon: Target, done: hasGoals, link: "#/settings", iconColor: "text-purple-400", bg: "from-purple-500/15 to-purple-600/5", border: "border-purple-500/25" },
-    { title: "First Run", desc: "Record a run", icon: Footprints, done: false, link: "#/add-run", iconColor: "text-brand-orange", bg: "from-orange-500/15 to-orange-600/5", border: "border-orange-500/25" },
+    { title: "Profile", desc: "Add your details", icon: User, done: hasProfile, link: "/settings", iconColor: "text-blue-400", bg: "from-blue-500/15 to-blue-600/5", border: "border-blue-500/25" },
+    { title: "Goals", desc: "Set weekly targets", icon: Target, done: hasGoals, link: "/settings?tab=goals", iconColor: "text-purple-400", bg: "from-purple-500/15 to-purple-600/5", border: "border-purple-500/25" },
+    { title: "First Run", desc: "Record a run", icon: Footprints, done: false, link: "/add-run", iconColor: "text-brand-orange", bg: "from-orange-500/15 to-orange-600/5", border: "border-orange-500/25" },
   ];
 
   const features = [
@@ -67,9 +67,9 @@ export const EmptyDashboard: React.FC<{
         {steps.map((step) => {
           const Icon = step.icon;
           return (
-            <a
+            <Link
               key={step.title}
-              href={step.link}
+              to={step.link}
               className={`group rounded-xl bg-gradient-to-br ${step.bg} border ${step.border} p-4 flex items-center gap-3 transition-all duration-300 hover:scale-[1.02]`}
             >
               <div className={`p-2 rounded-lg bg-gray-800/60 ${step.iconColor}`}>
@@ -83,7 +83,7 @@ export const EmptyDashboard: React.FC<{
                 <p className="text-xs text-gray-400">{step.desc}</p>
               </div>
               <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-brand-orange group-hover:translate-x-1 transition-all" />
-            </a>
+            </Link>
           );
         })}
       </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { useAppCore } from '@/context/AppCoreContext';
 import { useProfile } from '@/context/ProfileContext';
 import { useRuns } from '@/context/RunsContext';
@@ -75,12 +76,21 @@ const Settings: React.FC = () => {
   const { profile, updateProfile, isLoading: profileLoading } = useProfile();
   const { runs, isLoading: runsLoading } = useRuns();
   const { goals, updateGoals, isLoading: goalsLoading } = useGoals();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    const params = new URLSearchParams(
-      window.location.hash.split("?")[1] || "",
-    );
+    const searchString = location.search || window.location.hash.split("?")[1] || "";
+    const params = new URLSearchParams(searchString);
     return (params.get("tab") as ActiveTab) || "profile";
   });
+
+  useEffect(() => {
+    const searchString = location.search || window.location.hash.split("?")[1] || "";
+    const params = new URLSearchParams(searchString);
+    const tab = params.get("tab") as ActiveTab;
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.search, location.hash]);
 
   const [profileState, setProfileState] = useState<Profile | null>(null);
   const [goalState, setGoalState] = useState<Goal | null>(null);
