@@ -11,6 +11,7 @@ const GlobalChat: React.FC = () => {
   const [text, setText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [replyTo, setReplyTo] = useState<{ id: string; userName: string; message: string } | null>(null);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [olderMessages, setOlderMessages] = useState<any[]>([]);
   const [loadingOlder, setLoadingOlder] = useState(false);
@@ -95,8 +96,10 @@ const GlobalChat: React.FC = () => {
       userImage: user.imageUrl,
       userEmail: user.primaryEmailAddress?.emailAddress,
       message: text.trim(),
+      replyTo: replyTo ?? undefined,
     });
     setText("");
+    setReplyTo(null);
   };
 
   const handleEdit = async (id: string) => {
@@ -123,14 +126,17 @@ const GlobalChat: React.FC = () => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.96 }}
           transition={{ type: "spring", stiffness: 380, damping: 30 }}
-          className="fixed inset-0 lg:inset-auto lg:bottom-6 lg:right-6 z-50 w-full lg:w-[420px] lg:h-[560px] flex flex-col lg:rounded-2xl overflow-hidden shadow-2xl"
+          drag={window.innerWidth >= 1024}
+          dragMomentum={false}
+          dragElastic={0}
+          className="fixed inset-0 lg:inset-auto lg:bottom-6 lg:right-6 z-50 w-full lg:w-[420px] lg:h-[560px] flex flex-col lg:rounded-2xl overflow-hidden shadow-2xl lg:cursor-default"
           style={{
             background: "#1E1E1E",
             border: "1px solid #2D2D2D",
           }}
         >
           {/* Header */}
-          <div className="px-4 py-3 flex items-center justify-between flex-shrink-0"
+          <div className="px-4 py-3 flex items-center justify-between flex-shrink-0 lg:cursor-grab lg:active:cursor-grabbing"
             style={{ borderBottom: "1px solid #2D2D2D", background: "#121212" }}>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-brand-orange/20 flex items-center justify-center">
@@ -234,6 +240,12 @@ const GlobalChat: React.FC = () => {
                             : { background: "#2D2D2D" }
                         }
                       >
+                        {msg.replyTo && !isDeleted && (
+                          <div className="mb-1.5 px-2 py-1 rounded-lg text-[11px] border-l-2 border-white/40 bg-black/20">
+                            <p className="font-semibold text-white/70 mb-0.5">{msg.replyTo.userName}</p>
+                            <p className="text-white/50 truncate">{msg.replyTo.message}</p>
+                          </div>
+                        )}
                         {msg.message}
                       </div>
                     )}
@@ -241,10 +253,19 @@ const GlobalChat: React.FC = () => {
                     <div className="flex items-center gap-1.5 mt-1 mx-1">
                       <span className="text-[10px] text-gray-600">{fmt(msg._creationTime)}</span>
                       {msg.edited && !isDeleted && (
-                        <span className="text-[10px] text-gray-600">· edited</span>
+                        <span className="text-[10px] text-gray-600">· {msg.actionBy === "developer" ? "edited by Developer" : "edited"}</span>
+                      )}
+                      {isDeleted && msg.actionBy === "developer" && (
+                        <span className="text-[10px] text-blue-500/70">· removed by Developer</span>
                       )}
                       {(isMe || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && !isDeleted && editingId !== msg._id && (
                         <span className="hidden group-hover:flex items-center gap-1 ml-0.5">
+                          <button
+                            onClick={() => setReplyTo({ id: msg._id, userName: msg.userName, message: msg.message })}
+                            className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
+                          >
+                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                          </button>
                           <button
                             onClick={() => { setEditingId(msg._id); setEditText(msg.message); }}
                             className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
@@ -259,6 +280,16 @@ const GlobalChat: React.FC = () => {
                           </button>
                         </span>
                       )}
+                      {!(isMe || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && !isDeleted && (
+                        <span className="hidden group-hover:flex items-center gap-1 ml-0.5">
+                          <button
+                            onClick={() => setReplyTo({ id: msg._id, userName: msg.userName, message: msg.message })}
+                            className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
+                          >
+                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                          </button>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -270,6 +301,18 @@ const GlobalChat: React.FC = () => {
           {/* Input */}
           <div className="px-3 py-3 flex-shrink-0"
             style={{ borderTop: "1px solid #2D2D2D" }}>
+            {replyTo && (
+              <div className="flex items-center justify-between px-3 py-1.5 mb-2 rounded-lg border-l-2 border-brand-orange"
+                style={{ background: "#2D2D2D" }}>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold text-brand-orange">Replying to {replyTo.userName}</p>
+                  <p className="text-[11px] text-gray-400 truncate">{replyTo.message}</p>
+                </div>
+                <button onClick={() => setReplyTo(null)} className="ml-2 text-gray-500 hover:text-white flex-shrink-0">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
               style={{ background: "#121212", border: "1px solid #2D2D2D" }}>
               <img

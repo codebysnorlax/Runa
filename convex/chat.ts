@@ -8,6 +8,11 @@ export const sendMessage = mutation({
     userImage: v.optional(v.string()),
     userEmail: v.optional(v.string()),
     message: v.string(),
+    replyTo: v.optional(v.object({
+      id: v.string(),
+      userName: v.string(),
+      message: v.string(),
+    })),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("globalChat", args);
@@ -22,7 +27,8 @@ export const editMessage = mutation({
     const msg = await ctx.db.get(id);
     if (!msg) return;
     if (msg.userId !== userId && userEmail !== DEVELOPER_EMAIL) return;
-    await ctx.db.patch(id, { message, edited: true });
+    const isDev = userEmail === DEVELOPER_EMAIL && msg.userId !== userId;
+    await ctx.db.patch(id, { message, edited: true, ...(isDev ? { actionBy: "developer" } : {}) });
   },
 });
 
@@ -32,7 +38,8 @@ export const deleteMessage = mutation({
     const msg = await ctx.db.get(id);
     if (!msg) return;
     if (msg.userId !== userId && userEmail !== DEVELOPER_EMAIL) return;
-    await ctx.db.patch(id, { deleted: true, message: "This message was deleted" });
+    const isDev = userEmail === DEVELOPER_EMAIL && msg.userId !== userId;
+    await ctx.db.patch(id, { deleted: true, message: "This message was deleted", ...(isDev ? { actionBy: "developer" } : {}) });
   },
 });
 

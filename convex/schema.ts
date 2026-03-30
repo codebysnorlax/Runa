@@ -43,6 +43,12 @@ export default defineSchema({
     message: v.string(),
     deleted: v.optional(v.boolean()),
     edited: v.optional(v.boolean()),
+    actionBy: v.optional(v.string()),
+    replyTo: v.optional(v.object({
+      id: v.string(),
+      userName: v.string(),
+      message: v.string(),
+    })),
   }).index("by_time", ["userId"]),
 
   insights: defineTable({
