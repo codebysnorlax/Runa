@@ -17,6 +17,7 @@ const GlobalChat: React.FC = () => {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [olderMessages, setOlderMessages] = useState<any[]>([]);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -207,8 +208,16 @@ const GlobalChat: React.FC = () => {
             {messages.map((msg) => {
               const isMe = msg.userId === user?.id;
               const isDeleted = msg.deleted;
+              const isActive = activeMessageId === msg._id;
               return (
-                <div key={msg._id} className={`flex items-end gap-2 group ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                <div 
+                  key={msg._id} 
+                  className={`flex items-end gap-2 group ${isMe ? "flex-row-reverse" : "flex-row"}`}
+                  onClick={() => {
+                    if (isDeleted || editingId === msg._id) return;
+                    setActiveMessageId(isActive ? null : msg._id);
+                  }}
+                >
                   <Avatar
                     src={msg.userImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.userName)}&background=random`}
                     alt={msg.userName}
@@ -281,7 +290,7 @@ const GlobalChat: React.FC = () => {
                         <span className="text-[10px] text-blue-500/70">· removed by Developer</span>
                       )}
                       {(isMe || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && !isDeleted && editingId !== msg._id && (
-                        <span className={`flex items-center gap-1 ml-0.5 overflow-hidden transition-all duration-150 ease-out delay-1000 group-hover:delay-0 ${confirmDeleteId === msg._id ? "max-w-[8rem]" : "max-w-0 group-hover:max-w-[4rem]"}`}>
+                        <span className={`flex items-center gap-1 ml-0.5 overflow-hidden transition-all duration-150 ease-out delay-1000 group-hover:delay-0 ${confirmDeleteId === msg._id ? "max-w-[8rem]" : isActive ? "max-w-[4rem]" : "max-w-0 group-hover:max-w-[4rem]"}`}>
                           <button
                             onClick={() => setReplyTo({ id: msg._id, userName: msg.userName, message: msg.message })}
                             className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
@@ -313,7 +322,7 @@ const GlobalChat: React.FC = () => {
                         </span>
                       )}
                       {!(isMe || user?.primaryEmailAddress?.emailAddress === "codebysnorlax@gmail.com") && !isDeleted && (
-                        <span className="flex items-center gap-1 ml-0.5 overflow-hidden max-w-0 group-hover:max-w-[2rem] transition-all duration-150 ease-out delay-1000 group-hover:delay-0">
+                        <span className={`flex items-center gap-1 ml-0.5 overflow-hidden transition-all duration-150 ease-out delay-1000 group-hover:delay-0 ${isActive ? "max-w-[2rem]" : "max-w-0 group-hover:max-w-[2rem]"}`}>
                           <button
                             onClick={() => setReplyTo({ id: msg._id, userName: msg.userName, message: msg.message })}
                             className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-gray-300 hover:bg-white/10 transition-all"
