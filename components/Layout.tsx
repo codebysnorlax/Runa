@@ -19,10 +19,17 @@ const navItems = [
 ];
 
 const GlobalChatButton: React.FC = () => {
-  const [unread, setUnread] = React.useState<{ user: boolean; dev: boolean } | false>(false);
+  const [unread, setUnread] = React.useState<{ user: boolean; dev: boolean } | false>(() => {
+    const stored = localStorage.getItem("chat_unread_state");
+    return stored ? JSON.parse(stored) : false;
+  });
 
   React.useEffect(() => {
-    const onUnread = (e: Event) => setUnread((e as CustomEvent).detail);
+    const onUnread = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setUnread(detail);
+      localStorage.setItem("chat_unread_state", JSON.stringify(detail));
+    };
     window.addEventListener("chat-unread", onUnread);
     return () => window.removeEventListener("chat-unread", onUnread);
   }, []);
@@ -59,6 +66,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <>
       <style>
+        {`
+          .cl-internal-cieags {
+            display: none !important;
+          }
+          .cl-avatarBox::before,
+          .cl-avatarBox::after {
+            display: none !important;
+          }
+        `}
       </style>
       <div className="min-h-screen text-gray-200 flex flex-col lg:flex-row">
         {/* Mobile/Tablet Header */}
@@ -109,7 +125,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </nav>
 
           <div className="flex items-center space-x-3 p-3">
-            <UserButton afterSignOutUrl="/#/login" />
+            <UserButton 
+              afterSignOutUrl="/#/login"
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "w-8 h-8",
+                  userButtonPopoverCard: "bg-dark-card border-dark-border",
+                }
+              }}
+            />
             <span className="text-sm text-gray-400">Account</span>
             <GlobalChatButton />
           </div>

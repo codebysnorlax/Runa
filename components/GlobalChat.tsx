@@ -55,15 +55,22 @@ const GlobalChat: React.FC = () => {
     if (open) {
       seenCountRef.current = lastTs;
       localStorage.setItem("chat_last_seen_ts", String(lastTs));
+      localStorage.setItem("chat_unread_state", JSON.stringify(false));
       window.dispatchEvent(new CustomEvent("chat-unread", { detail: false }));
       return;
     }
 
-    // Skip on first mount — only show dot for messages that arrive after page load
+    // On first mount, check if there are unread messages
     if (!mountedRef.current) {
       mountedRef.current = true;
-      seenCountRef.current = lastTs;
-      localStorage.setItem("chat_last_seen_ts", String(lastTs));
+      if (lastTs > seenCountRef.current) {
+        const newMsgs = liveMessages.filter((m: any) => m._creationTime > seenCountRef.current);
+        const hasUser = newMsgs.some((m: any) => m.userEmail !== "codebysnorlax@gmail.com");
+        const hasDev = newMsgs.some((m: any) => m.userEmail === "codebysnorlax@gmail.com");
+        const unreadState = { user: hasUser, dev: hasDev };
+        localStorage.setItem("chat_unread_state", JSON.stringify(unreadState));
+        window.dispatchEvent(new CustomEvent("chat-unread", { detail: unreadState }));
+      }
       return;
     }
 
@@ -71,7 +78,9 @@ const GlobalChat: React.FC = () => {
       const newMsgs = liveMessages.filter((m: any) => m._creationTime > seenCountRef.current);
       const hasUser = newMsgs.some((m: any) => m.userEmail !== "codebysnorlax@gmail.com");
       const hasDev = newMsgs.some((m: any) => m.userEmail === "codebysnorlax@gmail.com");
-      window.dispatchEvent(new CustomEvent("chat-unread", { detail: { user: hasUser, dev: hasDev } }));
+      const unreadState = { user: hasUser, dev: hasDev };
+      localStorage.setItem("chat_unread_state", JSON.stringify(unreadState));
+      window.dispatchEvent(new CustomEvent("chat-unread", { detail: unreadState }));
     }
   }, [liveCount, open]);
 
