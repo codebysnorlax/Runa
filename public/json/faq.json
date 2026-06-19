@@ -1,15 +1,19 @@
 [
   {
     "question": "What is Runa?",
-    "answer": "Runa is your personal, AI-powered running companion. It helps you log your runs, analyze your pace, build up your streaks, and ultimately stay consistent with smart, actionable insights."
+    "answer": "Runa is your personal, AI-powered running companion. It helps you log your runs, analyze your pace, track your streaks, and stay consistent with smart, actionable insights."
+  },
+  {
+    "question": "Do I need an account to use Runa?",
+    "answer": "Yes. Creating an account keeps your running data secure and personalized, ensuring your training history stays safe and synced across your devices."
   },
   {
     "question": "Is my data safe on Runa?",
-    "answer": "Absolutely! Right now, all your running data is securely stored locally right in your browser. Just keep in mind that if you completely clear your browser's local storage, your data will be wiped out too. We highly recommend downloading a backup from the Settings page every now and then!"
+    "answer": "Absolutely! Your data is securely stored in our cloud database (Convex DB) and linked to your personal account. Unlike local browser storage, your runs are protected even if you clear your browser history or switch devices."
   },
   {
     "question": "What can I track with Runa?",
-    "answer": "You can log all the essentials: your run distance, duration, average speed, and even personal notes about how the run felt. Runa then takes these details to generate beautiful charts, heatmaps, and progress stats."
+    "answer": "You can log all the essentials: your run distance, duration, average speed, and personal notes about how the run felt. Runa takes these details to generate beautiful analytics, heatmaps, and progress stats."
   },
   {
     "question": "Can I edit or delete my runs?",
@@ -25,15 +29,15 @@
   },
   {
     "question": "Can I see analytics and charts?",
-    "answer": "Definitely! The Analytics page is packed with deep dives into your data. You'll find heatmaps, pace vs. distance trends, weekly goal comparisons, and monthly progress rings. You can even filter the data and download your favorite charts as images to share!"
+    "answer": "Definitely! The Analytics page is packed with deep dives into your data. You'll find heatmaps, pace vs. distance trends, weekly goal comparisons, and monthly progress rings. You can filter the data and download your favorite charts as images to share!"
   },
   {
-    "question": "Can I back up my data?",
-    "answer": "Yes. You can easily export your data as a backup file from the Settings page and restore it whenever you need to switch browsers or devices."
+    "question": "How is my data backed up?",
+    "answer": "Your data is automatically backed up and synced to the cloud in real-time. Since we migrated to Convex DB, you don't need to manually export or restore backup files—simply log in on any device to access all your runs."
   },
   {
-    "question": "Will Runa support cloud backup in the future?",
-    "answer": "Yes, that’s on the roadmap! We are planning to add optional cloud backups so you can securely sync your running history across all your devices without losing control of your data."
+    "question": "Does Runa support cloud backup?",
+    "answer": "Yes! Cloud backup is fully supported and enabled by default. Your running history is securely saved in our cloud database (Convex DB) in real-time, allowing you to access your runs seamlessly across all your devices."
   },
   {
     "question": "Does Runa work on mobile devices?",
@@ -41,7 +45,7 @@
   },
   {
     "question": "How can I give feedback?",
-    "answer": "We love hearing from users! You can share your thoughts, feature requests, or bug reports directly through the feedback section in the app. It really helps shape future updates."
+    "answer": "We love hearing from users! You can share your thoughts, feature requests, or bug reports directly through the feedback section in the Settings tab. It really helps shape future updates."
   },
   {
     "question": "Why is there no light mode?",
